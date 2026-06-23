@@ -26,6 +26,7 @@ public class AvailabilitySlot {
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
-    @Column
-    private boolean booked = false;
+    @Builder.Default
+@Column(nullable = false)
+private Boolean dispensed = false;
 }

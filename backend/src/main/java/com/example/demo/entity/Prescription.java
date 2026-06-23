@@ -25,6 +25,7 @@ public class Prescription {
     @Column(name = "medications_json", nullable = false, columnDefinition = "TEXT")
     private String medicationsJson;
 
-    @Column
-    private boolean dispensed = false;
+   @Builder.Default
+@Column(nullable = false)
+private Boolean dispensed = false;
 }

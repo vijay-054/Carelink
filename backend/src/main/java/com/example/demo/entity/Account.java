@@ -25,8 +25,9 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Column
-    private boolean active = true;
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean active = true;
 
     public enum Role {
         PATIENT, DOCTOR, CLINIC_ADMIN

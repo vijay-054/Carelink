@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "availability_slots")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -27,6 +28,6 @@ public class AvailabilitySlot {
     private LocalDateTime endTime;
 
     @Builder.Default
-@Column(nullable = false)
-private Boolean dispensed = false;
+    @Column(name = "booked", nullable = false)
+    private boolean booked = false;
 }

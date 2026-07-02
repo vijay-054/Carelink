@@ -10,14 +10,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface AvailabilitySlotRepository extends JpaRepository<AvailabilitySlot, Long> {
+public interface AvailabilitySlotRepository
+        extends JpaRepository<AvailabilitySlot, Long> {
 
     @Query("SELECT s FROM AvailabilitySlot s WHERE s.doctor.id = :doctorId AND s.booked = false")
-    List<AvailabilitySlot> findByDoctorIdAndBookedFalse(@Param("doctorId") Long doctorId);
+    List<AvailabilitySlot> findByDoctorIdAndBookedFalse(
+            @Param("doctorId") Long doctorId);
 
     List<AvailabilitySlot> findByDoctorId(Long doctorId);
 
-    @Query("SELECT COUNT(s) > 0 FROM AvailabilitySlot s WHERE s.doctor.id = :doctorId " +
+    @Query("SELECT COUNT(s) > 0 FROM AvailabilitySlot s " +
+           "WHERE s.doctor.id = :doctorId " +
            "AND s.startTime < :end AND s.endTime > :start")
     boolean existsOverlapping(@Param("doctorId") Long doctorId,
                               @Param("start") LocalDateTime start,

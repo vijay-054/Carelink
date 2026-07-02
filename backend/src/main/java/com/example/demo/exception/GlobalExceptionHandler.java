@@ -11,21 +11,24 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+    public ResponseEntity<Map<String, String>> handleResourceNotFoundException(
+            ResourceNotFoundException ex) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(AppointmentLimitExceededException.class)
-    public ResponseEntity<Map<String, String>> handleAppointmentLimitExceededException(AppointmentLimitExceededException ex) {
+    public ResponseEntity<Map<String, String>> handleAppointmentLimitExceededException(
+            AppointmentLimitExceededException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", ex.getMessage()));
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+    public ResponseEntity<Map<String, String>> handleRuntimeException(
+            RuntimeException ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", ex.getMessage()));

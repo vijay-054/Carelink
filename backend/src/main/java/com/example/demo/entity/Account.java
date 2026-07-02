@@ -5,7 +5,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "accounts")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -27,7 +28,7 @@ public class Account {
 
     @Builder.Default
     @Column(nullable = false)
-    private Boolean active = true;
+    private boolean active = true;
 
     public enum Role {
         PATIENT, DOCTOR, CLINIC_ADMIN

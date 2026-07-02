@@ -5,7 +5,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "prescriptions")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -25,7 +26,7 @@ public class Prescription {
     @Column(name = "medications_json", nullable = false, columnDefinition = "TEXT")
     private String medicationsJson;
 
-   @Builder.Default
-@Column(nullable = false)
-private Boolean dispensed = false;
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean dispensed = false;
 }

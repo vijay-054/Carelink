@@ -1,6 +1,8 @@
 package com.example.demo.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -11,4 +13,4 @@ public class RegisterPatientDto {
     private String fullName;
     private String bloodGroup;
     private String emergencyContact;
-} 
+}

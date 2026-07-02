@@ -16,20 +16,24 @@ public class ConsultationService {
     private final AppointmentRepository appointmentRepository;
 
     private static final List<String> PROHIBITED_SUBSTANCES = List.of(
-        "cocaine", "heroin", "meth", "fentanyl", "morphine"
+            "cocaine", "heroin", "meth", "fentanyl", "morphine"
     );
 
     @Transactional
     public void approveAppointment(String doctorEmail, Long appointmentId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
+        Appointment appointment = appointmentRepository
+                .findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Appointment not found"));
+                        "Appointment not found"));
 
-        if (!appointment.getDoctor().getAccount().getEmail().equals(doctorEmail)) {
+        if (!appointment.getDoctor().getAccount()
+                .getEmail().equals(doctorEmail)) {
             throw new RuntimeException("Unauthorized");
         }
-        if (appointment.getStatus() != Appointment.AppointmentStatus.PENDING) {
-            throw new RuntimeException("Appointment must be PENDING to approve");
+        if (appointment.getStatus() !=
+                Appointment.AppointmentStatus.PENDING) {
+            throw new RuntimeException(
+                    "Appointment must be PENDING to approve");
         }
 
         appointment.setStatus(Appointment.AppointmentStatus.CONFIRMED);
@@ -38,15 +42,19 @@ public class ConsultationService {
 
     @Transactional
     public void startConsultation(String doctorEmail, Long appointmentId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
+        Appointment appointment = appointmentRepository
+                .findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Appointment not found"));
+                        "Appointment not found"));
 
-        if (!appointment.getDoctor().getAccount().getEmail().equals(doctorEmail)) {
+        if (!appointment.getDoctor().getAccount()
+                .getEmail().equals(doctorEmail)) {
             throw new RuntimeException("Unauthorized");
         }
-        if (appointment.getStatus() != Appointment.AppointmentStatus.CONFIRMED) {
-            throw new RuntimeException("Appointment must be CONFIRMED to start");
+        if (appointment.getStatus() !=
+                Appointment.AppointmentStatus.CONFIRMED) {
+            throw new RuntimeException(
+                    "Appointment must be CONFIRMED to start");
         }
 
         appointment.setStatus(Appointment.AppointmentStatus.IN_PROGRESS);
@@ -55,12 +63,15 @@ public class ConsultationService {
 
     @Transactional
     public void finalizeConsultation(String doctorEmail, Long appointmentId,
-                                     String diagnosis, String medicationsJson) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
+                                     String diagnosis,
+                                     String medicationsJson) {
+        Appointment appointment = appointmentRepository
+                .findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Appointment not found"));
+                        "Appointment not found"));
 
-        if (!appointment.getDoctor().getAccount().getEmail().equals(doctorEmail)) {
+        if (!appointment.getDoctor().getAccount()
+                .getEmail().equals(doctorEmail)) {
             throw new RuntimeException("Unauthorized");
         }
 
@@ -68,7 +79,7 @@ public class ConsultationService {
         for (String substance : PROHIBITED_SUBSTANCES) {
             if (lowerMeds.contains(substance)) {
                 throw new RuntimeException(
-                    "Prohibited substance found: " + substance);
+                        "Prohibited substance found: " + substance);
             }
         }
 

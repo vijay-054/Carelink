@@ -27,12 +27,12 @@ public class ScheduleService {
                            LocalDateTime end) {
         var account = accountRepository.findByEmail(doctorEmail)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Account not found"));
+                        "Account not found"));
 
         DoctorProfile doctor = doctorProfileRepository
                 .findByAccountId(account.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Doctor profile not found"));
+                        "Doctor profile not found"));
 
         boolean overlapping = availabilitySlotRepository
                 .existsOverlapping(doctor.getId(), start, end);
@@ -52,18 +52,19 @@ public class ScheduleService {
     }
 
     public List<AvailabilitySlot> getAvailableSlots(Long doctorId) {
-        return availabilitySlotRepository.findByDoctorIdAndBookedFalse(doctorId);
+        return availabilitySlotRepository
+                .findByDoctorIdAndBookedFalse(doctorId);
     }
 
     public List<AvailabilitySlot> getDoctorSlots(String email) {
         var account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Account not found"));
+                        "Account not found"));
 
         DoctorProfile doctor = doctorProfileRepository
                 .findByAccountId(account.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                    "Doctor profile not found"));
+                        "Doctor profile not found"));
 
         return availabilitySlotRepository.findByDoctorId(doctor.getId());
     }

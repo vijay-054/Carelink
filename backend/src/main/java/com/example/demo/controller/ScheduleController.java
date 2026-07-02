@@ -24,8 +24,12 @@ public class ScheduleController {
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<Void> createSlot(
             @AuthenticationPrincipal UserDetails user,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime start,
+            @RequestParam
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime end) {
         scheduleService.createSlot(user.getUsername(), start, end);
         return ResponseEntity.ok().build();
     }
@@ -33,13 +37,15 @@ public class ScheduleController {
     @GetMapping("/slots/{doctorId}")
     public ResponseEntity<List<AvailabilitySlot>> getAvailableSlots(
             @PathVariable Long doctorId) {
-        return ResponseEntity.ok(scheduleService.getAvailableSlots(doctorId));
+        return ResponseEntity.ok(
+                scheduleService.getAvailableSlots(doctorId));
     }
 
     @GetMapping("/my")
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<List<AvailabilitySlot>> getDoctorSlots(
             @AuthenticationPrincipal UserDetails user) {
-        return ResponseEntity.ok(scheduleService.getDoctorSlots(user.getUsername()));
+        return ResponseEntity.ok(
+                scheduleService.getDoctorSlots(user.getUsername()));
     }
 }

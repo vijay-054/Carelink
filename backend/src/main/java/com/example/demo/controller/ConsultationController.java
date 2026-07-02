@@ -41,7 +41,7 @@ public class ConsultationController {
             @RequestParam String diagnosis,
             @RequestParam String medicationsJson) {
         consultationService.finalizeConsultation(
-            user.getUsername(), id, diagnosis, medicationsJson);
+                user.getUsername(), id, diagnosis, medicationsJson);
         return ResponseEntity.ok().build();
     }
 }

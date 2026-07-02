@@ -26,7 +26,7 @@ public class AppointmentController {
             @AuthenticationPrincipal UserDetails user,
             @Valid @RequestBody BookingRequestDto dto) {
         return ResponseEntity.ok(
-            appointmentService.bookAppointment(user.getUsername(), dto));
+                appointmentService.bookAppointment(user.getUsername(), dto));
     }
 
     @PutMapping("/cancel/{id}")
@@ -43,7 +43,8 @@ public class AppointmentController {
     public ResponseEntity<List<Appointment>> myAppointments(
             @AuthenticationPrincipal UserDetails user) {
         return ResponseEntity.ok(
-            appointmentService.getPatientAppointments(user.getUsername()));
+                appointmentService.getPatientAppointments(
+                        user.getUsername()));
     }
 
     @GetMapping

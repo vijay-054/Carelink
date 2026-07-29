@@ -26,12 +26,15 @@ public class JwtService {
 
     public String generateToken(Map<String, Object> extraClaims,
                                 UserDetails userDetails) {
+        // 1000 ms * 60 sec * 60 min = 1 Hour
+        long ONE_HOUR_IN_MILLIS = 1000 * 60 * 60; 
+        
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(
-                        System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+                // Token will now expire exactly 1 hour from the time it is issued
+                .setExpiration(new Date(System.currentTimeMillis() + ONE_HOUR_IN_MILLIS))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

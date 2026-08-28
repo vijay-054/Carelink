@@ -1,4 +1,4 @@
-import API from './api';
+import API from './apiServices';
 
 // Retrieves all appointments for the authenticated patient or doctor
 const getMyAppointments = async () => {

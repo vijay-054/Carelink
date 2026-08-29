@@ -1,40 +1,107 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getDoctors } from '../../store/slices/doctorSlice';
-import EmptyState from '../common/EmptyState';
-import AppointmentForm from '../appointments/AppointmentForm';
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useDispatch,
+  useSelector,
+} from "react-redux";
+
+import {
+  getDoctors,
+} from "../../store/slices/doctorSlice";
+
+import AppointmentForm from "../appointments/AppointmentForm";
 
 const DoctorList = () => {
-    const dispatch = useDispatch();
-    const { items, isLoading } = useSelector((state) => state.doctors);
-    const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const dispatch = useDispatch();
 
-    useEffect(() => {
-        dispatch(getDoctors());
-    }, [dispatch]);
+  const {
+    items: doctors = [],
+    isLoading,
+    isError,
+    error,
+  } = useSelector(
+    (state) => state.doctors || {}
+  );
 
-    return (
-        <div className="doctor-list">
-            <h2>Available Doctors</h2>
-            {items.length === 0 && !isLoading ? (
-                <EmptyState message="No doctors available at the moment" />
-            ) : (
-                <div className="doctor-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-                    {items.map((doc) => (
-                        <div key={doc.id} className="doctor-card" style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px' }}>
-                            <h3>Dr. {doc.account?.email}</h3>
-                            <p>Specialization: {doc.specialization}</p>
-                            <p>Experience: {doc.yearsOfExperience} years</p>
-                            <button onClick={() => setSelectedDoctor(doc)}>Book Appointment</button>
-                        </div>
-                    ))}
-                </div>
-            )}
-            {selectedDoctor && (
-                <AppointmentForm doctor={selectedDoctor} onClose={() => setSelectedDoctor(null)} />
-            )}
-        </div>
-    );
+  const [selectedDoctor, setSelectedDoctor] =
+    useState(null);
+
+  useEffect(() => {
+    dispatch(getDoctors());
+  }, [dispatch]);
+
+  return (
+    <div className="doctor-list">
+      <h2>Doctors</h2>
+
+      {isLoading && (
+        <p>Loading doctors...</p>
+      )}
+
+      {isError && (
+        <p>
+          {error || "Unable to load doctors"}
+        </p>
+      )}
+
+      {!isLoading &&
+        !isError &&
+        doctors.length === 0 && (
+          <p>No doctors found.</p>
+        )}
+
+      <div className="doctor-grid">
+        {doctors.map((doctor) => (
+          <div
+            className="doctor-card"
+            key={doctor.id}
+          >
+            <h3>
+              Dr.{" "}
+              {doctor.account?.email ||
+                doctor.email}
+            </h3>
+
+            <p>
+              Specialization:{" "}
+              {doctor.specialization}
+            </p>
+
+            <p>
+              Experience:{" "}
+              {doctor.yearsOfExperience} years
+            </p>
+
+            <p>
+              Consultation Fee: ₹
+              {doctor.consultationFee}
+            </p>
+
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedDoctor(doctor)
+              }
+            >
+              Book Appointment
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {selectedDoctor && (
+        <AppointmentForm
+          doctor={selectedDoctor}
+          onClose={() =>
+            setSelectedDoctor(null)
+          }
+        />
+      )}
+    </div>
+  );
 };
 
 export default DoctorList;

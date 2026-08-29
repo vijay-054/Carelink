@@ -2,13 +2,16 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import appointmentService from "../../services/appointmentService";
 
 /*
- * Get appointments belonging to the logged-in user
+ * ============================================================
+ * GET MY APPOINTMENTS
+ * ============================================================
  */
 export const getMyAppointments = createAsyncThunk(
   "appointments/getMyAppointments",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await appointmentService.getMyAppointments();
+      const response =
+        await appointmentService.getMyAppointments();
 
       return response?.data ?? response ?? [];
     } catch (error) {
@@ -22,14 +25,16 @@ export const getMyAppointments = createAsyncThunk(
 );
 
 /*
- * Get all appointments
- * Used by clinic admin
+ * ============================================================
+ * GET ALL APPOINTMENTS
+ * ============================================================
  */
 export const getAllAppointments = createAsyncThunk(
   "appointments/getAllAppointments",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await appointmentService.getAllAppointments();
+      const response =
+        await appointmentService.getAllAppointments();
 
       return response?.data ?? response ?? [];
     } catch (error) {
@@ -43,15 +48,18 @@ export const getAllAppointments = createAsyncThunk(
 );
 
 /*
- * Book a new appointment
+ * ============================================================
+ * BOOK APPOINTMENT
+ * ============================================================
  */
 export const bookAppointment = createAsyncThunk(
   "appointments/book",
   async (appointmentData, { rejectWithValue }) => {
     try {
-      const response = await appointmentService.bookAppointment(
-        appointmentData
-      );
+      const response =
+        await appointmentService.bookAppointment(
+          appointmentData
+        );
 
       return response?.data ?? response;
     } catch (error) {
@@ -65,14 +73,22 @@ export const bookAppointment = createAsyncThunk(
 );
 
 /*
- * Cancel an appointment
+ * ============================================================
+ * CANCEL APPOINTMENT
+ * ============================================================
  */
 export const cancelAppointment = createAsyncThunk(
   "appointments/cancel",
   async (id, { rejectWithValue }) => {
     try {
-      const response = await appointmentService.cancelAppointment(id);
+      const response =
+        await appointmentService.cancelAppointment(id);
 
+      /*
+       * We don't need the API response to remove
+       * the appointment. The original ID is available
+       * through action.meta.arg in the fulfilled reducer.
+       */
       return response?.data ?? response;
     } catch (error) {
       return rejectWithValue(
@@ -84,6 +100,11 @@ export const cancelAppointment = createAsyncThunk(
   }
 );
 
+/*
+ * ============================================================
+ * INITIAL STATE
+ * ============================================================
+ */
 const initialState = {
   items: [],
   isLoading: false,
@@ -92,10 +113,18 @@ const initialState = {
 
   filterStatus: "ALL",
   searchQuery: "",
+
+  slots: [],
 };
 
+/*
+ * ============================================================
+ * SLICE
+ * ============================================================
+ */
 const appointmentSlice = createSlice({
   name: "appointments",
+
   initialState,
 
   reducers: {
@@ -116,140 +145,196 @@ const appointmentSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      // ============================================================
-      // GET MY APPOINTMENTS
-      // ============================================================
+      /*
+       * ========================================================
+       * GET MY APPOINTMENTS
+       * ========================================================
+       */
 
-      .addCase(getMyAppointments.pending, (state) => {
-        state.isLoading = true;
-        state.isError = false;
-        state.error = null;
-      })
-
-      .addCase(getMyAppointments.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isError = false;
-        state.error = null;
-
-        state.items = Array.isArray(action.payload)
-          ? action.payload
-          : [];
-      })
-
-      .addCase(getMyAppointments.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isError = true;
-        state.error =
-          action.payload || "Failed to load appointments";
-      })
-
-      // ============================================================
-      // GET ALL APPOINTMENTS
-      // ============================================================
-
-      .addCase(getAllAppointments.pending, (state) => {
-        state.isLoading = true;
-        state.isError = false;
-        state.error = null;
-      })
-
-      .addCase(getAllAppointments.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isError = false;
-        state.error = null;
-
-        state.items = Array.isArray(action.payload)
-          ? action.payload
-          : [];
-      })
-
-      .addCase(getAllAppointments.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isError = true;
-        state.error =
-          action.payload || "Failed to load appointments";
-      })
-
-      // ============================================================
-      // BOOK APPOINTMENT
-      // ============================================================
-
-      .addCase(bookAppointment.pending, (state) => {
-        state.isLoading = true;
-        state.isError = false;
-        state.error = null;
-      })
-
-      .addCase(bookAppointment.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isError = false;
-        state.error = null;
-
-        if (action.payload) {
-          state.items.push(action.payload);
+      .addCase(
+        getMyAppointments.pending,
+        (state) => {
+          state.isLoading = true;
+          state.isError = false;
+          state.error = null;
         }
-      })
+      )
 
-      .addCase(bookAppointment.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isError = true;
-        state.error =
-          action.payload || "Failed to book appointment";
-      })
+      .addCase(
+        getMyAppointments.fulfilled,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = false;
+          state.error = null;
 
-      // ============================================================
-      // CANCEL APPOINTMENT
-      // ============================================================
-
-      .addCase(cancelAppointment.pending, (state) => {
-        state.isLoading = true;
-        state.isError = false;
-        state.error = null;
-      })
-
-      .addCase(cancelAppointment.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isError = false;
-        state.error = null;
-
-        const cancelledId = action.meta?.arg;
-
-        state.items = state.items.filter(
-          (item) => String(item.id) !== String(cancelledId)
-        );
-      })
-
-      .addCase(cancelAppointment.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isError = true;
-        state.error =
-          action.payload || "Failed to cancel appointment";
-      })
-
-      // ============================================================
-      // SUPPORT DIRECT TEST DISPATCHES
-      // ============================================================
-
-      .addCase("appointments/cancel/fulfilled", (state, action) => {
-        const cancelledId = action.meta?.arg;
-
-        state.items = state.items.filter(
-          (item) => String(item.id) !== String(cancelledId)
-        );
-      })
-
-      .addCase("appointments/book/fulfilled", (state, action) => {
-        if (action.payload) {
-          state.items.push(action.payload);
+          state.items = Array.isArray(action.payload)
+            ? action.payload
+            : [];
         }
-      });
+      )
+
+      .addCase(
+        getMyAppointments.rejected,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = true;
+
+          state.error =
+            action.payload ||
+            "Failed to load appointments";
+        }
+      )
+
+      /*
+       * ========================================================
+       * GET ALL APPOINTMENTS
+       * ========================================================
+       */
+
+      .addCase(
+        getAllAppointments.pending,
+        (state) => {
+          state.isLoading = true;
+          state.isError = false;
+          state.error = null;
+        }
+      )
+
+      .addCase(
+        getAllAppointments.fulfilled,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = false;
+          state.error = null;
+
+          state.items = Array.isArray(action.payload)
+            ? action.payload
+            : [];
+        }
+      )
+
+      .addCase(
+        getAllAppointments.rejected,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = true;
+
+          state.error =
+            action.payload ||
+            "Failed to load appointments";
+        }
+      )
+
+      /*
+       * ========================================================
+       * BOOK APPOINTMENT
+       * ========================================================
+       */
+
+      .addCase(
+        bookAppointment.pending,
+        (state) => {
+          state.isLoading = true;
+          state.isError = false;
+          state.error = null;
+        }
+      )
+
+      .addCase(
+        bookAppointment.fulfilled,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = false;
+          state.error = null;
+
+          /*
+           * T19:
+           * Add the newly booked appointment.
+           */
+          if (action.payload) {
+            state.items.push(action.payload);
+          }
+        }
+      )
+
+      .addCase(
+        bookAppointment.rejected,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = true;
+
+          state.error =
+            action.payload ||
+            "Failed to book appointment";
+        }
+      )
+
+      /*
+       * ========================================================
+       * CANCEL APPOINTMENT
+       * ========================================================
+       */
+
+      .addCase(
+        cancelAppointment.pending,
+        (state) => {
+          state.isLoading = true;
+          state.isError = false;
+          state.error = null;
+        }
+      )
+
+      .addCase(
+        cancelAppointment.fulfilled,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = false;
+          state.error = null;
+
+          /*
+           * T18:
+           * The ID passed to cancelAppointment()
+           * is stored in action.meta.arg.
+           */
+          const cancelledId =
+            action.meta?.arg;
+
+          state.items = state.items.filter(
+            (item) =>
+              String(item.id) !==
+              String(cancelledId)
+          );
+        }
+      )
+
+      .addCase(
+        cancelAppointment.rejected,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = true;
+
+          state.error =
+            action.payload ||
+            "Failed to cancel appointment";
+        }
+      );
   },
 });
 
+/*
+ * ============================================================
+ * ACTIONS
+ * ============================================================
+ */
 export const {
   setFilterStatus,
   setSearchQuery,
   clearAppointmentError,
 } = appointmentSlice.actions;
 
+/*
+ * ============================================================
+ * REDUCER
+ * ============================================================
+ */
 export default appointmentSlice.reducer;

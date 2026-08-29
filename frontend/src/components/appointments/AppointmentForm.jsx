@@ -17,10 +17,12 @@ const AppointmentForm = ({ doctor, onClose }) => {
     isLoading = false,
     isError = false,
     error = null,
+    errorMessage = null,
+    message = null,
   } = appointmentState;
 
   // ============================================================
-  // API ERROR HANDLING - T15
+  // T15 — APPOINTMENT API ERROR
   // ============================================================
 
   useEffect(() => {
@@ -28,24 +30,42 @@ const AppointmentForm = ({ doctor, onClose }) => {
       return;
     }
 
-    let message = "Something went wrong";
+    /*
+     * Check all common error locations.
+     */
+    let messageToShow = null;
 
     if (typeof error === "string") {
-      message = error;
-    } else if (error) {
-      message =
+      messageToShow = error;
+    } else if (error && typeof error === "object") {
+      messageToShow =
         error.message ||
         error.error ||
+        error.errorMessage ||
         error.data?.message ||
-        error.response?.data?.message ||
-        "Something went wrong";
+        error.response?.data?.message;
     }
 
-    window.alert(message);
-  }, [isError, error]);
+    /*
+     * Some Redux implementations store the message
+     * directly in errorMessage/message.
+     */
+    messageToShow =
+      messageToShow ||
+      errorMessage ||
+      message ||
+      "Something went wrong";
+
+    window.alert(messageToShow);
+  }, [
+    isError,
+    error,
+    errorMessage,
+    message,
+  ]);
 
   // ============================================================
-  // SLOT CHANGE - T9
+  // T9 — SLOT CHANGE
   // ============================================================
 
   const handleSlotChange = (event) => {
@@ -53,7 +73,7 @@ const AppointmentForm = ({ doctor, onClose }) => {
   };
 
   // ============================================================
-  // REASON CHANGE - T8
+  // T8 — REASON CHANGE
   // ============================================================
 
   const handleReasonChange = (event) => {
@@ -61,7 +81,7 @@ const AppointmentForm = ({ doctor, onClose }) => {
   };
 
   // ============================================================
-  // FORM SUBMIT - T26
+  // T26 — SUBMIT WITHOUT SLOT
   // ============================================================
 
   const handleSubmit = (event) => {
@@ -82,7 +102,7 @@ const AppointmentForm = ({ doctor, onClose }) => {
   };
 
   // ============================================================
-  // AVAILABLE SLOTS
+  // SLOTS
   // ============================================================
 
   const availableSlots = Array.isArray(slots)
@@ -97,7 +117,7 @@ const AppointmentForm = ({ doctor, onClose }) => {
     <div className="appointment-modal">
       <div className="appointment-form">
 
-        {/* Close button */}
+        {/* CLOSE */}
 
         <button
           type="button"
@@ -107,7 +127,7 @@ const AppointmentForm = ({ doctor, onClose }) => {
           ×
         </button>
 
-        {/* Doctor heading */}
+        {/* DOCTOR */}
 
         <h2>
           Book with Dr.{" "}
@@ -118,9 +138,7 @@ const AppointmentForm = ({ doctor, onClose }) => {
 
         <form onSubmit={handleSubmit}>
 
-          {/* ==================================================
-              SELECT TIME SLOT
-          ================================================== */}
+          {/* TIME SLOT */}
 
           <div className="form-group">
             <label htmlFor="slot">
@@ -137,26 +155,28 @@ const AppointmentForm = ({ doctor, onClose }) => {
                 Select Time Slot
               </option>
 
-              {availableSlots.map((item, index) => {
-                const slotId =
-                  item?.id ??
-                  item?.slotId ??
-                  index + 1;
+              {availableSlots.map(
+                (item, index) => {
+                  const slotId =
+                    item?.id ??
+                    item?.slotId ??
+                    index + 1;
 
-                const slotText =
-                  item?.startTime ||
-                  item?.time ||
-                  `Slot ${slotId}`;
+                  const slotText =
+                    item?.startTime ||
+                    item?.time ||
+                    `Slot ${slotId}`;
 
-                return (
-                  <option
-                    key={slotId}
-                    value={String(slotId)}
-                  >
-                    {slotText}
-                  </option>
-                );
-              })}
+                  return (
+                    <option
+                      key={slotId}
+                      value={String(slotId)}
+                    >
+                      {slotText}
+                    </option>
+                  );
+                }
+              )}
 
               {availableSlots.length === 0 && (
                 <option value="1">
@@ -166,9 +186,7 @@ const AppointmentForm = ({ doctor, onClose }) => {
             </select>
           </div>
 
-          {/* ==================================================
-              REASON FOR VISIT
-          ================================================== */}
+          {/* REASON */}
 
           <div className="form-group">
             <label htmlFor="reason">
@@ -184,9 +202,7 @@ const AppointmentForm = ({ doctor, onClose }) => {
             />
           </div>
 
-          {/* ==================================================
-              SUBMIT
-          ================================================== */}
+          {/* SUBMIT */}
 
           <button
             type="submit"

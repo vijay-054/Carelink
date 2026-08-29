@@ -1,26 +1,29 @@
-import API from './apiServices';
+import api from './api';
 
-// Retrieves all appointments for the authenticated patient or doctor
 const getMyAppointments = async () => {
-    const response = await API.get('/appointments/my');
+    const response = await api.get('/appointments/my');
     return response.data;
 };
 
-// Books an appointment passing the bookingData body
-const bookAppointment = async (bookingData) => {
-    const response = await API.post('/appointments/book', bookingData);
+const bookAppointment = async (appointmentData) => {
+    const response = await api.post(
+        '/appointments/book',
+        appointmentData
+    );
+
     return response.data;
 };
 
-// Cancels an appointment and releases the slot
-const cancelAppointment = async (id) => {
-    const response = await API.put(`/appointments/cancel/${id}`);
+const cancelAppointment = async (appointmentId) => {
+    const response = await api.put(
+        `/appointments/cancel/${appointmentId}`
+    );
+
     return response.data;
 };
 
-// Retrieves all appointments in the system (Clinic Admin)
 const getAllAppointments = async () => {
-    const response = await API.get('/appointments');
+    const response = await api.get('/appointments');
     return response.data;
 };
 

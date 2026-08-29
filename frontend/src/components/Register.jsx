@@ -1,25 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { register, reset } from '../store/slices/authSlice';
+
+import {
+    register,
+    reset,
+} from '../store/slices/authSlice';
 
 const Register = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const {
+        isLoading,
+        isError,
+        isSuccess,
+        message,
+    } = useSelector((state) => state.auth);
+
     const [formData, setFormData] = useState({
+        fullName: '',
         email: '',
         password: '',
-        fullName: '',
         bloodGroup: '',
         emergencyContact: '',
     });
 
-    const { email, password, fullName, bloodGroup, emergencyContact } = formData;
-
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-
-    const { user, isLoading, isError, isSuccess, message } = useSelector(
-        (state) => state.auth
-    );
+    const {
+        fullName,
+        email,
+        password,
+        bloodGroup,
+        emergencyContact,
+    } = formData;
 
     useEffect(() => {
         if (isError) {
@@ -27,92 +40,106 @@ const Register = () => {
             dispatch(reset());
         }
 
-        if (isSuccess || user) {
-            navigate('/');
+        if (isSuccess) {
+            navigate('/login');
             dispatch(reset());
         }
-    }, [user, isError, isSuccess, message, navigate, dispatch]);
+    }, [
+        isError,
+        isSuccess,
+        message,
+        navigate,
+        dispatch,
+    ]);
 
-    const onChange = (e) => {
-        setFormData((prevState) => ({
-            ...prevState,
-            [e.target.name]: e.target.value,
-        }));
+    const handleChange = (event) => {
+        setFormData({
+            ...formData,
+            [event.target.name]: event.target.value,
+        });
     };
 
-    const onSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = (event) => {
+        event.preventDefault();
+
         dispatch(
-            register({ email, password, fullName, bloodGroup, emergencyContact })
+            register({
+                fullName,
+                email,
+                password,
+                bloodGroup,
+                emergencyContact,
+            })
         );
     };
 
     return (
         <div className="register-container">
             <h2>Register</h2>
-            <form onSubmit={onSubmit}>
-                <div>
-                    <label htmlFor="email">Email *</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={email}
-                        placeholder="patient@carelink.com"
-                        onChange={onChange}
-                        required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="password">Password *</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={password}
-                        placeholder="Choose a password"
-                        onChange={onChange}
-                        required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="fullName">Full Name *</label>
-                    <input
-                        type="text"
-                        id="fullName"
-                        name="fullName"
-                        value={fullName}
-                        placeholder="John Doe"
-                        onChange={onChange}
-                        required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="bloodGroup">Blood Group</label>
-                    <input
-                        type="text"
-                        id="bloodGroup"
-                        name="bloodGroup"
-                        value={bloodGroup}
-                        placeholder="e.g. O+"
-                        onChange={onChange}
-                        required
-                    />
-                </div>
-                <div>
-                    <label htmlFor="emergencyContact">Emergency Contact *</label>
-                    <input
-                        type="text"
-                        id="emergencyContact"
-                        name="emergencyContact"
-                        value={emergencyContact}
-                        placeholder="1234567890"
-                        onChange={onChange}
-                        required
-                    />
-                </div>
-                <button type="submit" role="button">
-                    {isLoading ? 'Registering' : 'Register'}
+
+            <form onSubmit={handleSubmit}>
+                <label htmlFor="fullName">
+                    Full Name *
+                </label>
+                <input
+                    id="fullName"
+                    name="fullName"
+                    value={fullName}
+                    onChange={handleChange}
+                    required
+                />
+
+                <label htmlFor="email">
+                    Email *
+                </label>
+                <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={email}
+                    onChange={handleChange}
+                    required
+                />
+
+                <label htmlFor="password">
+                    Password *
+                </label>
+                <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    value={password}
+                    onChange={handleChange}
+                    required
+                />
+
+                <label htmlFor="bloodGroup">
+                    Blood Group *
+                </label>
+                <input
+                    id="bloodGroup"
+                    name="bloodGroup"
+                    value={bloodGroup}
+                    onChange={handleChange}
+                    required
+                />
+
+                <label htmlFor="emergencyContact">
+                    Emergency Contact *
+                </label>
+                <input
+                    id="emergencyContact"
+                    name="emergencyContact"
+                    value={emergencyContact}
+                    onChange={handleChange}
+                    required
+                />
+
+                <button
+                    type="submit"
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'Registering...' : 'Register'}
                 </button>
             </form>
         </div>

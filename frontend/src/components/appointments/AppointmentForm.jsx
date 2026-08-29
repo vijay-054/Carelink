@@ -1,15 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { bookAppointment, reset } from '../../store/slices/appointmentSlice';
-import { getSlots } from '../../store/slices/scheduleSlice';
+
+import {
+    getSlots,
+} from '../../store/slices/scheduleSlice';
+
+import {
+    bookAppointment,
+    reset as resetAppointments,
+} from '../../store/slices/appointmentSlice';
 
 const AppointmentForm = ({ doctor, onClose }) => {
-    const [slotId, setSlotId] = useState('');
-    const [reasonForVisit, setReasonForVisit] = useState('');
-
     const dispatch = useDispatch();
-    const { slots } = useSelector((state) => state.schedule);
-    const { isError, isSuccess, message } = useSelector((state) => state.appointments);
+
+    const {
+        slots,
+        isLoading: slotsLoading,
+    } = useSelector((state) => state.schedule);
+
+    const {
+        isError,
+        message,
+        isSuccess,
+    } = useSelector((state) => state.appointments);
+
+    const [slot, setSlot] = useState('');
+    const [reason, setReason] = useState('');
 
     useEffect(() => {
         if (doctor && doctor.id) {
@@ -20,57 +36,104 @@ const AppointmentForm = ({ doctor, onClose }) => {
     useEffect(() => {
         if (isError) {
             alert(message);
-            dispatch(reset());
+            dispatch(resetAppointments());
         }
-        if (isSuccess) {
-            alert('Appointment booked successfully!');
-            dispatch(reset());
-            onClose();
-        }
-    }, [isError, isSuccess, message, dispatch, onClose]);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!slotId) {
-            alert('Please select a time slot');
+        if (isSuccess) {
+            dispatch(resetAppointments());
+
+            if (onClose) {
+                onClose();
+            }
+        }
+    }, [
+        isError,
+        isSuccess,
+        message,
+        dispatch,
+        onClose,
+    ]);
+
+    const handleSubmit = (event) => {
+        event.preventDefault();
+
+        if (!slot) {
+            alert('Please select a time slot.');
             return;
         }
-        dispatch(bookAppointment({ slotId: Number(slotId), reasonForVisit }));
+
+        dispatch(
+            bookAppointment({
+                doctorId: doctor.id,
+                slotId: Number(slot),
+                reasonForVisit: reason,
+            })
+        );
     };
 
     return (
-        <div className="modal">
-            <div className="modal-content">
-                <button className="close-btn" onClick={onClose}>x</button>
-                <h3>Book with Dr. {doctor?.account?.email}</h3>
+        <div className="appointment-modal">
+            <div className="appointment-form">
+                <button
+                    type="button"
+                    aria-label="Close"
+                    onClick={onClose}
+                >
+                    ×
+                </button>
+
+                <h2>
+                    Book with Dr.{' '}
+                    {doctor?.account?.email}
+                </h2>
+
                 <form onSubmit={handleSubmit}>
-                    <div>
-                        <label htmlFor="slotId">Select Time Slot</label>
-                        <select
-                            id="slotId"
-                            value={slotId}
-                            onChange={(e) => setSlotId(e.target.value)}
-                        >
-                            <option value="">-- Select Slot --</option>
-                            {slots && slots.map((slot) => (
-                                <option key={slot.id} value={slot.id}>
-                                    {slot.startTime} to {slot.endTime}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label htmlFor="reasonForVisit">Reason for Visit *</label>
-                        <textarea
-                            id="reasonForVisit"
-                            placeholder="Describe your symptoms..."
-                            value={reasonForVisit}
-                            onChange={(e) => setReasonForVisit(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <button type="submit" disabled={!slotId}>
-                        Confirm Booking
+                    <label htmlFor="slot">
+                        Select Time Slot
+                    </label>
+
+                    <select
+                        id="slot"
+                        name="slot"
+                        value={slot}
+                        onChange={(event) =>
+                            setSlot(event.target.value)
+                        }
+                    >
+                        <option value="">
+                            Select a time slot
+                        </option>
+
+                        {slots?.map((item) => (
+                            <option
+                                key={item.id}
+                                value={item.id}
+                            >
+                                {item.startTime}
+                            </option>
+                        ))}
+                    </select>
+
+                    <label htmlFor="reason">
+                        Reason for Visit
+                    </label>
+
+                    <textarea
+                        id="reason"
+                        name="reason"
+                        value={reason}
+                        onChange={(event) =>
+                            setReason(event.target.value)
+                        }
+                    />
+
+                    <button
+                        type="submit"
+                        disabled={!slot || slotsLoading}
+                    >
+                        {slotsLoading
+                            ? 'Loading...'
+                            : 'Confirm Booking'}
                     </button>
                 </form>
             </div>

@@ -1,149 +1,174 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import {
-    register,
-    reset,
-} from '../store/slices/authSlice';
+  register,
+  reset,
+} from "../store/slices/authSlice";
 
 const Register = () => {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    const {
-        isLoading,
-        isError,
-        isSuccess,
-        message,
-    } = useSelector((state) => state.auth);
+  const {
+    isLoading,
+    isError,
+    isSuccess,
+    message,
+  } = useSelector((state) => state.auth || {});
 
-    const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        password: '',
-        bloodGroup: '',
-        emergencyContact: '',
-    });
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    bloodGroup: "",
+    emergencyContact: "",
+  });
 
-    const {
+  const {
+    fullName,
+    email,
+    password,
+    bloodGroup,
+    emergencyContact,
+  } = formData;
+
+  useEffect(() => {
+    if (isError) {
+      alert(message || "Registration failed");
+      dispatch(reset());
+      return;
+    }
+
+    if (isSuccess) {
+      dispatch(reset());
+      navigate("/login");
+    }
+  }, [
+    isError,
+    isSuccess,
+    message,
+    navigate,
+    dispatch,
+  ]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((previousData) => ({
+      ...previousData,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    dispatch(
+      register({
         fullName,
         email,
         password,
         bloodGroup,
         emergencyContact,
-    } = formData;
-
-    useEffect(() => {
-        if (isError) {
-            alert(message);
-            dispatch(reset());
-        }
-
-        if (isSuccess) {
-            navigate('/login');
-            dispatch(reset());
-        }
-    }, [
-        isError,
-        isSuccess,
-        message,
-        navigate,
-        dispatch,
-    ]);
-
-    const handleChange = (event) => {
-        setFormData({
-            ...formData,
-            [event.target.name]: event.target.value,
-        });
-    };
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-
-        dispatch(
-            register({
-                fullName,
-                email,
-                password,
-                bloodGroup,
-                emergencyContact,
-            })
-        );
-    };
-
-    return (
-        <div className="register-container">
-            <h2>Register</h2>
-
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="fullName">
-                    Full Name *
-                </label>
-                <input
-                    id="fullName"
-                    name="fullName"
-                    value={fullName}
-                    onChange={handleChange}
-                    required
-                />
-
-                <label htmlFor="email">
-                    Email *
-                </label>
-                <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={email}
-                    onChange={handleChange}
-                    required
-                />
-
-                <label htmlFor="password">
-                    Password *
-                </label>
-                <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={password}
-                    onChange={handleChange}
-                    required
-                />
-
-                <label htmlFor="bloodGroup">
-                    Blood Group *
-                </label>
-                <input
-                    id="bloodGroup"
-                    name="bloodGroup"
-                    value={bloodGroup}
-                    onChange={handleChange}
-                    required
-                />
-
-                <label htmlFor="emergencyContact">
-                    Emergency Contact *
-                </label>
-                <input
-                    id="emergencyContact"
-                    name="emergencyContact"
-                    value={emergencyContact}
-                    onChange={handleChange}
-                    required
-                />
-
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                >
-                    {isLoading ? 'Registering...' : 'Register'}
-                </button>
-            </form>
-        </div>
+      })
     );
+  };
+
+  return (
+    <div className="auth-page">
+      <h2>Register</h2>
+
+      <form onSubmit={handleSubmit}>
+
+        <div className="form-group">
+          <label htmlFor="fullName">
+            Full Name *
+          </label>
+
+          <input
+            id="fullName"
+            name="fullName"
+            type="text"
+            value={fullName}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="register-email">
+            Email *
+          </label>
+
+          <input
+            id="register-email"
+            name="email"
+            type="email"
+            value={email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="register-password">
+            Password *
+          </label>
+
+          <input
+            id="register-password"
+            name="password"
+            type="password"
+            value={password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="bloodGroup">
+            Blood Group *
+          </label>
+
+          <input
+            id="bloodGroup"
+            name="bloodGroup"
+            type="text"
+            value={bloodGroup}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="emergencyContact">
+            Emergency Contact *
+          </label>
+
+          <input
+            id="emergencyContact"
+            name="emergencyContact"
+            type="text"
+            value={emergencyContact}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading
+            ? "Registering..."
+            : "Register"}
+        </button>
+
+      </form>
+    </div>
+  );
 };
 
 export default Register;

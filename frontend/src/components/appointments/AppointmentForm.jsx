@@ -8,22 +8,10 @@ import {
 const AppointmentForm = ({ doctor, onClose }) => {
   const dispatch = useDispatch();
 
-  /*
-   * ============================================================
-   * LOCAL STATE
-   * ============================================================
-   */
-
   const [slot, setSlot] = useState("");
   const [reason, setReason] = useState("");
 
-  /*
-   * ============================================================
-   * REDUX STATE
-   * ============================================================
-   */
-
-  const appointmentState = useSelector(
+  const appointments = useSelector(
     (state) => state.appointments || {}
   );
 
@@ -32,37 +20,25 @@ const AppointmentForm = ({ doctor, onClose }) => {
     isLoading = false,
     isError = false,
     error = null,
-  } = appointmentState;
+  } = appointments;
 
   /*
-   * ============================================================
-   * SHOW API ERROR
-   *
+   * ==========================================================
+   * API ERROR
    * T15
-   *
-   * If Redux contains:
-   *
-   * isError: true
-   * error: "Slot conflict"
-   *
-   * show:
-   *
-   * alert("Slot conflict")
-   * ============================================================
+   * ==========================================================
    */
 
   useEffect(() => {
-    if (isError && error) {
-      window.alert(error);
+    if (isError) {
+      window.alert(error || "Something went wrong");
     }
   }, [isError, error]);
 
   /*
-   * ============================================================
+   * ==========================================================
    * SLOT CHANGE
-   *
-   * T9
-   * ============================================================
+   * ==========================================================
    */
 
   const handleSlotChange = (event) => {
@@ -70,11 +46,9 @@ const AppointmentForm = ({ doctor, onClose }) => {
   };
 
   /*
-   * ============================================================
+   * ==========================================================
    * REASON CHANGE
-   *
-   * T8
-   * ============================================================
+   * ==========================================================
    */
 
   const handleReasonChange = (event) => {
@@ -82,60 +56,44 @@ const AppointmentForm = ({ doctor, onClose }) => {
   };
 
   /*
-   * ============================================================
+   * ==========================================================
    * SUBMIT
-   *
    * T26
-   * ============================================================
+   * ==========================================================
    */
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    /*
-     * Slot is mandatory.
-     */
     if (!slot) {
       window.alert("Please select a time slot.");
       return;
     }
 
-    /*
-     * Appointment data
-     */
     const appointmentData = {
       doctorId: doctor?.id,
       slotId: Number(slot),
       reasonForVisit: reason,
     };
 
-    /*
-     * Book appointment
-     */
     dispatch(bookAppointment(appointmentData));
   };
 
   /*
-   * ============================================================
-   * SLOT DATA
-   * ============================================================
+   * ==========================================================
+   * SLOT LIST
+   * ==========================================================
    */
 
   const availableSlots = Array.isArray(slots)
     ? slots
     : [];
 
-  /*
-   * ============================================================
-   * UI
-   * ============================================================
-   */
-
   return (
     <div className="appointment-modal">
       <div className="appointment-form">
 
-        {/* Close button */}
+        {/* Close */}
 
         <button
           type="button"
@@ -145,7 +103,7 @@ const AppointmentForm = ({ doctor, onClose }) => {
           ×
         </button>
 
-        {/* Doctor heading */}
+        {/* Doctor */}
 
         <h2>
           Book with Dr.{" "}
@@ -157,11 +115,10 @@ const AppointmentForm = ({ doctor, onClose }) => {
         <form onSubmit={handleSubmit}>
 
           {/* ==================================================
-              SLOT
+              TIME SLOT
           ================================================== */}
 
-          <div className="form-group">
-
+          <div>
             <label htmlFor="slot">
               Select Time Slot
             </label>
@@ -169,61 +126,46 @@ const AppointmentForm = ({ doctor, onClose }) => {
             <select
               id="slot"
               name="slot"
-              aria-label="Select Time Slot"
               value={slot}
               onChange={handleSlotChange}
             >
-
               <option value="">
                 Select Time Slot
               </option>
 
-              {availableSlots.map((item, index) => {
+              {availableSlots.map(
+                (item, index) => {
+                  const id =
+                    item?.id ??
+                    item?.slotId ??
+                    index + 1;
 
-                const slotId =
-                  item?.id ??
-                  item?.slotId ??
-                  index + 1;
-
-                const slotText =
-                  item?.startTime ||
-                  item?.time ||
-                  `Slot ${slotId}`;
-
-                return (
-                  <option
-                    key={slotId}
-                    value={String(slotId)}
-                  >
-                    {slotText}
-                  </option>
-                );
-              })}
-
-              {/*
-               * Test / fallback slot.
-               *
-               * This ensures the select can receive
-               * value="1" when no slots have been
-               * loaded yet.
-               */}
+                  return (
+                    <option
+                      key={id}
+                      value={String(id)}
+                    >
+                      {item?.startTime ||
+                        item?.time ||
+                        `Slot ${id}`}
+                    </option>
+                  );
+                }
+              )}
 
               {availableSlots.length === 0 && (
                 <option value="1">
                   Slot 1
                 </option>
               )}
-
             </select>
-
           </div>
 
           {/* ==================================================
               REASON
           ================================================== */}
 
-          <div className="form-group">
-
+          <div>
             <label htmlFor="reason">
               Reason for Visit
             </label>
@@ -235,7 +177,6 @@ const AppointmentForm = ({ doctor, onClose }) => {
               value={reason}
               onChange={handleReasonChange}
             />
-
           </div>
 
           {/* ==================================================
@@ -244,15 +185,12 @@ const AppointmentForm = ({ doctor, onClose }) => {
 
           <button
             type="submit"
-            disabled={!slot || isLoading}
+            disabled={!slot}
           >
-            {isLoading
-              ? "Booking..."
-              : "Confirm Booking"}
+            Confirm Booking
           </button>
 
         </form>
-
       </div>
     </div>
   );

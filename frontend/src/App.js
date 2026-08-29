@@ -1,23 +1,108 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
+
+import Navbar from "./components/layout/Navbar";
+
+import Login from "./components/Login";
+import Register from "./components/Register";
+
+import AppointmentList from "./components/appointments/AppointmentList";
+
+import DoctorList from "./components/doctors/DoctorList";
+import DoctorConsultations from "./components/doctors/DoctorConsultations";
+import DoctorSchedule from "./components/doctors/DoctorSchedule";
+
+import ManageDoctors from "./components/admin/ManageDoctors";
+import ManagePatients from "./components/admin/ManagePatients";
+
+const Home = () => {
+  return (
+    <div>
+      <h1>Hospital Appointment Management System</h1>
+
+      <p>
+        Welcome to CareLink.
+      </p>
+
+      <p>
+        Please use the navigation menu to access
+        the available features.
+      </p>
+    </div>
+  );
+};
 
 function App() {
-  const auth = useSelector((state) => state.auth);
-
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px', backgroundColor: '#f4f6f8', minHeight: '100vh' }}>
-      <header style={{ backgroundColor: '#0284c7', color: 'white', padding: '15px 20px', borderRadius: '8px', marginBottom: '20px' }}>
-        <h1 style={{ margin: 0, fontSize: '24px' }}>Hospital Appointment Management System</h1>
-      </header>
+    <BrowserRouter>
+      <Navbar />
+
       <main>
-        <div style={{ background: 'white', padding: '20px', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-          <h2>Application Dashboard</h2>
-          <p>Frontend and Redux store are active and successfully compiled.</p>
-          <hr style={{ margin: '15px 0', border: '0', borderTop: '1px solid #eee' }} />
-          <p><strong>Auth State:</strong> {auth?.user ? 'Active Session' : 'Guest User'}</p>
-        </div>
+        <Routes>
+
+          {/* HOME */}
+          <Route
+            path="/"
+            element={<Home />}
+          />
+
+          {/* AUTHENTICATION */}
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+
+          <Route
+            path="/register"
+            element={<Register />}
+          />
+
+          {/* APPOINTMENTS */}
+          <Route
+            path="/appointments"
+            element={<AppointmentList />}
+          />
+
+          {/* DOCTOR */}
+          <Route
+            path="/doctor-list"
+            element={<DoctorList />}
+          />
+
+          <Route
+            path="/schedule"
+            element={<DoctorSchedule />}
+          />
+
+          <Route
+            path="/consultations"
+            element={<DoctorConsultations />}
+          />
+
+          {/* ADMIN */}
+          <Route
+            path="/doctors"
+            element={<ManageDoctors />}
+          />
+
+          <Route
+            path="/patients"
+            element={<ManagePatients />}
+          />
+
+          {/* FALLBACK */}
+          <Route
+            path="*"
+            element={<Home />}
+          />
+
+        </Routes>
       </main>
-    </div>
+    </BrowserRouter>
   );
 }
 

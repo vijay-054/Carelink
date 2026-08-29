@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import scheduleService from '../../services/scheduleService';
+import scheduleService from '../../../services/scheduleService';
 
 const initialState = {
     slots: [],

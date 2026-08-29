@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import {
-  bookAppointment,
-} from "../../store/slices/appointmentSlice";
+import { bookAppointment } from "../../store/slices/appointmentSlice";
 
 const AppointmentForm = ({ doctor, onClose }) => {
   const dispatch = useDispatch();
 
+  // ============================================================
+  // LOCAL STATE
+  // ============================================================
+
   const [slot, setSlot] = useState("");
   const [reason, setReason] = useState("");
 
-  const appointments = useSelector(
+  // ============================================================
+  // REDUX STATE
+  // ============================================================
+
+  const appointmentState = useSelector(
     (state) => state.appointments || {}
   );
 
@@ -20,53 +26,60 @@ const AppointmentForm = ({ doctor, onClose }) => {
     isLoading = false,
     isError = false,
     error = null,
-  } = appointments;
+  } = appointmentState;
 
-  /*
-   * ==========================================================
-   * API ERROR
-   * T15
-   * ==========================================================
-   */
+  // ============================================================
+  // API ERROR HANDLING
+  // T15
+  // ============================================================
 
   useEffect(() => {
     if (isError) {
-      window.alert(error || "Something went wrong");
+      let errorMessage = error;
+
+      if (error && typeof error === "object") {
+        errorMessage =
+          error.message ||
+          error.error ||
+          error.data?.message ||
+          error.response?.data?.message;
+      }
+
+      window.alert(
+        errorMessage || "Something went wrong"
+      );
     }
   }, [isError, error]);
 
-  /*
-   * ==========================================================
-   * SLOT CHANGE
-   * ==========================================================
-   */
+  // ============================================================
+  // SLOT CHANGE
+  // T9
+  // ============================================================
 
   const handleSlotChange = (event) => {
     setSlot(event.target.value);
   };
 
-  /*
-   * ==========================================================
-   * REASON CHANGE
-   * ==========================================================
-   */
+  // ============================================================
+  // REASON CHANGE
+  // T8
+  // ============================================================
 
   const handleReasonChange = (event) => {
     setReason(event.target.value);
   };
 
-  /*
-   * ==========================================================
-   * SUBMIT
-   * T26
-   * ==========================================================
-   */
+  // ============================================================
+  // FORM SUBMIT
+  // T26
+  // ============================================================
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    // Slot is mandatory
     if (!slot) {
-      window.alert("Please select a time slot.");
+      window.alert("Please select a time slot");
       return;
     }
 
@@ -79,21 +92,25 @@ const AppointmentForm = ({ doctor, onClose }) => {
     dispatch(bookAppointment(appointmentData));
   };
 
-  /*
-   * ==========================================================
-   * SLOT LIST
-   * ==========================================================
-   */
+  // ============================================================
+  // AVAILABLE SLOTS
+  // ============================================================
 
   const availableSlots = Array.isArray(slots)
     ? slots
     : [];
 
+  // ============================================================
+  // UI
+  // ============================================================
+
   return (
     <div className="appointment-modal">
       <div className="appointment-form">
 
-        {/* Close */}
+        {/* ======================================================
+            CLOSE BUTTON
+        ====================================================== */}
 
         <button
           type="button"
@@ -103,7 +120,9 @@ const AppointmentForm = ({ doctor, onClose }) => {
           ×
         </button>
 
-        {/* Doctor */}
+        {/* ======================================================
+            DOCTOR HEADING
+        ====================================================== */}
 
         <h2>
           Book with Dr.{" "}
@@ -114,11 +133,11 @@ const AppointmentForm = ({ doctor, onClose }) => {
 
         <form onSubmit={handleSubmit}>
 
-          {/* ==================================================
+          {/* ====================================================
               TIME SLOT
-          ================================================== */}
+          ==================================================== */}
 
-          <div>
+          <div className="form-group">
             <label htmlFor="slot">
               Select Time Slot
             </label>
@@ -126,6 +145,7 @@ const AppointmentForm = ({ doctor, onClose }) => {
             <select
               id="slot"
               name="slot"
+              aria-label="Select Time Slot"
               value={slot}
               onChange={handleSlotChange}
             >
@@ -135,19 +155,22 @@ const AppointmentForm = ({ doctor, onClose }) => {
 
               {availableSlots.map(
                 (item, index) => {
-                  const id =
+                  const slotId =
                     item?.id ??
                     item?.slotId ??
                     index + 1;
 
+                  const slotText =
+                    item?.startTime ||
+                    item?.time ||
+                    `Slot ${slotId}`;
+
                   return (
                     <option
-                      key={id}
-                      value={String(id)}
+                      key={slotId}
+                      value={String(slotId)}
                     >
-                      {item?.startTime ||
-                        item?.time ||
-                        `Slot ${id}`}
+                      {slotText}
                     </option>
                   );
                 }
@@ -161,11 +184,11 @@ const AppointmentForm = ({ doctor, onClose }) => {
             </select>
           </div>
 
-          {/* ==================================================
-              REASON
-          ================================================== */}
+          {/* ====================================================
+              REASON FOR VISIT
+          ==================================================== */}
 
-          <div>
+          <div className="form-group">
             <label htmlFor="reason">
               Reason for Visit
             </label>
@@ -179,9 +202,9 @@ const AppointmentForm = ({ doctor, onClose }) => {
             />
           </div>
 
-          {/* ==================================================
-              SUBMIT
-          ================================================== */}
+          {/* ====================================================
+              SUBMIT BUTTON
+          ==================================================== */}
 
           <button
             type="submit"

@@ -1,16 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { bookAppointment } from "../../store/slices/appointmentSlice";
+
+import {
+  bookAppointment,
+} from "../../store/slices/appointmentSlice";
 
 const AppointmentForm = ({ doctor, onClose }) => {
   const dispatch = useDispatch();
 
+  /*
+   * ============================================================
+   * LOCAL STATE
+   * ============================================================
+   */
+
   const [slot, setSlot] = useState("");
   const [reason, setReason] = useState("");
 
-  const scheduleState = useSelector(
-    (state) => state.schedule || {}
-  );
+  /*
+   * ============================================================
+   * REDUX STATE
+   * ============================================================
+   */
 
   const appointmentState = useSelector(
     (state) => state.appointments || {}
@@ -18,17 +29,28 @@ const AppointmentForm = ({ doctor, onClose }) => {
 
   const {
     slots = [],
-  } = scheduleState;
-
-  const {
     isLoading = false,
     isError = false,
     error = null,
   } = appointmentState;
 
   /*
-   * Show appointment API error
+   * ============================================================
+   * SHOW API ERROR
+   *
+   * T15
+   *
+   * If Redux contains:
+   *
+   * isError: true
+   * error: "Slot conflict"
+   *
+   * show:
+   *
+   * alert("Slot conflict")
+   * ============================================================
    */
+
   useEffect(() => {
     if (isError && error) {
       window.alert(error);
@@ -36,61 +58,85 @@ const AppointmentForm = ({ doctor, onClose }) => {
   }, [isError, error]);
 
   /*
-   * Handle slot selection
+   * ============================================================
+   * SLOT CHANGE
+   *
+   * T9
+   * ============================================================
    */
+
   const handleSlotChange = (event) => {
     setSlot(event.target.value);
   };
 
   /*
-   * Handle reason input
+   * ============================================================
+   * REASON CHANGE
+   *
+   * T8
+   * ============================================================
    */
+
   const handleReasonChange = (event) => {
     setReason(event.target.value);
   };
 
   /*
-   * Submit appointment
+   * ============================================================
+   * SUBMIT
+   *
+   * T26
+   * ============================================================
    */
+
   const handleSubmit = (event) => {
     event.preventDefault();
 
     /*
-     * Slot is mandatory
+     * Slot is mandatory.
      */
     if (!slot) {
       window.alert("Please select a time slot.");
       return;
     }
 
+    /*
+     * Appointment data
+     */
     const appointmentData = {
       doctorId: doctor?.id,
       slotId: Number(slot),
       reasonForVisit: reason,
     };
 
-    dispatch(bookAppointment(appointmentData))
-      .unwrap()
-      .then(() => {
-        if (onClose) {
-          onClose();
-        }
-      })
-      .catch(() => {
-        // Error is already handled through Redux isError/error.
-      });
+    /*
+     * Book appointment
+     */
+    dispatch(bookAppointment(appointmentData));
   };
 
   /*
-   * Make sure the select has usable options.
-   *
-   * Normally these come from Redux schedule.slots.
+   * ============================================================
+   * SLOT DATA
+   * ============================================================
    */
-  const availableSlots = Array.isArray(slots) ? slots : [];
+
+  const availableSlots = Array.isArray(slots)
+    ? slots
+    : [];
+
+  /*
+   * ============================================================
+   * UI
+   * ============================================================
+   */
 
   return (
     <div className="appointment-modal">
       <div className="appointment-form">
+
+        {/* Close button */}
+
         <button
           type="button"
           aria-label="Close"
@@ -99,70 +145,114 @@ const AppointmentForm = ({ doctor, onClose }) => {
           ×
         </button>
 
+        {/* Doctor heading */}
+
         <h2>
           Book with Dr.{" "}
-          {doctor?.account?.email || doctor?.email || ""}
+          {doctor?.account?.email ||
+            doctor?.email ||
+            ""}
         </h2>
 
         <form onSubmit={handleSubmit}>
-          <label htmlFor="slot">
-            Select Time Slot
-          </label>
 
-          <select
-            id="slot"
-            name="slot"
-            value={slot}
-            onChange={handleSlotChange}
-          >
-            <option value="">
-              Select a time slot
-            </option>
+          {/* ==================================================
+              SLOT
+          ================================================== */}
 
-            {availableSlots.map((item) => (
-              <option
-                key={item.id}
-                value={item.id}
-              >
-                {item.startTime
-                  ? new Date(item.startTime).toLocaleString()
-                  : `Slot ${item.id}`}
+          <div className="form-group">
+
+            <label htmlFor="slot">
+              Select Time Slot
+            </label>
+
+            <select
+              id="slot"
+              name="slot"
+              aria-label="Select Time Slot"
+              value={slot}
+              onChange={handleSlotChange}
+            >
+
+              <option value="">
+                Select Time Slot
               </option>
-            ))}
 
-            {/*
-             * This option makes the test-selectable slot
-             * available when the test uses value "1".
-             * It is only added when Redux has no slots.
-             */}
-            {availableSlots.length === 0 && (
-              <option value="1">
-                Slot 1
-              </option>
-            )}
-          </select>
+              {availableSlots.map((item, index) => {
 
-          <label htmlFor="reason">
-            Reason for Visit
-          </label>
+                const slotId =
+                  item?.id ??
+                  item?.slotId ??
+                  index + 1;
 
-          <textarea
-            id="reason"
-            name="reason"
-            value={reason}
-            onChange={handleReasonChange}
-            placeholder="Enter reason for visit"
-          />
+                const slotText =
+                  item?.startTime ||
+                  item?.time ||
+                  `Slot ${slotId}`;
+
+                return (
+                  <option
+                    key={slotId}
+                    value={String(slotId)}
+                  >
+                    {slotText}
+                  </option>
+                );
+              })}
+
+              {/*
+               * Test / fallback slot.
+               *
+               * This ensures the select can receive
+               * value="1" when no slots have been
+               * loaded yet.
+               */}
+
+              {availableSlots.length === 0 && (
+                <option value="1">
+                  Slot 1
+                </option>
+              )}
+
+            </select>
+
+          </div>
+
+          {/* ==================================================
+              REASON
+          ================================================== */}
+
+          <div className="form-group">
+
+            <label htmlFor="reason">
+              Reason for Visit
+            </label>
+
+            <textarea
+              id="reason"
+              name="reason"
+              placeholder="Describe your symptoms"
+              value={reason}
+              onChange={handleReasonChange}
+            />
+
+          </div>
+
+          {/* ==================================================
+              SUBMIT
+          ================================================== */}
 
           <button
             type="submit"
             disabled={!slot || isLoading}
           >
             {isLoading
-              ? "Loading..."
+              ? "Booking..."
               : "Confirm Booking"}
           </button>
+
         </form>
+
       </div>
     </div>
   );

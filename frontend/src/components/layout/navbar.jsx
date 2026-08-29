@@ -1,76 +1,121 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../../store/slices/authSlice';
+import React from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
 
-const Navbar = () => {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
+import Navbar from "./components/layout/Navbar";
 
-    const { user } = useSelector((state) => state.auth);
+import Login from "./components/Login";
+import Register from "./components/Register";
 
-    const handleLogout = () => {
-        dispatch(logout());
-        localStorage.removeItem('user');
-        navigate('/');
-    };
+import AppointmentList from "./components/appointments/AppointmentList";
+import DoctorList from "./components/doctors/DoctorList";
+import DoctorConsultations from "./components/doctors/DoctorConsultations";
+import DoctorSchedule from "./components/doctors/DoctorSchedule";
 
-    return (
-        <nav className="navbar">
-            <Link to="/" className="brand">
-                CareLink
-            </Link>
+import ManageDoctors from "./components/admin/ManageDoctors";
+import ManagePatients from "./components/admin/ManagePatients";
 
-            <div className="nav-links">
-                {!user ? (
-                    <>
-                        <Link to="/login">Login</Link>
-                        <Link to="/register">Register</Link>
-                    </>
-                ) : (
-                    <>
-                        {user.role === 'PATIENT' && (
-                            <Link to="/appointments">
-                                My Appointments
-                            </Link>
-                        )}
+function Home() {
+  return (
+    <div className="home-page">
+      <h1>Hospital Appointment Management System</h1>
 
-                        {user.role === 'DOCTOR' && (
-                            <>
-                                <Link to="/schedule">
-                                    My Schedule
-                                </Link>
+      <p>
+        Welcome to the Hospital Appointment Management System.
+      </p>
 
-                                <Link to="/consultations">
-                                    Consultations
-                                </Link>
-                            </>
-                        )}
+      <p>
+        Use the navigation menu to access your available
+        features.
+      </p>
+    </div>
+  );
+}
 
-                        {user.role === 'CLINIC_ADMIN' && (
-                            <>
-                                <Link to="/doctors">
-                                    Manage Doctors
-                                </Link>
+function App() {
+  return (
+    <BrowserRouter>
+      <div className="app">
 
-                                <Link to="/patients">
-                                    Manage Patients
-                                </Link>
+        {/* ==================================================
+            NAVIGATION
+        ================================================== */}
 
-                                <Link to="/appointments">
-                                    All Appointments
-                                </Link>
-                            </>
-                        )}
+        <Navbar />
 
-                        <button onClick={handleLogout}>
-                            Logout
-                        </button>
-                    </>
-                )}
-            </div>
-        </nav>
-    );
-};
+        {/* ==================================================
+            APPLICATION ROUTES
+        ================================================== */}
 
-export default Navbar;
+        <main className="main-content">
+          <Routes>
+
+            {/* Home */}
+
+            <Route
+              path="/"
+              element={<Home />}
+            />
+
+            {/* Authentication */}
+
+            <Route
+              path="/login"
+              element={<Login />}
+            />
+
+            <Route
+              path="/register"
+              element={<Register />}
+            />
+
+            {/* Patient */}
+
+            <Route
+              path="/appointments"
+              element={<AppointmentList />}
+            />
+
+            {/* Doctor */}
+
+            <Route
+              path="/doctors"
+              element={<DoctorList />}
+            />
+
+            <Route
+              path="/schedule"
+              element={<DoctorSchedule />}
+            />
+
+            <Route
+              path="/consultations"
+              element={<DoctorConsultations />}
+            />
+
+            {/* Clinic Admin */}
+
+            <Route
+              path="/patients"
+              element={<ManagePatients />}
+            />
+
+            {/* Fallback */}
+
+            <Route
+              path="*"
+              element={<Home />}
+            />
+
+          </Routes>
+        </main>
+
+      </div>
+    </BrowserRouter>
+  );
+}
+
+export default App;

@@ -1,121 +1,101 @@
 import React from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../store/slices/authSlice";
 
-import Navbar from "./components/layout/Navbar";
+const Navbar = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-import Login from "./components/Login";
-import Register from "./components/Register";
-
-import AppointmentList from "./components/appointments/AppointmentList";
-import DoctorList from "./components/doctors/DoctorList";
-import DoctorConsultations from "./components/doctors/DoctorConsultations";
-import DoctorSchedule from "./components/doctors/DoctorSchedule";
-
-import ManageDoctors from "./components/admin/ManageDoctors";
-import ManagePatients from "./components/admin/ManagePatients";
-
-function Home() {
-  return (
-    <div className="home-page">
-      <h1>Hospital Appointment Management System</h1>
-
-      <p>
-        Welcome to the Hospital Appointment Management System.
-      </p>
-
-      <p>
-        Use the navigation menu to access your available
-        features.
-      </p>
-    </div>
+  const { user } = useSelector(
+    (state) => state.auth || {}
   );
-}
 
-function App() {
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem("user");
+    navigate("/");
+  };
+
   return (
-    <BrowserRouter>
-      <div className="app">
+    <nav className="navbar">
 
-        {/* ==================================================
-            NAVIGATION
-        ================================================== */}
+      {/* Brand */}
 
-        <Navbar />
+      <Link to="/" className="brand">
+        CareLink
+      </Link>
 
-        {/* ==================================================
-            APPLICATION ROUTES
-        ================================================== */}
+      {/* Navigation Links */}
 
-        <main className="main-content">
-          <Routes>
+      <div className="nav-links">
 
-            {/* Home */}
+        {!user ? (
+          <>
+            <Link to="/login">
+              Login
+            </Link>
 
-            <Route
-              path="/"
-              element={<Home />}
-            />
+            <Link to="/register">
+              Register
+            </Link>
+          </>
+        ) : (
+          <>
+            {/* PATIENT */}
 
-            {/* Authentication */}
+            {user.role === "PATIENT" && (
+              <Link to="/appointments">
+                My Appointments
+              </Link>
+            )}
 
-            <Route
-              path="/login"
-              element={<Login />}
-            />
+            {/* DOCTOR */}
 
-            <Route
-              path="/register"
-              element={<Register />}
-            />
+            {user.role === "DOCTOR" && (
+              <>
+                <Link to="/schedule">
+                  My Schedule
+                </Link>
 
-            {/* Patient */}
+                <Link to="/consultations">
+                  Consultations
+                </Link>
+              </>
+            )}
 
-            <Route
-              path="/appointments"
-              element={<AppointmentList />}
-            />
+            {/* CLINIC ADMIN */}
 
-            {/* Doctor */}
+            {user.role === "CLINIC_ADMIN" && (
+              <>
+                <Link to="/doctors">
+                  Manage Doctors
+                </Link>
 
-            <Route
-              path="/doctors"
-              element={<DoctorList />}
-            />
+                <Link to="/patients">
+                  Manage Patients
+                </Link>
 
-            <Route
-              path="/schedule"
-              element={<DoctorSchedule />}
-            />
+                <Link to="/appointments">
+                  All Appointments
+                </Link>
+              </>
+            )}
 
-            <Route
-              path="/consultations"
-              element={<DoctorConsultations />}
-            />
+            {/* LOGOUT */}
 
-            {/* Clinic Admin */}
-
-            <Route
-              path="/patients"
-              element={<ManagePatients />}
-            />
-
-            {/* Fallback */}
-
-            <Route
-              path="*"
-              element={<Home />}
-            />
-
-          </Routes>
-        </main>
+            <button
+              type="button"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          </>
+        )}
 
       </div>
-    </BrowserRouter>
+    </nav>
   );
-}
+};
 
-export default App;
+export default Navbar;

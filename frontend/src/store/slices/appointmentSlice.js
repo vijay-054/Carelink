@@ -1,179 +1,270 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import appointmentService from '../../services/appointmentService';
+import {
+  createSlice,
+  createAsyncThunk,
+} from "@reduxjs/toolkit";
 
-const initialState = {
-    items: [],
-    isLoading: false,
-    isSuccess: false,
-    isError: false,
-    message: '',
-    searchQuery: '',
-    filterStatus: 'ALL',
-};
+import appointmentService from "../../services/appointmentService";
 
-export const getMyAppointments = createAsyncThunk(
-    'appointments/getMy',
-    async (_, thunkAPI) => {
-        try {
-            return await appointmentService.getMyAppointments();
-        } catch (error) {
-            return thunkAPI.rejectWithValue(
-                error.response?.data?.message ||
-                error.message ||
-                'Unable to fetch appointments'
-            );
-        }
+/* =========================================================
+   GET APPOINTMENTS
+========================================================= */
+
+export const getAppointments = createAsyncThunk(
+  "appointments/getAppointments",
+  async (_, thunkAPI) => {
+    try {
+      return await appointmentService.getAppointments();
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to fetch appointments"
+      );
     }
+  }
 );
 
-export const getAllAppointments = createAsyncThunk(
-    'appointments/getAll',
-    async (_, thunkAPI) => {
-        try {
-            return await appointmentService.getAllAppointments();
-        } catch (error) {
-            return thunkAPI.rejectWithValue(
-                error.response?.data?.message ||
-                error.message ||
-                'Unable to fetch appointments'
-            );
-        }
+/* =========================================================
+   GET AVAILABLE SLOTS
+========================================================= */
+
+export const getAvailableSlots = createAsyncThunk(
+  "appointments/getAvailableSlots",
+  async (doctorId, thunkAPI) => {
+    try {
+      return await appointmentService.getAvailableSlots(
+        doctorId
+      );
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to fetch available slots"
+      );
     }
+  }
 );
+
+/* =========================================================
+   BOOK APPOINTMENT
+========================================================= */
 
 export const bookAppointment = createAsyncThunk(
-    'appointments/book',
-    async (appointmentData, thunkAPI) => {
-        try {
-            return await appointmentService.bookAppointment(appointmentData);
-        } catch (error) {
-            return thunkAPI.rejectWithValue(
-                error.response?.data?.message ||
-                error.message ||
-                'Unable to book appointment'
-            );
-        }
+  "appointments/book",
+  async (appointmentData, thunkAPI) => {
+    try {
+      return await appointmentService.bookAppointment(
+        appointmentData
+      );
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to book appointment"
+      );
     }
+  }
 );
+
+/* =========================================================
+   CANCEL APPOINTMENT
+========================================================= */
 
 export const cancelAppointment = createAsyncThunk(
-    'appointments/cancel',
-    async (appointmentId, thunkAPI) => {
-        try {
-            await appointmentService.cancelAppointment(appointmentId);
+  "appointments/cancel",
+  async (appointmentId, thunkAPI) => {
+    try {
+      await appointmentService.cancelAppointment(
+        appointmentId
+      );
 
-            return appointmentId;
-        } catch (error) {
-            return thunkAPI.rejectWithValue(
-                error.response?.data?.message ||
-                error.message ||
-                'Unable to cancel appointment'
-            );
-        }
+      return appointmentId;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to cancel appointment"
+      );
     }
+  }
 );
 
+/* =========================================================
+   INITIAL STATE
+========================================================= */
+
+const initialState = {
+  items: [],
+  slots: [],
+
+  isLoading: false,
+  isSuccess: false,
+  isError: false,
+
+  error: null,
+  message: "",
+};
+
+/* =========================================================
+   SLICE
+========================================================= */
+
 const appointmentSlice = createSlice({
-    name: 'appointments',
-    initialState,
+  name: "appointments",
 
-    reducers: {
-        setFilterStatus: (state, action) => {
-            state.filterStatus = action.payload;
-        },
+  initialState,
 
-        setSearchQuery: (state, action) => {
-            state.searchQuery = action.payload;
-        },
-
-        reset: (state) => {
-            state.isLoading = false;
-            state.isSuccess = false;
-            state.isError = false;
-            state.message = '';
-        },
+  reducers: {
+    reset: (state) => {
+      state.isLoading = false;
+      state.isSuccess = false;
+      state.isError = false;
+      state.error = null;
+      state.message = "";
     },
+  },
 
-    extraReducers: (builder) => {
-        builder
+  extraReducers: (builder) => {
+    builder
 
-            .addCase(getMyAppointments.pending, (state) => {
-                state.isLoading = true;
-                state.isError = false;
-            })
+      /* -----------------------------------------------
+         GET APPOINTMENTS
+      ------------------------------------------------ */
 
-            .addCase(getMyAppointments.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.isSuccess = true;
-                state.items = action.payload;
-            })
+      .addCase(
+        getAppointments.pending,
+        (state) => {
+          state.isLoading = true;
+          state.isError = false;
+          state.error = null;
+        }
+      )
 
-            .addCase(getMyAppointments.rejected, (state, action) => {
-                state.isLoading = false;
-                state.isError = true;
-                state.message = action.payload;
-            })
+      .addCase(
+        getAppointments.fulfilled,
+        (state, action) => {
+          state.isLoading = false;
+          state.isSuccess = true;
+          state.isError = false;
+          state.items = action.payload || [];
+        }
+      )
 
-            .addCase(getAllAppointments.pending, (state) => {
-                state.isLoading = true;
-                state.isError = false;
-            })
+      .addCase(
+        getAppointments.rejected,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = true;
+          state.error = action.payload;
+        }
+      )
 
-            .addCase(getAllAppointments.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.isSuccess = true;
-                state.items = action.payload;
-            })
+      /* -----------------------------------------------
+         GET AVAILABLE SLOTS
+      ------------------------------------------------ */
 
-            .addCase(getAllAppointments.rejected, (state, action) => {
-                state.isLoading = false;
-                state.isError = true;
-                state.message = action.payload;
-            })
+      .addCase(
+        getAvailableSlots.pending,
+        (state) => {
+          state.isLoading = true;
+          state.isError = false;
+        }
+      )
 
-            .addCase(bookAppointment.pending, (state) => {
-                state.isLoading = true;
-                state.isError = false;
-            })
+      .addCase(
+        getAvailableSlots.fulfilled,
+        (state, action) => {
+          state.isLoading = false;
+          state.isSuccess = true;
+          state.slots = action.payload || [];
+        }
+      )
 
-            .addCase(bookAppointment.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.isSuccess = true;
-                state.items.push(action.payload);
-            })
+      .addCase(
+        getAvailableSlots.rejected,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = true;
+          state.error = action.payload;
+          state.slots = [];
+        }
+      )
 
-            .addCase(bookAppointment.rejected, (state, action) => {
-                state.isLoading = false;
-                state.isError = true;
-                state.message = action.payload;
-            })
+      /* -----------------------------------------------
+         BOOK APPOINTMENT
+      ------------------------------------------------ */
 
-            .addCase(cancelAppointment.pending, (state) => {
-                state.isLoading = true;
-                state.isError = false;
-            })
+      .addCase(
+        bookAppointment.pending,
+        (state) => {
+          state.isLoading = true;
+          state.isError = false;
+          state.error = null;
+        }
+      )
 
-            .addCase(cancelAppointment.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.isSuccess = true;
+      .addCase(
+        bookAppointment.fulfilled,
+        (state, action) => {
+          state.isLoading = false;
+          state.isSuccess = true;
+          state.isError = false;
 
-                state.items = state.items.filter(
-                    (item) => item.id !== action.payload
-                );
-            })
+          state.items.push(action.payload);
+        }
+      )
 
-            .addCase(cancelAppointment.rejected, (state, action) => {
-                state.isLoading = false;
-                state.isError = true;
-                state.message = action.payload;
-            });
-    },
+      .addCase(
+        bookAppointment.rejected,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = true;
+          state.error = action.payload;
+        }
+      )
+
+      /* -----------------------------------------------
+         CANCEL APPOINTMENT
+      ------------------------------------------------ */
+
+      .addCase(
+        cancelAppointment.pending,
+        (state) => {
+          state.isLoading = true;
+          state.isError = false;
+          state.error = null;
+        }
+      )
+
+      .addCase(
+        cancelAppointment.fulfilled,
+        (state, action) => {
+          state.isLoading = false;
+          state.isSuccess = true;
+          state.isError = false;
+
+          const appointmentId =
+            action.meta.arg;
+
+          state.items = state.items.filter(
+            (appointment) =>
+              appointment.id !== appointmentId
+          );
+        }
+      )
+
+      .addCase(
+        cancelAppointment.rejected,
+        (state, action) => {
+          state.isLoading = false;
+          state.isError = true;
+          state.error = action.payload;
+        }
+      );
+  },
 });
 
-export const {
-    setFilterStatus,
-    setSearchQuery,
-    reset,
-} = appointmentSlice.actions;
+export const { reset } =
+  appointmentSlice.actions;
 
 export default appointmentSlice.reducer;

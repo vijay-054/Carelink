@@ -3,7 +3,7 @@ import {
   createAsyncThunk,
 } from "@reduxjs/toolkit";
 
-import patientService from "../../services/patientService";
+import ... from '../../services/PatientService';
 
 /* =========================================================
    GET PATIENTS

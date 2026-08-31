@@ -5,10 +5,6 @@ createAsyncThunk,
 
 import patientService from "../../services/PatientService";
 
-/* =========================================================
-GET PATIENTS
-========================================================= */
-
 export const getPatients = createAsyncThunk(
 "patients/getPatients",
 async (_, thunkAPI) => {
@@ -23,10 +19,6 @@ error.message ||
 }
 }
 );
-
-/* =========================================================
-DELETE PATIENT
-========================================================= */
 
 export const deletePatient = createAsyncThunk(
 "patients/deletePatient",
@@ -48,10 +40,6 @@ await patientService.deletePatient(patientId);
 }
 );
 
-/* =========================================================
-INITIAL STATE
-========================================================= */
-
 const initialState = {
 items: [],
 isLoading: false,
@@ -60,10 +48,6 @@ isError: false,
 error: null,
 message: "",
 };
-
-/* =========================================================
-SLICE
-========================================================= */
 
 const patientSlice = createSlice({
 name: "patients",
@@ -81,16 +65,14 @@ state.message = "";
 
 extraReducers: (builder) => {
 builder
-/* GET PATIENTS */
+.addCase(getPatients.pending, (state) => {
+state.isLoading = true;
+state.isSuccess = false;
+state.isError = false;
+state.error = null;
+})
 
 ```
-  .addCase(getPatients.pending, (state) => {
-    state.isLoading = true;
-    state.isSuccess = false;
-    state.isError = false;
-    state.error = null;
-  })
-
   .addCase(getPatients.fulfilled, (state, action) => {
     state.isLoading = false;
     state.isSuccess = true;
@@ -103,14 +85,11 @@ builder
     state.isLoading = false;
     state.isSuccess = false;
     state.isError = true;
-
     state.error =
       action.payload ||
       action.error?.message ||
       "Unable to fetch patients";
   })
-
-  /* DELETE PATIENT */
 
   .addCase(deletePatient.pending, (state) => {
     state.isLoading = true;
@@ -134,7 +113,6 @@ builder
     state.isLoading = false;
     state.isSuccess = false;
     state.isError = true;
-
     state.error =
       action.payload ||
       action.error?.message ||
@@ -145,14 +123,6 @@ builder
 },
 });
 
-/* =========================================================
-ACTIONS
-========================================================= */
-
 export const { reset } = patientSlice.actions;
-
-/* =========================================================
-REDUCER
-========================================================= */
 
 export default patientSlice.reducer;

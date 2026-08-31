@@ -26,7 +26,7 @@ async (patientId, thunkAPI) => {
 try {
 await patientService.deletePatient(patientId);
 
-```
+
   return patientId;
 } catch (error) {
   return thunkAPI.rejectWithValue(
@@ -35,7 +35,7 @@ await patientService.deletePatient(patientId);
       "Unable to delete patient"
   );
 }
-```
+
 
 }
 );
@@ -72,7 +72,7 @@ state.isError = false;
 state.error = null;
 })
 
-```
+
   .addCase(getPatients.fulfilled, (state, action) => {
     state.isLoading = false;
     state.isSuccess = true;
@@ -118,7 +118,7 @@ state.error = null;
       action.error?.message ||
       "Unable to delete patient";
   });
-```
+
 
 },
 });

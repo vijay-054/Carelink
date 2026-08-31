@@ -1,179 +1,159 @@
-```javascript
 import {
-  createSlice,
-  createAsyncThunk,
+createSlice,
+createAsyncThunk,
 } from "@reduxjs/toolkit";
 
 import patientService from "../../services/PatientService";
 
 /* =========================================================
-   GET PATIENTS
+GET PATIENTS
 ========================================================= */
 
 export const getPatients = createAsyncThunk(
-  "patients/getPatients",
-  async (_, thunkAPI) => {
-    try {
-      return await patientService.getPatients();
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message ||
-          error.message ||
-          "Unable to fetch patients"
-      );
-    }
-  }
+"patients/getPatients",
+async (_, thunkAPI) => {
+try {
+return await patientService.getPatients();
+} catch (error) {
+return thunkAPI.rejectWithValue(
+error.response?.data?.message ||
+error.message ||
+"Unable to fetch patients"
+);
+}
+}
 );
 
 /* =========================================================
-   DELETE PATIENT
+DELETE PATIENT
 ========================================================= */
 
 export const deletePatient = createAsyncThunk(
-  "patients/deletePatient",
-  async (patientId, thunkAPI) => {
-    try {
-      await patientService.deletePatient(patientId);
+"patients/deletePatient",
+async (patientId, thunkAPI) => {
+try {
+await patientService.deletePatient(patientId);
 
-      return patientId;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message ||
-          error.message ||
-          "Unable to delete patient"
-      );
-    }
-  }
+```
+  return patientId;
+} catch (error) {
+  return thunkAPI.rejectWithValue(
+    error.response?.data?.message ||
+      error.message ||
+      "Unable to delete patient"
+  );
+}
+```
+
+}
 );
 
 /* =========================================================
-   INITIAL STATE
+INITIAL STATE
 ========================================================= */
 
 const initialState = {
-  items: [],
-
-  isLoading: false,
-  isSuccess: false,
-  isError: false,
-
-  error: null,
-  message: "",
+items: [],
+isLoading: false,
+isSuccess: false,
+isError: false,
+error: null,
+message: "",
 };
 
 /* =========================================================
-   SLICE
+SLICE
 ========================================================= */
 
 const patientSlice = createSlice({
-  name: "patients",
+name: "patients",
+initialState,
 
-  initialState,
+reducers: {
+reset: (state) => {
+state.isLoading = false;
+state.isSuccess = false;
+state.isError = false;
+state.error = null;
+state.message = "";
+},
+},
 
-  reducers: {
-    reset: (state) => {
-      state.isLoading = false;
-      state.isSuccess = false;
-      state.isError = false;
-      state.error = null;
-      state.message = "";
-    },
-  },
+extraReducers: (builder) => {
+builder
 
-  extraReducers: (builder) => {
-    builder
+```
+  /* GET PATIENTS */
 
-      /* =====================================================
-         GET PATIENTS - PENDING
-      ===================================================== */
+  .addCase(getPatients.pending, (state) => {
+    state.isLoading = true;
+    state.isSuccess = false;
+    state.isError = false;
+    state.error = null;
+  })
 
-      .addCase(getPatients.pending, (state) => {
-        state.isLoading = true;
-        state.isSuccess = false;
-        state.isError = false;
-        state.error = null;
-      })
+  .addCase(getPatients.fulfilled, (state, action) => {
+    state.isLoading = false;
+    state.isSuccess = true;
+    state.isError = false;
+    state.error = null;
+    state.items = action.payload || [];
+  })
 
-      /* =====================================================
-         GET PATIENTS - SUCCESS
-      ===================================================== */
+  .addCase(getPatients.rejected, (state, action) => {
+    state.isLoading = false;
+    state.isSuccess = false;
+    state.isError = true;
 
-      .addCase(getPatients.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.isError = false;
-        state.error = null;
+    state.error =
+      action.payload ||
+      action.error?.message ||
+      "Unable to fetch patients";
+  })
 
-        state.items = action.payload || [];
-      })
+  /* DELETE PATIENT */
 
-      /* =====================================================
-         GET PATIENTS - ERROR
-      ===================================================== */
+  .addCase(deletePatient.pending, (state) => {
+    state.isLoading = true;
+    state.isSuccess = false;
+    state.isError = false;
+    state.error = null;
+  })
 
-      .addCase(getPatients.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = false;
-        state.isError = true;
+  .addCase(deletePatient.fulfilled, (state, action) => {
+    state.isLoading = false;
+    state.isSuccess = true;
+    state.isError = false;
+    state.error = null;
 
-        state.error =
-          action.payload ||
-          action.error?.message ||
-          "Unable to fetch patients";
-      })
+    state.items = state.items.filter(
+      (patient) => patient.id !== action.payload
+    );
+  })
 
-      /* =====================================================
-         DELETE PATIENT - PENDING
-      ===================================================== */
+  .addCase(deletePatient.rejected, (state, action) => {
+    state.isLoading = false;
+    state.isSuccess = false;
+    state.isError = true;
 
-      .addCase(deletePatient.pending, (state) => {
-        state.isLoading = true;
-        state.isSuccess = false;
-        state.isError = false;
-        state.error = null;
-      })
+    state.error =
+      action.payload ||
+      action.error?.message ||
+      "Unable to delete patient";
+  });
+```
 
-      /* =====================================================
-         DELETE PATIENT - SUCCESS
-      ===================================================== */
-
-      .addCase(deletePatient.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        state.isError = false;
-        state.error = null;
-
-        state.items = state.items.filter(
-          (patient) => patient.id !== action.payload
-        );
-      })
-
-      /* =====================================================
-         DELETE PATIENT - ERROR
-      ===================================================== */
-
-      .addCase(deletePatient.rejected, (state, action) => {
-        state.isLoading = false;
-        state.isSuccess = false;
-        state.isError = true;
-
-        state.error =
-          action.payload ||
-          action.error?.message ||
-          "Unable to delete patient";
-      });
-  },
+},
 });
 
 /* =========================================================
-   ACTIONS
+ACTIONS
 ========================================================= */
 
 export const { reset } = patientSlice.actions;
 
 /* =========================================================
-   REDUCER
+REDUCER
 ========================================================= */
 
 export default patientSlice.reducer;
-```

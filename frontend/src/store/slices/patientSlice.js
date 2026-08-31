@@ -81,10 +81,9 @@ state.message = "";
 
 extraReducers: (builder) => {
 builder
+/* GET PATIENTS */
 
 ```
-  /* GET PATIENTS */
-
   .addCase(getPatients.pending, (state) => {
     state.isLoading = true;
     state.isSuccess = false;

@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import { login, reset } from "../store/slices/authSlice";
+import {
+  login,
+  reset,
+} from "../store/slices/authSlice";
 
 const Login = () => {
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -14,22 +18,25 @@ const Login = () => {
     isError,
     isSuccess,
     message,
-  } = useSelector((state) => state.auth || {});
+  } = useSelector(
+    (state) => state.auth || {}
+  );
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   useEffect(() => {
+
     if (isError) {
       alert(message || "Login failed");
       dispatch(reset());
-      return;
     }
 
     if (isSuccess || user) {
-      dispatch(reset());
       navigate("/");
+      dispatch(reset());
     }
+
   }, [
     isError,
     isSuccess,
@@ -40,6 +47,7 @@ const Login = () => {
   ]);
 
   const handleSubmit = (event) => {
+
     event.preventDefault();
 
     dispatch(
@@ -52,50 +60,81 @@ const Login = () => {
 
   return (
     <div className="auth-page">
-      <h2>Login</h2>
 
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="login-email">
-            Email *
-          </label>
+      <div className="auth-card">
 
-          <input
-            id="login-email"
-            name="email"
-            type="email"
-            value={email}
-            onChange={(event) =>
-              setEmail(event.target.value)
-            }
-            required
-          />
+        <h2>Login</h2>
+
+        <p className="auth-subtitle">
+          Sign in to access your CareLink account.
+        </p>
+
+        <form onSubmit={handleSubmit}>
+
+          <div className="form-group">
+
+            <label htmlFor="email">
+              Email *
+            </label>
+
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(event) =>
+                setEmail(event.target.value)
+              }
+              required
+            />
+
+          </div>
+
+          <div className="form-group">
+
+            <label htmlFor="password">
+              Password *
+            </label>
+
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(event) =>
+                setPassword(event.target.value)
+              }
+              required
+            />
+
+          </div>
+
+          <button
+            type="submit"
+            className="submit-btn"
+            disabled={isLoading}
+          >
+            {isLoading
+              ? "Logging in..."
+              : "Login"}
+          </button>
+
+        </form>
+
+        <div className="auth-footer">
+
+          Don't have an account?{" "}
+
+          <Link to="/register">
+            Register
+          </Link>
+
         </div>
 
-        <div className="form-group">
-          <label htmlFor="login-password">
-            Password *
-          </label>
+      </div>
 
-          <input
-            id="login-password"
-            name="password"
-            type="password"
-            value={password}
-            onChange={(event) =>
-              setPassword(event.target.value)
-            }
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-        >
-          {isLoading ? "Logging in..." : "Login"}
-        </button>
-      </form>
     </div>
   );
 };

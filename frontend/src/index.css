@@ -2,33 +2,65 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f4f6f8;
-  color: #222;
+html {
+  scroll-behavior: smooth;
 }
 
-/* =========================
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+  background: #f5f8fb;
+  color: #102a43;
+}
+
+a {
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+/* =========================================================
    NAVBAR
-========================= */
+   ========================================================= */
 
 .navbar {
+  height: 76px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 18px 40px;
+  padding: 0 48px;
 
-  background-color: #0284c7;
-  color: white;
+  background: #0788c9;
+
+  box-shadow:
+    0 3px 12px rgba(0, 0, 0, 0.08);
+
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.navbar .brand {
+.brand {
   color: white;
-  text-decoration: none;
+
   font-size: 32px;
-  font-weight: bold;
+  font-weight: 800;
+
+  letter-spacing: -1px;
 }
 
 .nav-links {
@@ -39,96 +71,389 @@ body {
 
 .nav-links a {
   color: white;
-  text-decoration: none;
-  font-size: 20px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  transition: 0.2s;
 }
 
 .nav-links a:hover {
-  text-decoration: underline;
+  opacity: 0.75;
 }
 
-.nav-links button {
-  border: none;
-  padding: 9px 18px;
-  border-radius: 5px;
+.logout-btn {
+  border: 0;
 
-  background-color: white;
-  color: #0284c7;
+  padding: 10px 18px;
 
-  font-size: 16px;
+  border-radius: 7px;
+
+  background: white;
+  color: #0788c9;
+
+  font-weight: 700;
+
   cursor: pointer;
 }
 
-.nav-links button:hover {
-  background-color: #e0f2fe;
-}
-
-/* =========================
-   MAIN
-========================= */
-
-main {
-  padding: 40px;
-}
-
-/* =========================
+/* =========================================================
    HOME
-========================= */
+   ========================================================= */
 
 .home-page {
-  background-color: white;
-
-  max-width: 1100px;
-  margin: 20px auto;
-
-  padding: 40px;
-
-  border-radius: 10px;
-
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: calc(100vh - 76px);
 }
 
-.home-page h1 {
-  margin-top: 0;
-  color: #0284c7;
+.hero-section {
+  padding: 70px 7% 50px;
 }
 
-.home-page p {
+.hero-content {
+  max-width: 1250px;
+
+  margin: auto;
+
+  min-height: 470px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 50px;
+
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #e9f8ff,
+      #f7fcff
+    );
+
+  overflow: hidden;
+}
+
+.hero-text {
+  max-width: 580px;
+}
+
+.hero-badge {
+  display: inline-block;
+
+  padding: 7px 13px;
+
+  border-radius: 20px;
+
+  background: #d7f1ff;
+  color: #0788c9;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  letter-spacing: 1px;
+}
+
+.hero-text h1 {
+  margin: 20px 0;
+
+  font-size: 52px;
+  line-height: 1.08;
+
+  color: #092f55;
+}
+
+.hero-text p {
+  max-width: 520px;
+
   font-size: 18px;
-  line-height: 1.6;
+  line-height: 1.7;
+
+  color: #587086;
 }
 
-/* =========================
-   LOGIN / REGISTER CONTAINER
-========================= */
+.hero-actions {
+  display: flex;
+  gap: 15px;
+
+  margin-top: 28px;
+}
+
+.primary-btn,
+.secondary-btn {
+  display: inline-block;
+
+  padding: 13px 23px;
+
+  border-radius: 7px;
+
+  font-weight: 700;
+}
+
+.primary-btn {
+  background: #0788c9;
+  color: white;
+}
+
+.secondary-btn {
+  background: white;
+  color: #0788c9;
+
+  border: 1px solid #b8dcec;
+}
+
+.hero-illustration {
+  width: 45%;
+
+  display: flex;
+  justify-content: center;
+}
+
+.hospital-card {
+  width: 380px;
+  height: 300px;
+
+  position: relative;
+
+  background: #dff5ff;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hospital-building {
+  position: relative;
+
+  width: 190px;
+}
+
+.hospital-cross {
+  position: absolute;
+
+  top: 35px;
+  left: 170px;
+
+  width: 55px;
+  height: 55px;
+
+  border-radius: 50%;
+
+  background: #0788c9;
+  color: white;
+
+  font-size: 38px;
+  font-weight: 800;
+
+  text-align: center;
+  line-height: 50px;
+
+  z-index: 2;
+}
+
+.hospital-body {
+  height: 190px;
+
+  background: white;
+
+  border: 3px solid #b6dff0;
+
+  border-radius: 8px;
+
+  padding: 25px 15px 10px;
+
+  text-align: center;
+}
+
+.hospital-body h3 {
+  margin: 0 0 12px;
+
+  color: #0788c9;
+}
+
+.hospital-windows {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 8px;
+}
+
+.hospital-windows span {
+  height: 22px;
+
+  background: #b9e7f8;
+
+  border-radius: 3px;
+}
+
+.hospital-door {
+  width: 35px;
+  height: 50px;
+
+  background: #0788c9;
+
+  margin: 12px auto 0;
+
+  border-radius: 5px 5px 0 0;
+}
+
+.doctor-illustration {
+  position: absolute;
+
+  right: 20px;
+  bottom: 30px;
+
+  font-size: 85px;
+}
+
+/* =========================================================
+   FEATURES
+   ========================================================= */
+
+.feature-section {
+  padding: 60px 7% 90px;
+
+  background: white;
+}
+
+.section-heading {
+  text-align: center;
+
+  margin-bottom: 45px;
+}
+
+.section-heading span {
+  color: #0788c9;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  letter-spacing: 2px;
+}
+
+.section-heading h2 {
+  margin: 10px 0;
+
+  font-size: 32px;
+
+  color: #092f55;
+}
+
+.section-heading p {
+  color: #70859a;
+}
+
+.feature-grid {
+  max-width: 1150px;
+
+  margin: auto;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 22px;
+}
+
+.feature-card {
+  padding: 28px;
+
+  background: white;
+
+  border: 1px solid #e1ebf2;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 5px 20px rgba(22, 60, 90, 0.06);
+}
+
+.feature-icon {
+  font-size: 35px;
+}
+
+.feature-card h3 {
+  color: #092f55;
+}
+
+.feature-card p {
+  color: #71869a;
+
+  line-height: 1.5;
+}
+
+/* =========================================================
+   PAGE CONTAINER
+   ========================================================= */
+
+.page-container {
+  max-width: 1200px;
+
+  margin: 45px auto;
+
+  padding: 0 25px;
+}
+
+.page-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 25px;
+}
+
+.page-header h1,
+.page-header h2 {
+  margin: 0;
+
+  color: #092f55;
+}
+
+/* =========================================================
+   AUTH
+   ========================================================= */
 
 .auth-page {
-  max-width: 500px;
-  margin: 40px auto;
+  min-height: calc(100vh - 76px);
 
-  background-color: white;
+  display: flex;
+
+  justify-content: center;
+  align-items: flex-start;
+
+  padding: 65px 20px;
+}
+
+.auth-card {
+  width: 440px;
+
+  background: white;
 
   padding: 35px;
 
-  border-radius: 10px;
+  border-radius: 16px;
 
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 8px 30px rgba(30, 65, 90, 0.10);
 }
 
-.auth-page h2 {
+.auth-card h2 {
   margin-top: 0;
-  margin-bottom: 25px;
 
-  color: #0284c7;
-  font-size: 28px;
+  color: #092f55;
+
+  font-size: 30px;
 }
 
-/* =========================
-   FORM
-========================= */
+.auth-subtitle {
+  color: #71869a;
 
-form {
-  width: 100%;
+  margin-bottom: 28px;
 }
 
 .form-group {
@@ -140,8 +465,11 @@ form {
 
   margin-bottom: 7px;
 
-  font-weight: 600;
-  font-size: 15px;
+  color: #263f55;
+
+  font-size: 14px;
+
+  font-weight: 700;
 }
 
 .form-group input,
@@ -149,129 +477,521 @@ form {
 .form-group textarea {
   width: 100%;
 
-  padding: 11px 12px;
+  padding: 12px 13px;
 
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border: 1px solid #d6e1e9;
 
-  font-size: 15px;
+  border-radius: 7px;
+
+  background: white;
 
   outline: none;
+
+  font-size: 14px;
+
+  transition: 0.2s;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: #0284c7;
+  border-color: #0788c9;
+
+  box-shadow:
+    0 0 0 3px rgba(7, 136, 201, 0.10);
 }
 
-/* =========================
-   FORM BUTTON
-========================= */
+.form-group textarea {
+  min-height: 100px;
 
-form button {
+  resize: vertical;
+}
+
+.submit-btn {
   width: 100%;
 
-  padding: 11px;
+  padding: 13px;
 
-  border: none;
-  border-radius: 6px;
+  border: 0;
 
-  background-color: #0284c7;
+  border-radius: 7px;
+
+  background: #0788c9;
+
   color: white;
 
-  font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
 
   cursor: pointer;
 }
 
-form button:hover {
-  background-color: #0369a1;
+.submit-btn:hover {
+  background: #0679b2;
 }
 
-form button:disabled {
-  background-color: #94a3b8;
+.submit-btn:disabled {
+  background: #a9c8d8;
+
   cursor: not-allowed;
 }
 
-/* =========================
-   APPOINTMENT LIST
-========================= */
-
-.appointment-list {
-  max-width: 1000px;
-  margin: 20px auto;
-
-  background-color: white;
-
-  padding: 30px;
-
-  border-radius: 10px;
-
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.appointment-list h2 {
-  margin-top: 0;
-  color: #0284c7;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th,
-td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-th {
-  background-color: #e0f2fe;
-}
-
-/* =========================
-   EMPTY STATE
-========================= */
-
-.empty-state {
-  padding: 30px;
+.auth-footer {
+  margin-top: 22px;
 
   text-align: center;
 
-  background-color: #f8fafc;
+  color: #71869a;
 
-  border-radius: 8px;
-
-  color: #64748b;
+  font-size: 14px;
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
+.auth-footer a {
+  color: #0788c9;
 
-@media (max-width: 768px) {
-  .navbar {
-    padding: 15px 20px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.table-card {
+  background: white;
+
+  border-radius: 13px;
+
+  border: 1px solid #e3ebf1;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 5px 20px rgba(20, 60, 90, 0.05);
+}
+
+.data-table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+.data-table th {
+  background: #edf7fc;
+
+  color: #25435b;
+
+  font-size: 13px;
+
+  text-align: left;
+
+  padding: 15px;
+}
+
+.data-table td {
+  padding: 15px;
+
+  border-top: 1px solid #edf1f4;
+
+  color: #4e6476;
+
+  font-size: 14px;
+}
+
+.data-table tr:hover {
+  background: #fafcfd;
+}
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status {
+  display: inline-block;
+
+  padding: 5px 10px;
+
+  border-radius: 20px;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+.status-scheduled,
+.status-confirmed,
+.status-active,
+.status-completed {
+  background: #d9f8e7;
+
+  color: #16834c;
+}
+
+.status-pending {
+  background: #fff3cd;
+
+  color: #946c00;
+}
+
+.status-cancelled {
+  background: #ffe1e1;
+
+  color: #c43c3c;
+}
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.action-btn {
+  padding: 7px 12px;
+
+  border-radius: 6px;
+
+  border: 1px solid #0788c9;
+
+  background: white;
+
+  color: #0788c9;
+
+  cursor: pointer;
+
+  font-size: 12px;
+
+  font-weight: 700;
+}
+
+.action-btn:hover {
+  background: #0788c9;
+
+  color: white;
+}
+
+.danger-btn {
+  border-color: #ed6262;
+
+  color: #d84646;
+}
+
+.danger-btn:hover {
+  background: #ed6262;
+
+  color: white;
+}
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+.search-filter-bar {
+  display: flex;
+
+  gap: 12px;
+
+  margin-bottom: 20px;
+}
+
+.search-filter-bar input,
+.search-filter-bar select {
+  padding: 11px 13px;
+
+  border: 1px solid #d5e1e8;
+
+  border-radius: 7px;
+
+  outline: none;
+
+  background: white;
+}
+
+.search-filter-bar input {
+  flex: 1;
+}
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-state {
+  padding: 60px 20px;
+
+  text-align: center;
+
+  background: white;
+
+  border: 1px dashed #cbdde8;
+
+  border-radius: 12px;
+
+  color: #71869a;
+}
+
+.empty-state p {
+  margin: 0 0 18px;
+}
+
+.empty-state button {
+  padding: 10px 18px;
+
+  border: 0;
+
+  border-radius: 7px;
+
+  background: #0788c9;
+
+  color: white;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   DOCTOR CARDS
+   ========================================================= */
+
+.doctor-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 22px;
+}
+
+.doctor-card {
+  background: white;
+
+  padding: 25px;
+
+  border-radius: 14px;
+
+  border: 1px solid #e2ebf1;
+
+  box-shadow:
+    0 5px 20px rgba(20, 60, 90, 0.06);
+}
+
+.doctor-avatar {
+  width: 65px;
+  height: 65px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 15px;
+
+  border-radius: 50%;
+
+  background: #dff4ff;
+
+  font-size: 32px;
+}
+
+.doctor-card h3 {
+  margin: 0 0 7px;
+
+  color: #092f55;
+}
+
+.doctor-specialty {
+  color: #0788c9;
+
+  font-weight: 700;
+
+  font-size: 14px;
+}
+
+.doctor-email {
+  color: #71869a;
+
+  font-size: 13px;
+
+  margin: 10px 0 18px;
+}
+
+/* =========================================================
+   APPOINTMENT FORM
+   ========================================================= */
+
+.appointment-form-card {
+  max-width: 650px;
+
+  margin: 45px auto;
+
+  padding: 35px;
+
+  background: white;
+
+  border-radius: 15px;
+
+  box-shadow:
+    0 8px 30px rgba(20, 60, 90, 0.08);
+}
+
+.appointment-form-card h2 {
+  margin-top: 0;
+
+  color: #092f55;
+}
+
+.doctor-heading {
+  color: #0788c9;
+
+  margin-bottom: 25px;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(5, 25, 40, 0.55);
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  z-index: 2000;
+
+  padding: 20px;
+}
+
+.modal {
+  width: 100%;
+
+  max-width: 600px;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border-radius: 15px;
+
+  padding: 30px;
+
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+
+  top: 15px;
+  right: 18px;
+
+  width: 35px;
+  height: 35px;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background: #edf5f9;
+
+  color: #345;
+
+  font-size: 22px;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .hero-content {
     flex-direction: column;
-    align-items: flex-start;
+
+    text-align: center;
+
+    gap: 40px;
+  }
+
+  .hero-text {
+    max-width: 700px;
+  }
+
+  .hero-text p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-illustration {
+    width: 100%;
+  }
+
+  .feature-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .doctor-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 650px) {
+
+  .navbar {
+    height: auto;
+
+    padding: 18px 20px;
+
+    flex-direction: column;
+
     gap: 15px;
   }
 
   .nav-links {
     flex-wrap: wrap;
-    gap: 15px;
+
+    justify-content: center;
+
+    gap: 14px;
   }
 
-  main {
-    padding: 20px;
+  .hero-section {
+    padding: 25px 15px;
   }
 
-  .auth-page {
-    margin: 20px auto;
-    padding: 25px;
+  .hero-content {
+    padding: 30px 20px;
+  }
+
+  .hero-text h1 {
+    font-size: 36px;
+  }
+
+  .hero-illustration {
+    display: none;
+  }
+
+  .feature-grid,
+  .doctor-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-filter-bar {
+    flex-direction: column;
+  }
+
+  .data-table {
+    min-width: 700px;
+  }
+
+  .table-card {
+    overflow-x: auto;
   }
 }

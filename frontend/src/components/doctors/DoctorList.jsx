@@ -1,182 +1,105 @@
-import React, { useState } from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useDispatch,
+  useSelector,
+} from "react-redux";
+
+import {
+  getDoctors,
+} from "../../store/slices/doctorSlice";
+
+import AppointmentForm from "../appointments/AppointmentForm";
 
 const DoctorList = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const dispatch = useDispatch();
 
-  // Temporary UI data.
-  // Backend data can be connected later.
-  const doctors = [
-    {
-      id: 1,
-      name: "Dr. John Smith",
-      email: "john.smith@carelink.com",
-      specialty: "General Physician",
-      experience: "8 years",
-    },
-    {
-      id: 2,
-      name: "Dr. Sarah Williams",
-      email: "sarah.williams@carelink.com",
-      specialty: "Cardiologist",
-      experience: "10 years",
-    },
-    {
-      id: 3,
-      name: "Dr. Michael Brown",
-      email: "michael.brown@carelink.com",
-      specialty: "Dermatologist",
-      experience: "6 years",
-    },
-  ];
+  const {
+    items: doctors = [],
+    isLoading,
+    isError,
+    error,
+  } = useSelector(
+    (state) => state.doctors || {}
+  );
 
-  const handleBookAppointment = (doctor) => {
-    setSelectedDoctor(doctor);
-    setShowForm(true);
-  };
+  const [selectedDoctor, setSelectedDoctor] =
+    useState(null);
 
-  const handleClose = () => {
-    setShowForm(false);
-    setSelectedDoctor(null);
-  };
+  useEffect(() => {
+    dispatch(getDoctors());
+  }, [dispatch]);
 
   return (
-    <div className="page-container">
+    <div className="doctor-list">
+      <h2>Doctors</h2>
 
-      <div className="page-header">
-        <div>
-          <h1>Find a Doctor</h1>
-          <p>
-            Browse available doctors and book an appointment.
-          </p>
-        </div>
-      </div>
+      {isLoading && (
+        <p>Loading doctors...</p>
+      )}
+
+      {isError && (
+        <p>
+          {error || "Unable to load doctors"}
+        </p>
+      )}
+
+      {!isLoading &&
+        !isError &&
+        doctors.length === 0 && (
+          <p>No doctors found.</p>
+        )}
 
       <div className="doctor-grid">
-
         {doctors.map((doctor) => (
           <div
             className="doctor-card"
             key={doctor.id}
           >
-
-            <div className="doctor-avatar">
-              👨‍⚕️
-            </div>
-
             <h3>
-              {doctor.name}
+              Dr.{" "}
+              {doctor.account?.email ||
+                doctor.email}
             </h3>
 
-            <div className="doctor-specialty">
-              {doctor.specialty}
-            </div>
-
-            <p className="doctor-email">
-              {doctor.email}
+            <p>
+              Specialization:{" "}
+              {doctor.specialization}
             </p>
 
             <p>
-              <strong>Experience:</strong>{" "}
-              {doctor.experience}
+              Experience:{" "}
+              {doctor.yearsOfExperience} years
+            </p>
+
+            <p>
+              Consultation Fee: ₹
+              {doctor.consultationFee}
             </p>
 
             <button
               type="button"
-              className="primary-btn"
               onClick={() =>
-                handleBookAppointment(doctor)
+                setSelectedDoctor(doctor)
               }
             >
               Book Appointment
             </button>
-
           </div>
         ))}
-
       </div>
 
-      {showForm && (
-        <div className="modal-overlay">
-
-          <div className="modal">
-
-            <button
-              type="button"
-              className="modal-close"
-              onClick={handleClose}
-            >
-              ×
-            </button>
-
-            <h2>
-              Book Appointment
-            </h2>
-
-            <p className="doctor-heading">
-              Doctor: {selectedDoctor?.name}
-            </p>
-
-            <div className="form-group">
-
-              <label>
-                Select Time Slot
-              </label>
-
-              <select>
-                <option value="">
-                  -- Select Time Slot --
-                </option>
-
-                <option value="09:00">
-                  09:00 AM
-                </option>
-
-                <option value="10:00">
-                  10:00 AM
-                </option>
-
-                <option value="11:00">
-                  11:00 AM
-                </option>
-
-                <option value="14:00">
-                  02:00 PM
-                </option>
-
-                <option value="15:00">
-                  03:00 PM
-                </option>
-
-              </select>
-
-            </div>
-
-            <div className="form-group">
-
-              <label>
-                Reason for Visit
-              </label>
-
-              <textarea
-                placeholder="Enter reason for visit..."
-              />
-
-            </div>
-
-            <button
-              type="button"
-              className="submit-btn"
-              onClick={handleClose}
-            >
-              Book Appointment
-            </button>
-
-          </div>
-
-        </div>
+      {selectedDoctor && (
+        <AppointmentForm
+          doctor={selectedDoctor}
+          onClose={() =>
+            setSelectedDoctor(null)
+          }
+        />
       )}
-
     </div>
   );
 };

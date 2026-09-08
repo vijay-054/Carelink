@@ -1,153 +1,260 @@
-import React, { useEffect } from 'react';
-import {
-    useDispatch,
-    useSelector,
-} from 'react-redux';
+import React, {
+  useEffect,
+} from "react";
 
 import {
-    getMyAppointments,
-    getAllAppointments,
-    cancelAppointment,
-    setFilterStatus,
-    setSearchQuery,
-} from '../../store/slices/appointmentSlice';
+  useDispatch,
+  useSelector,
+} from "react-redux";
 
-import EmptyState from '../common/EmptyState';
-import SearchFilterBar from '../common/SearchFilterBar';
+import {
+  getMyAppointments,
+  getAllAppointments,
+  cancelAppointment,
+  setFilterStatus,
+  setSearchQuery,
+} from "../../store/slices/appointmentSlice";
+
+import EmptyState from "../common/EmptyState";
+import SearchFilterBar from "../common/SearchFilterBar";
 
 const AppointmentList = () => {
-    const dispatch = useDispatch();
 
-    const { user } = useSelector(
-        (state) => state.auth
-    );
+  const dispatch = useDispatch();
 
-    const {
-        items,
-        isLoading,
-        filterStatus,
-        searchQuery,
-    } = useSelector(
-        (state) => state.appointments
-    );
+  const user = useSelector(
+    (state) => state.auth?.user || null
+  );
 
-    useEffect(() => {
-        if (
-            user &&
-            user.role === 'CLINIC_ADMIN'
-        ) {
-            dispatch(getAllAppointments());
-        } else {
-            dispatch(getMyAppointments());
-        }
-    }, [dispatch, user]);
+  const {
+    items = [],
+    isLoading = false,
+    filterStatus = "ALL",
+    searchQuery = "",
+  } = useSelector(
+    (state) => state.appointments || {}
+  );
 
-    const handleCancel = (id) => {
-        if (
-            window.confirm(
-                'Are you sure you want to cancel this appointment?'
-            )
-        ) {
-            dispatch(cancelAppointment(id));
-        }
-    };
+  useEffect(() => {
 
-    const filteredItems = items.filter((item) => {
-        const matchesStatus =
-            filterStatus === 'ALL' ||
-            item.status === filterStatus;
+    if (user?.role === "CLINIC_ADMIN") {
+      dispatch(getAllAppointments());
+    } else {
+      dispatch(getMyAppointments());
+    }
 
-        const matchesSearch =
-            searchQuery === '' ||
-            item.reasonForVisit
-                ?.toLowerCase()
-                .includes(
-                    searchQuery.toLowerCase()
-                );
+  }, [dispatch, user]);
 
-        return matchesStatus && matchesSearch;
+  const handleCancel = (id) => {
+
+    if (
+      window.confirm(
+        "Are you sure you want to cancel this appointment?"
+      )
+    ) {
+      dispatch(
+        cancelAppointment(id)
+      );
+    }
+  };
+
+  const safeItems =
+    Array.isArray(items)
+      ? items
+      : [];
+
+  const filteredItems =
+    safeItems.filter((item) => {
+
+      const matchesStatus =
+        filterStatus === "ALL" ||
+        item.status === filterStatus;
+
+      const reason =
+        item.reasonForVisit || "";
+
+      const matchesSearch =
+        searchQuery === "" ||
+        reason
+          .toLowerCase()
+          .includes(
+            searchQuery.toLowerCase()
+          );
+
+      return (
+        matchesStatus &&
+        matchesSearch
+      );
     });
 
-    return (
-        <div className="appointment-list">
-            <h2>Appointment List</h2>
+  return (
+    <div className="page-container">
 
-            <SearchFilterBar
-                placeholder="Search by reason..."
-                filterOptions={[
-                    'ALL',
-                    'CONFIRMED',
-                    'PENDING',
-                    'CANCELLED',
-                    'COMPLETED',
-                ]}
-                onSearch={(query) =>
-                    dispatch(setSearchQuery(query))
-                }
-                onFilter={(filter) =>
-                    dispatch(setFilterStatus(filter))
-                }
-            />
+      <div className="page-header">
 
-            {filteredItems.length === 0 &&
-            !isLoading ? (
-                <EmptyState
-                    message="No appointments found."
-                />
-            ) : (
-                <table>
-                    <thead>
-                        <tr>
-                            <th>
-                                Reason for Visit
-                            </th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
+        <div>
+          <h1>
+            {user?.role === "CLINIC_ADMIN"
+              ? "All Appointments"
+              : "My Appointments"}
+          </h1>
 
-                    <tbody>
-                        {filteredItems.map(
-                            (appointment) => (
-                                <tr
-                                    key={appointment.id}
-                                >
-                                    <td>
-                                        {
-                                            appointment.reasonForVisit
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {
-                                            appointment.status
-                                        }
-                                    </td>
-
-                                    <td>
-                                        {appointment.status !==
-                                            'CANCELLED' &&
-                                            appointment.status !==
-                                                'COMPLETED' && (
-                                                <button
-                                                    onClick={() =>
-                                                        handleCancel(
-                                                            appointment.id
-                                                        )
-                                                    }
-                                                >
-                                                    Cancel
-                                                </button>
-                                            )}
-                                    </td>
-                                </tr>
-                            )
-                        )}
-                    </tbody>
-                </table>
-            )}
+          <p>
+            View and manage your hospital appointments.
+          </p>
         </div>
-    );
+
+        {user?.role === "PATIENT" && (
+          <a
+            href="/book-appointment"
+            className="primary-btn"
+          >
+            + Book Appointment
+          </a>
+        )}
+
+      </div>
+
+      <SearchFilterBar
+        placeholder="Search by reason..."
+        filterOptions={[
+          "ALL",
+          "CONFIRMED",
+          "PENDING",
+          "CANCELLED",
+          "COMPLETED",
+        ]}
+        onSearch={(query) =>
+          dispatch(
+            setSearchQuery(query)
+          )
+        }
+        onFilter={(filter) =>
+          dispatch(
+            setFilterStatus(filter)
+          )
+        }
+      />
+
+      {filteredItems.length === 0 &&
+      !isLoading ? (
+
+        <EmptyState
+          message="No appointments found."
+        />
+
+      ) : (
+
+        <div className="table-card">
+
+          <table className="data-table">
+
+            <thead>
+
+              <tr>
+                <th>
+                  Date & Time
+                </th>
+
+                <th>
+                  Doctor
+                </th>
+
+                <th>
+                  Reason for Visit
+                </th>
+
+                <th>
+                  Status
+                </th>
+
+                <th>
+                  Action
+                </th>
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              {filteredItems.map(
+                (appointment) => (
+
+                  <tr
+                    key={
+                      appointment.id
+                    }
+                  >
+
+                    <td>
+                      {appointment.date ||
+                        appointment.appointmentDate ||
+                        "—"}
+                    </td>
+
+                    <td>
+                      {appointment.doctorEmail ||
+                        appointment.doctor?.email ||
+                        "—"}
+                    </td>
+
+                    <td>
+                      {appointment.reasonForVisit ||
+                        "—"}
+                    </td>
+
+                    <td>
+
+                      <span
+                        className={`status status-${(
+                          appointment.status ||
+                          "pending"
+                        ).toLowerCase()}`}
+                      >
+                        {appointment.status ||
+                          "PENDING"}
+                      </span>
+
+                    </td>
+
+                    <td>
+
+                      {appointment.status !==
+                        "CANCELLED" &&
+                        appointment.status !==
+                          "COMPLETED" && (
+
+                          <button
+                            type="button"
+                            className="action-btn danger-btn"
+                            onClick={() =>
+                              handleCancel(
+                                appointment.id
+                              )
+                            }
+                          >
+                            Cancel
+                          </button>
+
+                        )}
+
+                    </td>
+
+                  </tr>
+
+                )
+              )}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      )}
+
+    </div>
+  );
 };
 
 export default AppointmentList;

@@ -995,3 +995,118 @@ select {
     overflow-x: auto;
   }
 }
+/* =========================================
+   APPOINTMENT FORM
+   ========================================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.appointment-modal {
+  position: relative;
+  width: 460px;
+  max-width: 90%;
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  cursor: pointer;
+  color: #555;
+}
+
+.modal-close:hover {
+  color: #000;
+}
+
+.appointment-header {
+  margin-bottom: 25px;
+}
+
+.appointment-header h2 {
+  margin: 0 0 12px;
+  font-size: 26px;
+  color: #123047;
+}
+
+.doctor-name {
+  margin: 5px 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.doctor-email {
+  margin: 5px 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  font-size: 15px;
+  font-family: Arial, sans-serif;
+  background: white;
+}
+
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #0284c7;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 7px;
+  background: #0284c7;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #0369a1;
+}
+
+.submit-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}

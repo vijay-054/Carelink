@@ -4,31 +4,35 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../store/slices/authSlice";
 
 const Navbar = () => {
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { user } = useSelector(
-    (state) => state.auth || {}
+  const user = useSelector(
+    (state) => state.auth?.user || null
   );
 
   const handleLogout = () => {
+
     dispatch(logout());
+
     localStorage.removeItem("user");
+
     navigate("/");
   };
 
   return (
     <nav className="navbar">
 
-      {/* Brand */}
-
       <Link to="/" className="brand">
         CareLink
       </Link>
 
-      {/* Navigation Links */}
-
       <div className="nav-links">
+
+        <Link to="/">
+          Home
+        </Link>
 
         {!user ? (
           <>
@@ -42,15 +46,18 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            {/* PATIENT */}
 
             {user.role === "PATIENT" && (
-              <Link to="/appointments">
-                My Appointments
-              </Link>
-            )}
+              <>
+                <Link to="/doctor-list">
+                  Find Doctors
+                </Link>
 
-            {/* DOCTOR */}
+                <Link to="/appointments">
+                  My Appointments
+                </Link>
+              </>
+            )}
 
             {user.role === "DOCTOR" && (
               <>
@@ -63,8 +70,6 @@ const Navbar = () => {
                 </Link>
               </>
             )}
-
-            {/* CLINIC ADMIN */}
 
             {user.role === "CLINIC_ADMIN" && (
               <>
@@ -82,18 +87,19 @@ const Navbar = () => {
               </>
             )}
 
-            {/* LOGOUT */}
-
             <button
               type="button"
+              className="logout-btn"
               onClick={handleLogout}
             >
               Logout
             </button>
+
           </>
         )}
 
       </div>
+
     </nav>
   );
 };

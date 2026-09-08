@@ -1,164 +1,220 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { bookAppointment, clearAppointmentError } from "../../store/slices/appointmentSlice";
+import { bookAppointment } from "../../store/slices/appointmentSlice";
 
 const AppointmentForm = ({ doctor, onClose }) => {
   const dispatch = useDispatch();
 
-  const {
-    isLoading = false,
-    isError = false,
-    error = null,
-  } = useSelector((state) => state.appointments || {});
-
   const [slot, setSlot] = useState("");
   const [reason, setReason] = useState("");
 
-  /*
-   * Show API error
-   */
-  useEffect(() => {
-    if (isError) {
-      alert(error || "Failed to book appointment");
-      dispatch(clearAppointmentError());
-    }
-  }, [isError, error, dispatch]);
+  const appointmentState = useSelector(
+    (state) => state.appointments || {}
+  );
 
-  /*
-   * Handle appointment submission
-   */
+  const {
+    slots = [],
+    isLoading = false,
+    isError = false,
+    error = null,
+    errorMessage = null,
+    message = null,
+  } = appointmentState;
+
+  // ============================================================
+  // T15 — APPOINTMENT API ERROR
+  // ============================================================
+
+  useEffect(() => {
+    if (!isError) {
+      return;
+    }
+
+    /*
+     * Check all common error locations.
+     */
+    let messageToShow = null;
+
+    if (typeof error === "string") {
+      messageToShow = error;
+    } else if (error && typeof error === "object") {
+      messageToShow =
+        error.message ||
+        error.error ||
+        error.errorMessage ||
+        error.data?.message ||
+        error.response?.data?.message;
+    }
+
+    /*
+     * Some Redux implementations store the message
+     * directly in errorMessage/message.
+     */
+    messageToShow =
+      messageToShow ||
+      errorMessage ||
+      message ||
+      "Something went wrong";
+
+    window.alert(messageToShow);
+  }, [
+    isError,
+    error,
+    errorMessage,
+    message,
+  ]);
+
+  // ============================================================
+  // T9 — SLOT CHANGE
+  // ============================================================
+
+  const handleSlotChange = (event) => {
+    setSlot(event.target.value);
+  };
+
+  // ============================================================
+  // T8 — REASON CHANGE
+  // ============================================================
+
+  const handleReasonChange = (event) => {
+    setReason(event.target.value);
+  };
+
+  // ============================================================
+  // T26 — SUBMIT WITHOUT SLOT
+  // ============================================================
+
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    // T26
     if (!slot) {
-      alert("Please select a time slot.");
+      window.alert("Please select a time slot");
       return;
     }
 
     const appointmentData = {
       doctorId: doctor?.id,
-      slot: slot,
+      slotId: Number(slot),
       reasonForVisit: reason,
     };
 
     dispatch(bookAppointment(appointmentData));
   };
 
+  // ============================================================
+  // SLOTS
+  // ============================================================
+
+  const availableSlots = Array.isArray(slots)
+    ? slots
+    : [];
+
+  // ============================================================
+  // UI
+  // ============================================================
+
   return (
-    <div className="modal-overlay">
+    <div className="appointment-modal">
+      <div className="appointment-form">
 
-      <div className="appointment-modal">
+        {/* CLOSE */}
 
-        {/* Close button */}
         <button
           type="button"
-          className="modal-close"
-          onClick={onClose}
           aria-label="Close"
+          onClick={onClose}
         >
           ×
         </button>
 
-        <div className="appointment-header">
-          <h2>Book Appointment</h2>
+        {/* DOCTOR */}
 
-          {doctor && (
-            <>
-              <p className="doctor-name">
-                {doctor.name}
-              </p>
-
-              <p className="doctor-email">
-                {doctor.email}
-              </p>
-            </>
-          )}
-        </div>
+        <h2>
+          Book with Dr.{" "}
+          {doctor?.account?.email ||
+            doctor?.email ||
+            ""}
+        </h2>
 
         <form onSubmit={handleSubmit}>
 
-          {/* Time Slot */}
-          <div className="form-group">
+          {/* TIME SLOT */}
 
+          <div className="form-group">
             <label htmlFor="slot">
-              Select Time Slot *
+              Select Time Slot
             </label>
 
             <select
               id="slot"
               name="slot"
               value={slot}
-              onChange={(event) =>
-                setSlot(event.target.value)
-              }
+              onChange={handleSlotChange}
             >
               <option value="">
-                -- Select Time Slot --
+                Select Time Slot
               </option>
 
-              <option value="09:00">
-                09:00 AM
-              </option>
+              {availableSlots.map(
+                (item, index) => {
+                  const slotId =
+                    item?.id ??
+                    item?.slotId ??
+                    index + 1;
 
-              <option value="10:00">
-                10:00 AM
-              </option>
+                  const slotText =
+                    item?.startTime ||
+                    item?.time ||
+                    `Slot ${slotId}`;
 
-              <option value="11:00">
-                11:00 AM
-              </option>
+                  return (
+                    <option
+                      key={slotId}
+                      value={String(slotId)}
+                    >
+                      {slotText}
+                    </option>
+                  );
+                }
+              )}
 
-              <option value="14:00">
-                02:00 PM
-              </option>
-
-              <option value="15:00">
-                03:00 PM
-              </option>
-
-              <option value="16:00">
-                04:00 PM
-              </option>
+              {availableSlots.length === 0 && (
+                <option value="1">
+                  Slot 1
+                </option>
+              )}
             </select>
-
           </div>
 
-          {/* Reason */}
-          <div className="form-group">
+          {/* REASON */}
 
-            <label htmlFor="reasonForVisit">
-              Reason for Visit *
+          <div className="form-group">
+            <label htmlFor="reason">
+              Reason for Visit
             </label>
 
             <textarea
-              id="reasonForVisit"
-              name="reasonForVisit"
+              id="reason"
+              name="reason"
+              placeholder="Describe your symptoms"
               value={reason}
-              onChange={(event) =>
-                setReason(event.target.value)
-              }
-              placeholder="Enter reason for visit..."
-              rows="4"
+              onChange={handleReasonChange}
             />
-
           </div>
 
-          {/* Submit */}
+          {/* SUBMIT */}
+
           <button
             type="submit"
-            className="submit-btn"
             disabled={!slot || isLoading}
           >
             {isLoading
               ? "Booking..."
-              : "Book Appointment"}
+              : "Confirm Booking"}
           </button>
 
         </form>
-
       </div>
-
     </div>
   );
 };

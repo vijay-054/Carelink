@@ -3,6 +3,7 @@ import {
   BrowserRouter,
   Routes,
   Route,
+  Link,
 } from "react-router-dom";
 
 import Navbar from "./components/layout/Navbar";
@@ -20,9 +21,16 @@ import DoctorConsultations from "./components/doctors/DoctorConsultations";
 import ManageDoctors from "./components/admin/ManageDoctors";
 import ManagePatients from "./components/admin/ManagePatients";
 
+
+/* =========================================================
+   HOME PAGE
+========================================================= */
+
 const Home = () => {
   return (
     <div className="home-page">
+
+      {/* ================= HERO ================= */}
 
       <section className="hero-section">
 
@@ -47,16 +55,27 @@ const Home = () => {
             </p>
 
             <div className="hero-actions">
-              <a href="/login" className="primary-btn">
-                Get Started
-              </a>
 
-              <a href="/register" className="secondary-btn">
+              <Link
+                to="/login"
+                className="primary-btn"
+              >
+                Get Started
+              </Link>
+
+              <Link
+                to="/register"
+                className="secondary-btn"
+              >
                 Create Account
-              </a>
+              </Link>
+
             </div>
 
           </div>
+
+
+          {/* ================= HOSPITAL ILLUSTRATION ================= */}
 
           <div className="hero-illustration">
 
@@ -75,12 +94,14 @@ const Home = () => {
                   <h3>HOSPITAL</h3>
 
                   <div className="hospital-windows">
+
                     <span></span>
                     <span></span>
                     <span></span>
                     <span></span>
                     <span></span>
                     <span></span>
+
                   </div>
 
                   <div className="hospital-door"></div>
@@ -101,48 +122,103 @@ const Home = () => {
 
       </section>
 
+
+      {/* ================= FEATURES ================= */}
+
       <section className="feature-section">
 
         <div className="section-heading">
-          <span>OUR SERVICES</span>
-          <h2>Everything You Need</h2>
+
+          <span>
+            OUR SERVICES
+          </span>
+
+          <h2>
+            Everything You Need
+          </h2>
+
           <p>
             Simple and convenient healthcare appointment management.
           </p>
+
         </div>
+
 
         <div className="feature-grid">
 
+          {/* Appointment */}
+
           <div className="feature-card">
-            <div className="feature-icon">📅</div>
-            <h3>Easy Appointments</h3>
+
+            <div className="feature-icon">
+              📅
+            </div>
+
+            <h3>
+              Easy Appointments
+            </h3>
+
             <p>
               Book and manage your appointments easily.
             </p>
+
           </div>
 
+
+          {/* Doctors */}
+
           <div className="feature-card">
-            <div className="feature-icon">👨‍⚕️</div>
-            <h3>Find Doctors</h3>
+
+            <div className="feature-icon">
+              👨‍⚕️
+            </div>
+
+            <h3>
+              Find Doctors
+            </h3>
+
             <p>
               Browse doctors and select the right specialist.
             </p>
+
           </div>
 
+
+          {/* Schedule */}
+
           <div className="feature-card">
-            <div className="feature-icon">⏰</div>
-            <h3>Schedule Management</h3>
+
+            <div className="feature-icon">
+              ⏰
+            </div>
+
+            <h3>
+              Schedule Management
+            </h3>
+
             <p>
               View available schedules and time slots.
             </p>
+
           </div>
 
+
+          {/* Security */}
+
           <div className="feature-card">
-            <div className="feature-icon">🔒</div>
-            <h3>Secure Access</h3>
+
+            <div className="feature-icon">
+              🔒
+            </div>
+
+            <h3>
+              Secure Access
+            </h3>
+
             <p>
               Role-based access for patients, doctors and admins.
             </p>
+
           </div>
 
         </div>
@@ -153,6 +229,11 @@ const Home = () => {
   );
 };
 
+
+/* =========================================================
+   APPLICATION ROUTES
+========================================================= */
+
 const App = () => {
   return (
     <BrowserRouter>
@@ -162,6 +243,8 @@ const App = () => {
       <main>
 
         <Routes>
+
+          {/* ================= PUBLIC ================= */}
 
           <Route
             path="/"
@@ -178,6 +261,14 @@ const App = () => {
             element={<Register />}
           />
 
+
+          {/* ================= PATIENT ================= */}
+
+          <Route
+            path="/doctor-list"
+            element={<DoctorList />}
+          />
+
           <Route
             path="/appointments"
             element={<AppointmentList />}
@@ -188,10 +279,8 @@ const App = () => {
             element={<AppointmentForm />}
           />
 
-          <Route
-            path="/doctor-list"
-            element={<DoctorList />}
-          />
+
+          {/* ================= DOCTOR ================= */}
 
           <Route
             path="/schedule"
@@ -202,6 +291,9 @@ const App = () => {
             path="/consultations"
             element={<DoctorConsultations />}
           />
+
+
+          {/* ================= CLINIC ADMIN ================= */}
 
           <Route
             path="/doctors"

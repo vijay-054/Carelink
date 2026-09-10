@@ -34,30 +34,38 @@ const Register = () => {
   );
 
 
-  /* =========================
+  /* =========================================================
      FORM DATA
-  ========================= */
+  ========================================================= */
 
   const [formData, setFormData] = useState({
 
     fullName: "",
+
     email: "",
+
     password: "",
 
+    // Only Patient and Doctor are available
     role: "PATIENT",
 
+    // Patient fields
     bloodGroup: "",
+
     emergencyContact: "",
 
+    // Doctor fields
     specialization: "",
+
     experience: "",
+
     consultationFee: "",
   });
 
 
-  /* =========================
+  /* =========================================================
      SUCCESS / ERROR
-  ========================= */
+  ========================================================= */
 
   useEffect(() => {
 
@@ -69,7 +77,10 @@ const Register = () => {
       );
 
       dispatch(reset());
+
+      return;
     }
+
 
     if (isSuccess) {
 
@@ -77,9 +88,9 @@ const Register = () => {
         "Registration successful! Please login."
       );
 
-      navigate("/login");
-
       dispatch(reset());
+
+      navigate("/login");
     }
 
   }, [
@@ -91,9 +102,9 @@ const Register = () => {
   ]);
 
 
-  /* =========================
+  /* =========================================================
      HANDLE INPUT
-  ========================= */
+  ========================================================= */
 
   const handleChange = (event) => {
 
@@ -102,6 +113,7 @@ const Register = () => {
       value,
     } = event.target;
 
+
     setFormData((previousData) => ({
       ...previousData,
       [name]: value,
@@ -109,25 +121,50 @@ const Register = () => {
   };
 
 
-  /* =========================
+  /* =========================================================
      HANDLE SUBMIT
-  ========================= */
+  ========================================================= */
 
   const handleSubmit = (event) => {
 
     event.preventDefault();
 
+
+    /* -------------------------------------------------------
+       BASIC VALIDATION
+    ------------------------------------------------------- */
+
+    if (!formData.role) {
+
+      alert("Please select an account role.");
+
+      return;
+    }
+
+
+    /* -------------------------------------------------------
+       COMMON DATA
+    ------------------------------------------------------- */
+
     const dataToSend = {
-      fullName: formData.fullName,
-      email: formData.email,
-      password: formData.password,
-      role: formData.role,
+
+      fullName:
+        formData.fullName,
+
+      email:
+        formData.email,
+
+      password:
+        formData.password,
+
+      role:
+        formData.role,
     };
 
 
-    /* =========================
+    /* =======================================================
        PATIENT DATA
-    ========================= */
+    ======================================================= */
 
     if (formData.role === "PATIENT") {
 
@@ -139,9 +176,9 @@ const Register = () => {
     }
 
 
-    /* =========================
+    /* =======================================================
        DOCTOR DATA
-    ========================= */
+    ======================================================= */
 
     if (formData.role === "DOCTOR") {
 
@@ -156,16 +193,15 @@ const Register = () => {
     }
 
 
-    /* =========================
-       CLINIC ADMIN
-    ========================= */
+    console.log(
+      "CARELINK REGISTRATION DATA:",
+      dataToSend
+    );
 
-    if (formData.role === "CLINIC_ADMIN") {
 
-      dataToSend.role =
-        "CLINIC_ADMIN";
-    }
-
+    /* -------------------------------------------------------
+       SEND TO BACKEND
+    ------------------------------------------------------- */
 
     dispatch(
       register(dataToSend)
@@ -173,35 +209,50 @@ const Register = () => {
   };
 
 
+  /* =========================================================
+     UI
+  ========================================================= */
+
   return (
+
     <div className="auth-page">
 
       <div className="auth-card">
 
-        {/* =========================
+
+        {/* =================================================
             HEADER
-        ========================= */}
+        ================================================= */}
 
         <h2>
           Register
         </h2>
+
 
         <p className="auth-subtitle">
           Create your CareLink account.
         </p>
 
 
-        <form onSubmit={handleSubmit}>
+        {/* =================================================
+            FORM
+        ================================================= */}
 
-          {/* =========================
+        <form
+          onSubmit={handleSubmit}
+        >
+
+
+          {/* ===============================================
               FULL NAME
-          ========================= */}
+          =============================================== */}
 
           <div className="form-group">
 
             <label htmlFor="fullName">
               Full Name *
             </label>
+
 
             <input
               id="fullName"
@@ -216,15 +267,16 @@ const Register = () => {
           </div>
 
 
-          {/* =========================
+          {/* ===============================================
               EMAIL
-          ========================= */}
+          =============================================== */}
 
           <div className="form-group">
 
             <label htmlFor="email">
               Email *
             </label>
+
 
             <input
               id="email"
@@ -239,15 +291,16 @@ const Register = () => {
           </div>
 
 
-          {/* =========================
+          {/* ===============================================
               PASSWORD
-          ========================= */}
+          =============================================== */}
 
           <div className="form-group">
 
             <label htmlFor="password">
               Password *
             </label>
+
 
             <input
               id="password"
@@ -262,15 +315,16 @@ const Register = () => {
           </div>
 
 
-          {/* =========================
-              ROLE
-          ========================= */}
+          {/* ===============================================
+              ACCOUNT ROLE
+          =============================================== */}
 
           <div className="form-group">
 
             <label htmlFor="role">
               Account Role *
             </label>
+
 
             <select
               id="role"
@@ -284,12 +338,9 @@ const Register = () => {
                 Patient
               </option>
 
+
               <option value="DOCTOR">
                 Doctor
-              </option>
-
-              <option value="CLINIC_ADMIN">
-                Clinic Admin
               </option>
 
             </select>
@@ -297,18 +348,22 @@ const Register = () => {
           </div>
 
 
-          {/* ==================================================
+          {/* =================================================
               PATIENT FIELDS
-          ================================================== */}
+          ================================================= */}
 
           {formData.role === "PATIENT" && (
+
             <>
+
+              {/* Blood Group */}
 
               <div className="form-group">
 
                 <label htmlFor="bloodGroup">
                   Blood Group *
                 </label>
+
 
                 <select
                   id="bloodGroup"
@@ -322,33 +377,41 @@ const Register = () => {
                     -- Select Blood Group --
                   </option>
 
+
                   <option value="A+">
                     A+
                   </option>
+
 
                   <option value="A-">
                     A-
                   </option>
 
+
                   <option value="B+">
                     B+
                   </option>
+
 
                   <option value="B-">
                     B-
                   </option>
 
+
                   <option value="AB+">
                     AB+
                   </option>
+
 
                   <option value="AB-">
                     AB-
                   </option>
 
+
                   <option value="O+">
                     O+
                   </option>
+
 
                   <option value="O-">
                     O-
@@ -359,11 +422,14 @@ const Register = () => {
               </div>
 
 
+              {/* Emergency Contact */}
+
               <div className="form-group">
 
                 <label htmlFor="emergencyContact">
                   Emergency Contact *
                 </label>
+
 
                 <input
                   id="emergencyContact"
@@ -380,21 +446,27 @@ const Register = () => {
               </div>
 
             </>
+
           )}
 
 
-          {/* ==================================================
+          {/* =================================================
               DOCTOR FIELDS
-          ================================================== */}
+          ================================================= */}
 
           {formData.role === "DOCTOR" && (
+
             <>
+
+
+              {/* Specialization */}
 
               <div className="form-group">
 
                 <label htmlFor="specialization">
                   Specialization *
                 </label>
+
 
                 <input
                   id="specialization"
@@ -411,11 +483,14 @@ const Register = () => {
               </div>
 
 
+              {/* Experience */}
+
               <div className="form-group">
 
                 <label htmlFor="experience">
                   Experience (Years) *
                 </label>
+
 
                 <input
                   id="experience"
@@ -433,11 +508,14 @@ const Register = () => {
               </div>
 
 
+              {/* Consultation Fee */}
+
               <div className="form-group">
 
                 <label htmlFor="consultationFee">
                   Consultation Fee *
                 </label>
+
 
                 <input
                   id="consultationFee"
@@ -455,37 +533,13 @@ const Register = () => {
               </div>
 
             </>
-          )}
-
-
-          {/* ==================================================
-              ADMIN INFORMATION
-          ================================================== */}
-
-          {formData.role === "CLINIC_ADMIN" && (
-
-            <div className="admin-registration-note">
-
-              <p>
-                You are registering as a{" "}
-                <strong>
-                  Clinic Administrator
-                </strong>.
-              </p>
-
-              <small>
-                Administrator access should only be
-                granted to authorized hospital staff.
-              </small>
-
-            </div>
 
           )}
 
 
-          {/* =========================
+          {/* =================================================
               REGISTER BUTTON
-          ========================= */}
+          ================================================= */}
 
           <button
             type="submit"
@@ -499,12 +553,13 @@ const Register = () => {
 
           </button>
 
+
         </form>
 
 
-        {/* =========================
+        {/* =================================================
             LOGIN LINK
-        ========================= */}
+        ================================================= */}
 
         <div className="auth-footer">
 
@@ -515,6 +570,7 @@ const Register = () => {
           </Link>
 
         </div>
+
 
       </div>
 

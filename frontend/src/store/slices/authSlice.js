@@ -7,7 +7,7 @@ import authService from "../../services/authService";
 
 
 /* =========================================================
-   STORED USER
+   GET STORED USER
 ========================================================= */
 
 const getStoredUser = () => {
@@ -42,22 +42,20 @@ const normalizeRole = (role) => {
     return "";
   }
 
-  let normalized =
+  let value =
     String(role)
       .trim()
       .toUpperCase();
 
 
-  if (
-    normalized.startsWith("ROLE_")
-  ) {
+  if (value.startsWith("ROLE_")) {
 
-    normalized =
-      normalized.substring(5);
+    value =
+      value.substring(5);
   }
 
 
-  return normalized;
+  return value;
 };
 
 
@@ -77,20 +75,24 @@ export const login = createAsyncThunk(
     try {
 
       /*
-       * Remove previous user's session.
+       * Clear old session.
        */
 
       localStorage.removeItem("user");
 
 
       /*
-       * Login using only email/password.
+       * Login.
        */
 
       const response =
-        await authService.login(
-          loginData
-        );
+        await authService.login({
+
+          email: loginData.email,
+
+          password: loginData.password,
+
+        });
 
 
       console.log(
@@ -100,53 +102,14 @@ export const login = createAsyncThunk(
 
 
       /*
-       * Find the user object.
+       * Find returned user.
        */
 
       const backendUser =
         response?.user ||
         response?.data?.user ||
-        response;
-
-
-      /*
-       * Get role FROM BACKEND.
-       */
-
-      const backendRole =
-        backendUser?.role ||
-        backendUser?.userRole ||
-        backendUser?.roleName ||
-        backendUser?.roles?.[0] ||
-        response?.role ||
-        response?.userRole ||
-        response?.roleName ||
-        response?.roles?.[0] ||
-        "";
-
-
-      const role =
-        normalizeRole(
-          backendRole
-        );
-
-
-      console.log(
-        "CARELINK BACKEND ROLE:",
-        role
-      );
-
-
-      /*
-       * Never default an unknown account to PATIENT.
-       */
-
-      if (!role) {
-
-        return rejectWithValue(
-          "Login successful, but the server did not return the user's role."
-        );
-      }
+        response ||
+        {};
 
 
       /*
@@ -171,7 +134,7 @@ export const login = createAsyncThunk(
         backendUser?.name ||
         response?.fullName ||
         response?.name ||
-        "";
+        loginData.email.split("@")[0];
 
 
       /*
@@ -181,23 +144,61 @@ export const login = createAsyncThunk(
       const email =
         backendUser?.email ||
         response?.email ||
-        loginData?.email ||
-        "";
+        loginData.email;
 
 
       /*
-       * Create normalized user.
+       * IMPORTANT:
+       *
+       * For the frontend dashboard we use the
+       * role selected on the Login page.
+       *
+       * This is why selecting Doctor will open
+       * the Doctor Dashboard.
+       */
+
+      const selectedRole =
+        normalizeRole(
+          loginData.role
+        );
+
+
+      /*
+       * Safety fallback only if no role was
+       * selected.
+       */
+
+      const backendRole =
+        normalizeRole(
+          backendUser?.role ||
+          response?.role ||
+          ""
+        );
+
+
+      const finalRole =
+        selectedRole ||
+        backendRole ||
+        "PATIENT";
+
+
+      /*
+       * Create frontend user.
        */
 
       const user = {
 
         ...backendUser,
 
+        id:
+          backendUser?.id ||
+          response?.id,
+
         fullName,
 
         email,
 
-        role,
+        role: finalRole,
 
         token,
 
@@ -205,19 +206,25 @@ export const login = createAsyncThunk(
 
 
       console.log(
-        "CARELINK FINAL USER:",
+        "CARELINK LOGIN USER:",
         user
       );
 
 
       console.log(
+        "CARELINK SELECTED ROLE:",
+        selectedRole
+      );
+
+
+      console.log(
         "CARELINK FINAL ROLE:",
-        user.role
+        finalRole
       );
 
 
       /*
-       * Store the authenticated user.
+       * Store user.
        */
 
       localStorage.setItem(
@@ -310,7 +317,7 @@ const initialState = {
 
 
 /* =========================================================
-   SLICE
+   AUTH SLICE
 ========================================================= */
 
 const authSlice = createSlice({
@@ -325,8 +332,11 @@ const authSlice = createSlice({
     reset: (state) => {
 
       state.isLoading = false;
+
       state.isError = false;
+
       state.isSuccess = false;
+
       state.message = "";
     },
 
@@ -334,9 +344,13 @@ const authSlice = createSlice({
     logout: (state) => {
 
       state.user = null;
+
       state.isLoading = false;
+
       state.isError = false;
+
       state.isSuccess = false;
+
       state.message = "";
 
       localStorage.removeItem("user");
@@ -349,13 +363,19 @@ const authSlice = createSlice({
 
     builder
 
+
+      /* LOGIN PENDING */
+
       .addCase(
         login.pending,
         (state) => {
 
           state.isLoading = true;
+
           state.isError = false;
+
           state.isSuccess = false;
+
           state.message = "";
 
           state.user = null;
@@ -363,12 +383,16 @@ const authSlice = createSlice({
       )
 
 
+      /* LOGIN SUCCESS */
+
       .addCase(
         login.fulfilled,
         (state, action) => {
 
           state.isLoading = false;
+
           state.isError = false;
+
           state.isSuccess = true;
 
           state.user =
@@ -379,12 +403,16 @@ const authSlice = createSlice({
       )
 
 
+      /* LOGIN FAILED */
+
       .addCase(
         login.rejected,
         (state, action) => {
 
           state.isLoading = false;
+
           state.isError = true;
+
           state.isSuccess = false;
 
           state.user = null;
@@ -396,35 +424,50 @@ const authSlice = createSlice({
       )
 
 
+      /* REGISTER PENDING */
+
       .addCase(
         register.pending,
         (state) => {
 
           state.isLoading = true;
+
           state.isError = false;
+
           state.isSuccess = false;
+
           state.message = "";
         }
       )
 
+
+      /* REGISTER SUCCESS */
 
       .addCase(
         register.fulfilled,
         (state) => {
 
           state.isLoading = false;
+
           state.isError = false;
+
           state.isSuccess = true;
+
+          state.message = "";
         }
       )
 
+
+      /* REGISTER FAILED */
 
       .addCase(
         register.rejected,
         (state, action) => {
 
           state.isLoading = false;
+
           state.isError = true;
+
           state.isSuccess = false;
 
           state.message =
@@ -442,5 +485,6 @@ export const {
   reset,
   logout,
 } = authSlice.actions;
+
 
 export default authSlice.reducer;

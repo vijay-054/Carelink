@@ -25,6 +25,12 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [role, setRole] = useState("PATIENT");
+
+
+  /* =====================================================
+     LOGIN RESULT
+  ===================================================== */
 
   useEffect(() => {
 
@@ -57,14 +63,24 @@ const Login = () => {
   ]);
 
 
+  /* =====================================================
+     SUBMIT LOGIN
+  ===================================================== */
+
   const handleSubmit = (event) => {
 
     event.preventDefault();
+
+
+    /*
+     * Send email, password and selected role.
+     */
 
     dispatch(
       login({
         email,
         password,
+        role,
       })
     );
   };
@@ -85,6 +101,8 @@ const Login = () => {
 
 
         <form onSubmit={handleSubmit}>
+
+          {/* EMAIL */}
 
           <div className="form-group">
 
@@ -107,6 +125,8 @@ const Login = () => {
           </div>
 
 
+          {/* PASSWORD */}
+
           <div className="form-group">
 
             <label htmlFor="password">
@@ -127,6 +147,43 @@ const Login = () => {
 
           </div>
 
+
+          {/* ROLE */}
+
+          <div className="form-group">
+
+            <label htmlFor="loginRole">
+              Login As *
+            </label>
+
+            <select
+              id="loginRole"
+              name="loginRole"
+              value={role}
+              onChange={(event) =>
+                setRole(event.target.value)
+              }
+              required
+            >
+
+              <option value="PATIENT">
+                Patient
+              </option>
+
+              <option value="DOCTOR">
+                Doctor
+              </option>
+
+              <option value="CLINIC_ADMIN">
+                Clinic Admin
+              </option>
+
+            </select>
+
+          </div>
+
+
+          {/* LOGIN */}
 
           <button
             type="submit"

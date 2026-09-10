@@ -1,0 +1,1390 @@
+/* =========================================================
+   CARELINK DASHBOARD
+========================================================= */
+
+.care-dashboard {
+  min-height: calc(100vh - 72px);
+  display: flex;
+  background: #f5fbfa;
+  color: #14252a;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.dashboard-sidebar {
+  width: 245px;
+  min-height: calc(100vh - 72px);
+  background: linear-gradient(
+    180deg,
+    #effcf9 0%,
+    #e9f8f6 100%
+  );
+  border-right: 1px solid #dcefeb;
+  padding: 24px 14px 20px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+
+.dashboard-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px 25px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #12383c;
+}
+
+
+.logo-heart {
+  width: 35px;
+  height: 35px;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    #0eae8a,
+    #25c7a5
+  );
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+
+.doctor-logo {
+  background: linear-gradient(
+    135deg,
+    #4569d8,
+    #6f50d8
+  );
+}
+
+
+.dashboard-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+
+.dashboard-nav-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 12px 14px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  text-align: left;
+  color: #394c50;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+
+.dashboard-nav-item span {
+  width: 20px;
+  font-size: 18px;
+  text-align: center;
+}
+
+
+.dashboard-nav-item:hover {
+  background: rgba(40, 185, 155, 0.08);
+}
+
+
+.dashboard-nav-item.active {
+  background: #d1f1e8;
+  color: #087b65;
+  font-weight: 700;
+}
+
+
+.doctor-dashboard .dashboard-nav-item.active {
+  background: #dce6ff;
+  color: #315cc9;
+}
+
+
+.dashboard-logout {
+  margin-top: auto;
+  border: none;
+  background: transparent;
+  padding: 13px 14px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  color: #34474b;
+  cursor: pointer;
+  font-size: 13px;
+  border-radius: 9px;
+}
+
+
+.dashboard-logout:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.dashboard-main {
+  flex: 1;
+  min-width: 0;
+}
+
+
+.dashboard-topbar {
+  height: 70px;
+  padding: 0 35px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.75);
+  border-bottom: 1px solid #e4eeee;
+}
+
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+
+.notification-button {
+  width: 37px;
+  height: 37px;
+  border: 1px solid #e1efeb;
+  border-radius: 50%;
+  background: white;
+  position: relative;
+  cursor: pointer;
+  color: #087b65;
+}
+
+
+.notification-dot {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: #ff756c;
+  border-radius: 50%;
+  top: 7px;
+  right: 7px;
+}
+
+
+.user-avatar {
+  width: 39px;
+  height: 39px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: white;
+  font-size: 16px;
+}
+
+
+.patient-avatar {
+  background: linear-gradient(
+    135deg,
+    #24b99b,
+    #74d8c4
+  );
+}
+
+
+.doctor-avatar {
+  background: linear-gradient(
+    135deg,
+    #4b70d7,
+    #8d65db
+  );
+}
+
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 80px;
+}
+
+
+.user-info strong {
+  font-size: 12px;
+}
+
+
+.user-info span {
+  font-size: 10px;
+  color: #77878a;
+  margin-top: 2px;
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.dashboard-content {
+  padding: 28px 34px 45px;
+  max-width: 1500px;
+  margin: auto;
+}
+
+
+.dashboard-heading {
+  margin-bottom: 20px;
+}
+
+
+.dashboard-heading h1 {
+  font-size: 25px;
+  margin: 0 0 5px;
+  color: #14292d;
+}
+
+
+.dashboard-heading p {
+  margin: 0;
+  color: #718184;
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   PATIENT HERO
+========================================================= */
+
+.patient-hero {
+  min-height: 185px;
+  border-radius: 13px;
+  background: linear-gradient(
+    105deg,
+    #d8f8ed,
+    #c5f1df
+  );
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+
+.patient-hero-content {
+  padding: 28px 25px;
+  position: relative;
+  z-index: 2;
+}
+
+
+.patient-hero h2,
+.doctor-hero h2 {
+  margin: 0;
+  font-size: 23px;
+  line-height: 1.15;
+  color: #132c2e;
+}
+
+
+.patient-hero p,
+.doctor-hero p {
+  max-width: 340px;
+  font-size: 11px;
+  line-height: 1.55;
+  color: #466366;
+  margin: 9px 0 13px;
+}
+
+
+.hero-button {
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+.patient-button {
+  background: #0a9d76;
+}
+
+
+.patient-button:hover {
+  background: #087e62;
+}
+
+
+.patient-hero-art {
+  position: absolute;
+  right: 100px;
+  bottom: -20px;
+  width: 220px;
+  height: 210px;
+}
+
+
+.patient-woman {
+  position: absolute;
+  bottom: 5px;
+  left: 65px;
+  font-size: 105px;
+}
+
+
+.heart-shape {
+  position: absolute;
+  left: 107px;
+  top: 55px;
+  color: #ef6e72;
+  font-size: 28px;
+}
+
+
+.leaf {
+  position: absolute;
+  font-size: 55px;
+  opacity: 0.75;
+}
+
+
+.leaf-one {
+  left: 0;
+  bottom: 35px;
+}
+
+
+.hero-script {
+  position: absolute;
+  right: 24px;
+  top: 34px;
+  font-size: 20px;
+  font-style: italic;
+  color: #16896e;
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+   DOCTOR HERO
+========================================================= */
+
+.doctor-hero {
+  min-height: 170px;
+  border-radius: 13px;
+  background: linear-gradient(
+    105deg,
+    #dbe7ff,
+    #c5dcff
+  );
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+
+.doctor-hero-content {
+  padding: 28px 25px;
+  position: relative;
+  z-index: 2;
+}
+
+
+.stethoscope {
+  position: absolute;
+  right: 165px;
+  top: 15px;
+  font-size: 115px;
+  opacity: 0.75;
+}
+
+
+.doctor-script {
+  position: absolute;
+  right: 28px;
+  top: 34px;
+  font-size: 17px;
+  font-style: italic;
+  color: #3b65c6;
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+
+.dashboard-stat {
+  background: rgba(255,255,255,0.9);
+  border: 1px solid #e7eeee;
+  border-radius: 11px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 3px 12px rgba(26, 70, 65, 0.035);
+}
+
+
+.stat-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  flex-shrink: 0;
+}
+
+
+.stat-icon.mint {
+  background: #dcf8ed;
+  color: #08a079;
+}
+
+
+.stat-icon.teal {
+  background: #d8f5f3;
+  color: #159d9a;
+}
+
+
+.stat-icon.orange {
+  background: #fff0d9;
+  color: #e99a1a;
+}
+
+
+.stat-icon.coral {
+  background: #ffe3df;
+  color: #ee756a;
+}
+
+
+.stat-icon.blue {
+  background: #e3edff;
+  color: #3971d8;
+}
+
+
+.stat-icon.purple {
+  background: #eee7ff;
+  color: #7856d8;
+}
+
+
+.stat-icon.green {
+  background: #dff8eb;
+  color: #17a16e;
+}
+
+
+.dashboard-stat div:last-child {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.dashboard-stat span {
+  color: #78878a;
+  font-size: 9px;
+  margin-bottom: 2px;
+}
+
+
+.dashboard-stat strong {
+  font-size: 19px;
+  line-height: 1.2;
+}
+
+
+.dashboard-stat small {
+  font-size: 8px;
+  color: #0e9a76;
+  margin-top: 3px;
+}
+
+
+.positive-change {
+  color: #079d70 !important;
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.dashboard-card {
+  background: rgba(255,255,255,0.94);
+  border: 1px solid #e7eeee;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 3px 14px rgba(27, 64, 63, 0.035);
+}
+
+
+.card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+
+.card-heading h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #182b2f;
+}
+
+
+.view-all {
+  border: none;
+  background: transparent;
+  color: #1767c9;
+  font-size: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   TWO COLUMNS
+========================================================= */
+
+.two-column-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+
+.doctor-middle-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+
+/* =========================================================
+   APPOINTMENT
+========================================================= */
+
+.doctor-appointment {
+  display: flex;
+  gap: 13px;
+}
+
+
+.doctor-photo {
+  width: 65px;
+  height: 65px;
+  border-radius: 9px;
+  background: #e9f4f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+}
+
+
+.appointment-doctor {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+
+.appointment-doctor strong {
+  font-size: 12px;
+}
+
+
+.appointment-doctor span {
+  color: #607579;
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+
+.appointment-doctor small {
+  font-size: 9px;
+  color: #65777a;
+}
+
+
+.appointment-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+
+.outline-button,
+.green-button {
+  padding: 8px;
+  border-radius: 7px;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+
+.outline-button {
+  background: #e9f8f4;
+  border: none;
+  color: #197b68;
+}
+
+
+.green-button {
+  border: none;
+  background: #079c70;
+  color: white;
+}
+
+
+/* =========================================================
+   QUICK ACTIONS
+========================================================= */
+
+.quick-action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+
+.quick-action {
+  min-height: 65px;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
+}
+
+
+.quick-action:hover {
+  transform: translateY(-2px);
+}
+
+
+.quick-action span {
+  font-size: 19px;
+}
+
+
+.quick-action small {
+  font-size: 9px;
+}
+
+
+.green-action {
+  background: #e0f8ee;
+  color: #078b68;
+}
+
+
+.blue-action {
+  background: #e2efff;
+  color: #1767ca;
+}
+
+
+.orange-action {
+  background: #fff0dd;
+  color: #e18a16;
+}
+
+
+.sky-action {
+  background: #e1f3ff;
+  color: #2477bd;
+}
+
+
+.doctor-blue-action {
+  background: #e1ebff;
+  color: #2862c7;
+}
+
+
+.doctor-purple-action {
+  background: #eee7ff;
+  color: #7958cf;
+}
+
+
+.doctor-green-action {
+  background: #e1f8ec;
+  color: #139b6d;
+}
+
+
+.doctor-mint-action {
+  background: #ddf7f4;
+  color: #199b98;
+}
+
+
+/* =========================================================
+   RECOMMENDED DOCTORS
+========================================================= */
+
+.recommended-doctors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+
+.recommended-doctor {
+  border: 1px solid #edf1f1;
+  border-radius: 9px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+.recommended-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #e9f5f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  margin-bottom: 7px;
+}
+
+
+.recommended-doctor strong {
+  font-size: 10px;
+}
+
+
+.recommended-doctor > span {
+  font-size: 8px;
+  color: #728185;
+  margin-top: 2px;
+}
+
+
+.doctor-rating {
+  color: #e99a16;
+  font-size: 9px;
+  margin: 6px 0;
+}
+
+
+.doctor-rating small {
+  color: #718084;
+  margin-left: 3px;
+}
+
+
+.recommended-doctor button {
+  width: 100%;
+  border: none;
+  background: #e0f7f0;
+  color: #097b67;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   BOTTOM
+========================================================= */
+
+.patient-bottom-grid,
+.doctor-bottom-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 0.5fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+
+.activity-item {
+  display: flex;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid #eef2f2;
+}
+
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+
+.activity-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e4f7f0;
+  color: #079a72;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+
+.activity-item > div:last-child {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.activity-item strong {
+  font-size: 9px;
+  font-weight: 600;
+}
+
+
+.activity-item span {
+  color: #829093;
+  font-size: 8px;
+  margin-top: 3px;
+}
+
+
+.wellness-card {
+  border-radius: 12px;
+  background: linear-gradient(
+    145deg,
+    #d4f5ec,
+    #c2eee4
+  );
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+
+.wellness-icon {
+  font-size: 42px;
+  margin-bottom: 5px;
+}
+
+
+.wellness-card h3 {
+  font-size: 16px;
+  line-height: 1.15;
+  margin: 0;
+  color: #126d5e;
+  font-style: italic;
+}
+
+
+.wellness-card p {
+  font-size: 9px;
+  color: #4d7e77;
+}
+
+
+/* =========================================================
+   DOCTOR SCHEDULE
+========================================================= */
+
+.schedule-row {
+  display: grid;
+  grid-template-columns: 72px 12px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 37px;
+  border-bottom: 1px solid #f0f2f3;
+}
+
+
+.schedule-row:last-child {
+  border-bottom: none;
+}
+
+
+.schedule-time {
+  font-size: 9px;
+  color: #65777c;
+}
+
+
+.schedule-row strong {
+  font-size: 9px;
+}
+
+
+.schedule-row small {
+  font-size: 8px;
+  color: #7d8b8e;
+}
+
+
+.schedule-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+
+.schedule-dot.green {
+  background: #16b488;
+}
+
+
+.schedule-dot.purple {
+  background: #8a5de0;
+}
+
+
+.schedule-dot.orange {
+  background: #f0a22b;
+}
+
+
+.schedule-dot.teal {
+  background: #24aaa6;
+}
+
+
+.schedule-dot.blue {
+  background: #4269db;
+}
+
+
+/* =========================================================
+   CHARTS
+========================================================= */
+
+.doctor-chart-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 14px;
+}
+
+
+.chart-card {
+  min-height: 235px;
+}
+
+
+.chart-card select {
+  border: 1px solid #e2e8ee;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 8px;
+  color: #66777b;
+  background: white;
+}
+
+
+.line-chart {
+  position: relative;
+  height: 180px;
+  padding-left: 22px;
+}
+
+
+.chart-y-axis {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #829095;
+  font-size: 8px;
+}
+
+
+.chart-svg {
+  width: 100%;
+  height: 145px;
+  overflow: visible;
+}
+
+
+.chart-grid-line {
+  stroke: #edf0f3;
+  stroke-width: 1;
+}
+
+
+.chart-line {
+  stroke: #2875d5;
+  stroke-width: 3;
+}
+
+
+.chart-point {
+  fill: #2875d5;
+}
+
+
+.chart-months {
+  display: flex;
+  justify-content: space-around;
+  font-size: 8px;
+  color: #829095;
+  margin-top: -2px;
+}
+
+
+.distribution-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  min-height: 170px;
+}
+
+
+.donut-chart {
+  width: 135px;
+  height: 135px;
+  border-radius: 50%;
+  background: conic-gradient(
+    #2774d2 0deg 144deg,
+    #7958d9 144deg 234deg,
+    #36c5ca 234deg 306deg,
+    #9a70dd 306deg 360deg
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.donut-inner {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.donut-inner strong {
+  font-size: 20px;
+}
+
+
+.donut-inner span {
+  font-size: 8px;
+  color: #758387;
+}
+
+
+.distribution-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+.distribution-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 22px;
+  min-width: 145px;
+}
+
+
+.distribution-item span {
+  font-size: 8px;
+  color: #647478;
+}
+
+
+.distribution-item strong {
+  font-size: 8px;
+}
+
+
+.distribution-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+
+.distribution-dot.blue {
+  background: #2774d2;
+}
+
+
+.distribution-dot.purple {
+  background: #7958d9;
+}
+
+
+.distribution-dot.teal {
+  background: #36c5ca;
+}
+
+
+.distribution-dot.violet {
+  background: #9a70dd;
+}
+
+
+/* =========================================================
+   CONSULTATIONS
+========================================================= */
+
+.consultation-item {
+  display: grid;
+  grid-template-columns: 34px 1fr 1fr auto;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eef1f3;
+}
+
+
+.consultation-item:last-child {
+  border-bottom: none;
+}
+
+
+.consultation-avatar {
+  width: 31px;
+  height: 31px;
+  border-radius: 50%;
+  background: #edf2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+
+.consultation-item strong {
+  font-size: 9px;
+}
+
+
+.consultation-item span,
+.consultation-item small {
+  font-size: 8px;
+  color: #778589;
+}
+
+
+.doctor-message-card {
+  border-radius: 12px;
+  padding: 20px;
+  background: linear-gradient(
+    145deg,
+    #dce9ff,
+    #c9dcff
+  );
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+}
+
+
+.doctor-message-card h3 {
+  margin: 0;
+  color: #155ab3;
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+
+.doctor-message-card p {
+  font-size: 9px;
+  color: #5178a8;
+  margin-top: 12px;
+}
+
+
+.doctor-message-art {
+  font-size: 75px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+
+  .dashboard-sidebar {
+    width: 210px;
+  }
+
+  .dashboard-content {
+    padding: 24px;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .doctor-chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 800px) {
+
+  .dashboard-sidebar {
+    width: 70px;
+    padding: 18px 8px;
+  }
+
+  .dashboard-logo span,
+  .dashboard-nav-item:not(.active),
+  .dashboard-nav-item:not(.active) span,
+  .dashboard-logout {
+    font-size: 0;
+  }
+
+  .dashboard-nav-item {
+    justify-content: center;
+    padding: 13px 5px;
+  }
+
+  .dashboard-nav-item span {
+    font-size: 18px;
+  }
+
+  .dashboard-logo {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .logo-heart {
+    width: 36px;
+  }
+
+  .two-column-grid,
+  .doctor-middle-grid,
+  .patient-bottom-grid,
+  .doctor-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recommended-doctors {
+    grid-template-columns: 1fr;
+  }
+
+  .patient-hero-art {
+    right: 10px;
+    opacity: 0.45;
+  }
+
+  .stethoscope {
+    right: 80px;
+    opacity: 0.4;
+  }
+
+}
+
+
+@media (max-width: 550px) {
+
+  .dashboard-topbar {
+    padding: 0 15px;
+  }
+
+  .dashboard-content {
+    padding: 20px 14px;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-heading h1 {
+    font-size: 21px;
+  }
+
+  .patient-hero h2,
+  .doctor-hero h2 {
+    font-size: 20px;
+  }
+
+  .hero-script,
+  .doctor-script {
+    display: none;
+  }
+
+  .patient-hero-art {
+    right: -50px;
+  }
+
+  .stethoscope {
+    right: -20px;
+  }
+
+  .distribution-content {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .consultation-item {
+    grid-template-columns: 34px 1fr;
+  }
+
+  .consultation-item span,
+  .consultation-item small {
+    display: none;
+  }
+
+}

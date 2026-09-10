@@ -156,6 +156,17 @@ const Register = () => {
     }
 
 
+    /* =========================
+       CLINIC ADMIN
+    ========================= */
+
+    if (formData.role === "CLINIC_ADMIN") {
+
+      dataToSend.role =
+        "CLINIC_ADMIN";
+    }
+
+
     dispatch(
       register(dataToSend)
     );
@@ -172,11 +183,11 @@ const Register = () => {
         ========================= */}
 
         <h2>
-          Create Account
+          Register
         </h2>
 
         <p className="auth-subtitle">
-          Register for your CareLink account.
+          Create your CareLink account.
         </p>
 
 
@@ -456,8 +467,10 @@ const Register = () => {
             <div className="admin-registration-note">
 
               <p>
-                You are registering as a
-                <strong> Clinic Administrator</strong>.
+                You are registering as a{" "}
+                <strong>
+                  Clinic Administrator
+                </strong>.
               </p>
 
               <small>
@@ -471,7 +484,7 @@ const Register = () => {
 
 
           {/* =========================
-              SUBMIT
+              REGISTER BUTTON
           ========================= */}
 
           <button
@@ -482,7 +495,7 @@ const Register = () => {
 
             {isLoading
               ? "Registering..."
-              : "Create Account"}
+              : "Register"}
 
           </button>
 

@@ -8,7 +8,9 @@ import DomainChart from "./DomainChart";
 import RecentActivity from "./RecentActivity";
 import StatCards from "./StatCards";
 
+
 const Dashboard = () => {
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -16,22 +18,55 @@ const Dashboard = () => {
     (state) => state.auth || {}
   );
 
-  const role = user?.role || "PATIENT";
 
-  const isDoctor = role === "DOCTOR";
+  /* =====================================================
+     GET LOGGED-IN USER
+  ===================================================== */
+
+  console.log("CARELINK DASHBOARD USER:", user);
+
+
+  /*
+   * Different backends may return the role in slightly
+   * different formats.
+   */
+
+  const rawRole =
+    user?.role ||
+    user?.userRole ||
+    user?.roles?.[0] ||
+    user?.user?.role ||
+    user?.data?.role ||
+    "";
+
+
+  const role = String(rawRole)
+    .trim()
+    .toUpperCase();
+
+
+  console.log("CARELINK USER ROLE:", role);
+
 
   const userName =
     user?.fullName ||
     user?.name ||
+    user?.user?.fullName ||
+    user?.user?.name ||
     user?.email?.split("@")[0] ||
-    (isDoctor ? "Doctor" : "Patient");
+    "User";
+
 
   const firstLetter =
     userName.charAt(0).toUpperCase();
 
+
   const handleLogout = () => {
+
     dispatch(logout());
+
     localStorage.removeItem("user");
+
     navigate("/");
   };
 
@@ -67,6 +102,7 @@ const Dashboard = () => {
     },
   ];
 
+
   const patientChart = [
     { label: "Mon", value: 2 },
     { label: "Tue", value: 4 },
@@ -75,6 +111,7 @@ const Dashboard = () => {
     { label: "Fri", value: 3 },
     { label: "Sat", value: 4 },
   ];
+
 
   const patientActivities = [
     {
@@ -131,6 +168,7 @@ const Dashboard = () => {
     },
   ];
 
+
   const doctorChart = [
     { label: "Mon", value: 5 },
     { label: "Tue", value: 7 },
@@ -139,6 +177,7 @@ const Dashboard = () => {
     { label: "Fri", value: 6 },
     { label: "Sat", value: 4 },
   ];
+
 
   const doctorActivities = [
     {
@@ -165,25 +204,28 @@ const Dashboard = () => {
 
 
   /* =====================================================
-     PATIENT DASHBOARD
+     DOCTOR DASHBOARD
   ===================================================== */
 
-  if (!isDoctor) {
+  if (role === "DOCTOR") {
+
     return (
-      <div className="carelink-dashboard patient-dashboard">
+      <div className="carelink-dashboard doctor-dashboard">
 
         {/* ================= SIDEBAR ================= */}
 
         <aside className="dashboard-sidebar">
 
           <div className="sidebar-logo">
-            <div className="logo-heart">
+
+            <div className="logo-heart doctor-logo">
               ♥
             </div>
 
             <span>
               CareLink
             </span>
+
           </div>
 
 
@@ -191,7 +233,7 @@ const Dashboard = () => {
 
             <Link
               to="/dashboard"
-              className="sidebar-link active"
+              className="sidebar-link active doctor-active"
             >
               <span className="sidebar-icon">
                 ▦
@@ -202,53 +244,70 @@ const Dashboard = () => {
 
 
             <Link
-              to="/doctor-list"
-              className="sidebar-link"
-            >
-              <span className="sidebar-icon">
-                ♙
-              </span>
-
-              Find a Doctor
-            </Link>
-
-
-            <Link
-              to="/appointments"
+              to="/schedule"
               className="sidebar-link"
             >
               <span className="sidebar-icon">
                 ▣
               </span>
 
-              My Appointments
+              My Schedule
+            </Link>
+
+
+            <Link
+              to="/consultations"
+              className="sidebar-link"
+            >
+              <span className="sidebar-icon">
+                ♧
+              </span>
+
+              Consultations
             </Link>
 
 
             <div className="sidebar-link">
+
               <span className="sidebar-icon">
-                ♡
+                👥
               </span>
 
-              Health Profile
+              My Patients
+
             </div>
 
 
             <div className="sidebar-link">
+
+              <span className="sidebar-icon">
+                ♙
+              </span>
+
+              Profile
+
+            </div>
+
+
+            <div className="sidebar-link">
+
               <span className="sidebar-icon">
                 ▢
               </span>
 
               Messages
+
             </div>
 
 
             <div className="sidebar-link">
+
               <span className="sidebar-icon">
                 ⚙
               </span>
 
               Settings
+
             </div>
 
           </nav>
@@ -258,11 +317,13 @@ const Dashboard = () => {
             className="sidebar-logout"
             onClick={handleLogout}
           >
+
             <span>
               ⇥
             </span>
 
             Logout
+
           </button>
 
         </aside>
@@ -272,19 +333,19 @@ const Dashboard = () => {
 
         <main className="dashboard-main">
 
-          {/* TOP BAR */}
-
           <header className="dashboard-topbar">
 
             <div className="dashboard-search">
+
               <span>
                 ⌕
               </span>
 
               <input
                 type="text"
-                placeholder="Search doctors, specialties..."
+                placeholder="Search patients, appointments..."
               />
+
             </div>
 
 
@@ -292,30 +353,31 @@ const Dashboard = () => {
 
               <button className="notification-button">
                 ♧
+
                 <span className="notification-dot"></span>
               </button>
 
 
               <div className="topbar-profile">
 
-                <div className="topbar-avatar patient-avatar">
+                <div className="topbar-avatar doctor-top-avatar">
                   {firstLetter}
                 </div>
 
                 <div className="topbar-user">
 
                   <strong>
-                    {userName}
+                    Dr. {userName}
                   </strong>
 
                   <span>
-                    Patient
+                    Doctor
                   </span>
 
                 </div>
 
                 <span className="profile-arrow">
-                 ⌄
+                  ⌄
                 </span>
 
               </div>
@@ -325,39 +387,51 @@ const Dashboard = () => {
           </header>
 
 
-          {/* CONTENT */}
-
           <div className="dashboard-content">
 
             {/* WELCOME */}
 
-            <section className="welcome-banner">
+            <section className="welcome-banner doctor-welcome">
 
               <div className="welcome-content">
 
-                <span className="welcome-label">
-                  PATIENT DASHBOARD
+                <span className="welcome-label doctor-label">
+                  DOCTOR DASHBOARD
                 </span>
 
                 <h1>
-                  Welcome, {userName} 👋
+                  Welcome, Dr. {userName} 👋
                 </h1>
 
                 <p>
-                  Manage your appointments and healthcare
-                  activities from one place.
+                  Manage your schedule, consultations
+                  and patients from one place.
                 </p>
 
               </div>
 
 
-              <div className="patient-illustration">
-                <div className="person-head">
-                  <div className="person-hair"></div>
-                  <div className="person-face"></div>
+              <div className="doctor-illustration">
+
+                <div className="doctor-head">
+
+                  <div className="doctor-hair"></div>
+
+                  <div className="doctor-face"></div>
+
                 </div>
 
-                <div className="person-body"></div>
+
+                <div className="doctor-body">
+
+                  <div className="doctor-coat"></div>
+
+                  <div className="doctor-stethoscope">
+                    ♡
+                  </div>
+
+                </div>
+
               </div>
 
             </section>
@@ -365,27 +439,27 @@ const Dashboard = () => {
 
             {/* STATS */}
 
-            <section className="dashboard-stat-wrapper">
+            <section className="dashboard-stat-wrapper doctor-stat-wrapper">
 
               <StatCards
-                stats={patientStats}
+                stats={doctorStats}
               />
 
             </section>
 
 
-            {/* QUICK ACTIONS */}
+            {/* SERVICES */}
 
             <section className="quick-actions-section">
 
               <div className="dashboard-section-heading">
 
-                <span>
-                  QUICK ACTIONS
+                <span className="doctor-heading">
+                  DOCTOR SERVICES
                 </span>
 
                 <h2>
-                  Manage Your Healthcare
+                  Manage Your Practice
                 </h2>
 
               </div>
@@ -394,57 +468,28 @@ const Dashboard = () => {
               <div className="action-card-grid">
 
                 <Link
-                  to="/doctor-list"
-                  className="action-card"
+                  to="/schedule"
+                  className="action-card doctor-card"
                 >
 
-                  <div className="action-card-icon blue">
-                    ♧
-                  </div>
-
-                  <div className="action-card-content">
-
-                    <h3>
-                      Find a Doctor
-                    </h3>
-
-                    <p>
-                      Browse doctors and find the
-                      right specialist for you.
-                    </p>
-
-                  </div>
-
-                  <span className="action-card-arrow">
-                    ›
-                  </span>
-
-                </Link>
-
-
-                <Link
-                  to="/appointments"
-                  className="action-card"
-                >
-
-                  <div className="action-card-icon blue">
+                  <div className="action-card-icon green">
                     ▣
                   </div>
 
                   <div className="action-card-content">
 
                     <h3>
-                      My Appointments
+                      My Schedule
                     </h3>
 
                     <p>
                       View and manage your
-                      appointments.
+                      available slots.
                     </p>
 
                   </div>
 
-                  <span className="action-card-arrow">
+                  <span className="action-card-arrow green-arrow">
                     ›
                   </span>
 
@@ -452,54 +497,80 @@ const Dashboard = () => {
 
 
                 <Link
-                  to="/doctor-list"
-                  className="action-card"
+                  to="/consultations"
+                  className="action-card doctor-card"
                 >
 
-                  <div className="action-card-icon blue">
-                    +
+                  <div className="action-card-icon green">
+                    ♧
                   </div>
 
                   <div className="action-card-content">
 
                     <h3>
-                      Book Appointment
+                      Consultations
                     </h3>
 
                     <p>
-                      Schedule a consultation
-                      with a doctor.
+                      View your patient consultations
+                      and appointment details.
                     </p>
 
                   </div>
 
-                  <span className="action-card-arrow">
+                  <span className="action-card-arrow green-arrow">
                     ›
                   </span>
 
                 </Link>
 
 
-                <div className="action-card">
+                <div className="action-card doctor-card">
 
-                  <div className="action-card-icon pink">
-                    ♥
+                  <div className="action-card-icon green">
+                    👥
                   </div>
 
                   <div className="action-card-content">
 
                     <h3>
-                      Health Profile
+                      My Patients
                     </h3>
 
                     <p>
-                      View your personal healthcare
-                      information.
+                      View patients associated with
+                      your consultations.
                     </p>
 
                   </div>
 
-                  <span className="action-card-arrow">
+                  <span className="action-card-arrow green-arrow">
+                    ›
+                  </span>
+
+                </div>
+
+
+                <div className="action-card doctor-card">
+
+                  <div className="action-card-icon green">
+                    ♙
+                  </div>
+
+                  <div className="action-card-content">
+
+                    <h3>
+                      Doctor Profile
+                    </h3>
+
+                    <p>
+                      View your specialization,
+                      experience and profile.
+                    </p>
+
+                  </div>
+
+                  <span className="action-card-arrow green-arrow">
                     ›
                   </span>
 
@@ -510,17 +581,17 @@ const Dashboard = () => {
             </section>
 
 
-            {/* BOTTOM */}
+            {/* CHART + ACTIVITY */}
 
             <section className="dashboard-bottom">
 
               <DomainChart
-                data={patientChart}
-                title="Appointment Activity"
+                data={doctorChart}
+                title="Weekly Consultation Activity"
               />
 
               <RecentActivity
-                activities={patientActivities}
+                activities={doctorActivities}
               />
 
             </section>
@@ -535,24 +606,26 @@ const Dashboard = () => {
 
 
   /* =====================================================
-     DOCTOR DASHBOARD
+     PATIENT DASHBOARD
   ===================================================== */
 
   return (
-    <div className="carelink-dashboard doctor-dashboard">
+    <div className="carelink-dashboard patient-dashboard">
 
       {/* ================= SIDEBAR ================= */}
 
       <aside className="dashboard-sidebar">
 
         <div className="sidebar-logo">
-          <div className="logo-heart doctor-logo">
+
+          <div className="logo-heart">
             ♥
           </div>
 
           <span>
             CareLink
           </span>
+
         </div>
 
 
@@ -560,58 +633,53 @@ const Dashboard = () => {
 
           <Link
             to="/dashboard"
-            className="sidebar-link active doctor-active"
+            className="sidebar-link active"
           >
+
             <span className="sidebar-icon">
               ▦
             </span>
 
             Dashboard
+
           </Link>
 
 
           <Link
-            to="/schedule"
+            to="/doctor-list"
             className="sidebar-link"
           >
-            <span className="sidebar-icon">
-              ▣
-            </span>
-
-            My Schedule
-          </Link>
-
-
-          <Link
-            to="/consultations"
-            className="sidebar-link"
-          >
-            <span className="sidebar-icon">
-              ♧
-            </span>
-
-            Consultations
-          </Link>
-
-
-          <div className="sidebar-link">
-
-            <span className="sidebar-icon">
-              👥
-            </span>
-
-            My Patients
-
-          </div>
-
-
-          <div className="sidebar-link">
 
             <span className="sidebar-icon">
               ♙
             </span>
 
-            Profile
+            Find a Doctor
+
+          </Link>
+
+
+          <Link
+            to="/appointments"
+            className="sidebar-link"
+          >
+
+            <span className="sidebar-icon">
+              ▣
+            </span>
+
+            My Appointments
+
+          </Link>
+
+
+          <div className="sidebar-link">
+
+            <span className="sidebar-icon">
+              ♡
+            </span>
+
+            Health Profile
 
           </div>
 
@@ -660,8 +728,6 @@ const Dashboard = () => {
 
       <main className="dashboard-main">
 
-        {/* TOPBAR */}
-
         <header className="dashboard-topbar">
 
           <div className="dashboard-search">
@@ -672,7 +738,7 @@ const Dashboard = () => {
 
             <input
               type="text"
-              placeholder="Search patients, appointments..."
+              placeholder="Search doctors, specialties..."
             />
 
           </div>
@@ -681,31 +747,34 @@ const Dashboard = () => {
           <div className="topbar-right">
 
             <button className="notification-button">
+
               ♧
+
               <span className="notification-dot"></span>
+
             </button>
 
 
             <div className="topbar-profile">
 
-              <div className="topbar-avatar doctor-top-avatar">
+              <div className="topbar-avatar patient-avatar">
                 {firstLetter}
               </div>
 
               <div className="topbar-user">
 
                 <strong>
-                  Dr. {userName}
+                  {userName}
                 </strong>
 
                 <span>
-                  Doctor
+                  Patient
                 </span>
 
               </div>
 
               <span className="profile-arrow">
-               ⌄
+                ⌄
               </span>
 
             </div>
@@ -715,45 +784,41 @@ const Dashboard = () => {
         </header>
 
 
-        {/* CONTENT */}
-
         <div className="dashboard-content">
 
           {/* WELCOME */}
 
-          <section className="welcome-banner doctor-welcome">
+          <section className="welcome-banner">
 
             <div className="welcome-content">
 
-              <span className="welcome-label doctor-label">
-                DOCTOR DASHBOARD
+              <span className="welcome-label">
+                PATIENT DASHBOARD
               </span>
 
               <h1>
-                Welcome, Dr. {userName} 👋
+                Welcome, {userName} 👋
               </h1>
 
               <p>
-                Manage your schedule, consultations
-                and patients from one place.
+                Manage your appointments and healthcare
+                activities from one place.
               </p>
 
             </div>
 
 
-            <div className="doctor-illustration">
+            <div className="patient-illustration">
 
-              <div className="doctor-head">
-                <div className="doctor-hair"></div>
-                <div className="doctor-face"></div>
+              <div className="person-head">
+
+                <div className="person-hair"></div>
+
+                <div className="person-face"></div>
+
               </div>
 
-              <div className="doctor-body">
-                <div className="doctor-coat"></div>
-                <div className="doctor-stethoscope">
-                  ♡
-                </div>
-              </div>
+              <div className="person-body"></div>
 
             </div>
 
@@ -762,27 +827,27 @@ const Dashboard = () => {
 
           {/* STATS */}
 
-          <section className="dashboard-stat-wrapper doctor-stat-wrapper">
+          <section className="dashboard-stat-wrapper">
 
             <StatCards
-              stats={doctorStats}
+              stats={patientStats}
             />
 
           </section>
 
 
-          {/* SERVICES */}
+          {/* ACTIONS */}
 
           <section className="quick-actions-section">
 
             <div className="dashboard-section-heading">
 
-              <span className="doctor-heading">
-                DOCTOR SERVICES
+              <span>
+                QUICK ACTIONS
               </span>
 
               <h2>
-                Manage Your Practice
+                Manage Your Healthcare
               </h2>
 
             </div>
@@ -791,28 +856,28 @@ const Dashboard = () => {
             <div className="action-card-grid">
 
               <Link
-                to="/schedule"
-                className="action-card doctor-card"
+                to="/doctor-list"
+                className="action-card"
               >
 
-                <div className="action-card-icon green">
-                  ▣
+                <div className="action-card-icon blue">
+                  ♧
                 </div>
 
                 <div className="action-card-content">
 
                   <h3>
-                    My Schedule
+                    Find a Doctor
                   </h3>
 
                   <p>
-                    View and manage your
-                    available slots.
+                    Browse doctors and find the
+                    right specialist for you.
                   </p>
 
                 </div>
 
-                <span className="action-card-arrow green-arrow">
+                <span className="action-card-arrow">
                   ›
                 </span>
 
@@ -820,80 +885,83 @@ const Dashboard = () => {
 
 
               <Link
-                to="/consultations"
-                className="action-card doctor-card"
+                to="/appointments"
+                className="action-card"
               >
 
-                <div className="action-card-icon green">
-                  ♧
+                <div className="action-card-icon blue">
+                  ▣
                 </div>
 
                 <div className="action-card-content">
 
                   <h3>
-                    Consultations
+                    My Appointments
                   </h3>
 
                   <p>
-                    View your patient consultations
-                    and appointment details.
+                    View and manage your
+                    appointments.
                   </p>
 
                 </div>
 
-                <span className="action-card-arrow green-arrow">
+                <span className="action-card-arrow">
                   ›
                 </span>
 
               </Link>
 
 
-              <div className="action-card doctor-card">
+              <Link
+                to="/doctor-list"
+                className="action-card"
+              >
 
-                <div className="action-card-icon green">
-                  👥
+                <div className="action-card-icon blue">
+                  +
                 </div>
 
                 <div className="action-card-content">
 
                   <h3>
-                    My Patients
+                    Book Appointment
                   </h3>
 
                   <p>
-                    View patients associated with
-                    your consultations.
+                    Schedule a consultation
+                    with a doctor.
                   </p>
 
                 </div>
 
-                <span className="action-card-arrow green-arrow">
+                <span className="action-card-arrow">
                   ›
                 </span>
 
-              </div>
+              </Link>
 
 
-              <div className="action-card doctor-card">
+              <div className="action-card">
 
-                <div className="action-card-icon green">
-                  ♙
+                <div className="action-card-icon pink">
+                  ♥
                 </div>
 
                 <div className="action-card-content">
 
                   <h3>
-                    Doctor Profile
+                    Health Profile
                   </h3>
 
                   <p>
-                    View your specialization,
-                    experience and profile.
+                    View your personal healthcare
+                    information.
                   </p>
 
                 </div>
 
-                <span className="action-card-arrow green-arrow">
+                <span className="action-card-arrow">
                   ›
                 </span>
 
@@ -904,17 +972,17 @@ const Dashboard = () => {
           </section>
 
 
-          {/* BOTTOM */}
+          {/* CHART + ACTIVITY */}
 
           <section className="dashboard-bottom">
 
             <DomainChart
-              data={doctorChart}
-              title="Weekly Consultation Activity"
+              data={patientChart}
+              title="Appointment Activity"
             />
 
             <RecentActivity
-              activities={doctorActivities}
+              activities={patientActivities}
             />
 
           </section>
@@ -926,5 +994,6 @@ const Dashboard = () => {
     </div>
   );
 };
+
 
 export default Dashboard;

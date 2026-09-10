@@ -8,7 +8,6 @@ import {
 } from "../store/slices/authSlice";
 
 const Login = () => {
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -25,6 +24,8 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [role, setRole] = useState("PATIENT");
+
 
   /* =====================================================
      LOGIN SUCCESS / ERROR
@@ -39,13 +40,13 @@ const Login = () => {
       );
 
       dispatch(reset());
+
+      return;
     }
 
 
-    if (isSuccess || user) {
+    if (isSuccess && user) {
 
-      // After successful login,
-      // open the role-based dashboard.
       navigate("/dashboard");
 
       dispatch(reset());
@@ -73,6 +74,7 @@ const Login = () => {
       login({
         email,
         password,
+        role,
       })
     );
   };
@@ -83,10 +85,6 @@ const Login = () => {
 
       <div className="auth-card">
 
-        {/* =========================
-            HEADER
-        ========================= */}
-
         <h2>
           Login
         </h2>
@@ -95,10 +93,6 @@ const Login = () => {
           Sign in to access your CareLink account.
         </p>
 
-
-        {/* =========================
-            FORM
-        ========================= */}
 
         <form onSubmit={handleSubmit}>
 
@@ -148,6 +142,41 @@ const Login = () => {
           </div>
 
 
+          {/* ROLE */}
+
+          <div className="form-group">
+
+            <label htmlFor="loginRole">
+              Login As *
+            </label>
+
+            <select
+              id="loginRole"
+              name="loginRole"
+              value={role}
+              onChange={(event) =>
+                setRole(event.target.value)
+              }
+              required
+            >
+
+              <option value="PATIENT">
+                Patient
+              </option>
+
+              <option value="DOCTOR">
+                Doctor
+              </option>
+
+              <option value="CLINIC_ADMIN">
+                Clinic Admin
+              </option>
+
+            </select>
+
+          </div>
+
+
           {/* LOGIN BUTTON */}
 
           <button
@@ -164,10 +193,6 @@ const Login = () => {
 
         </form>
 
-
-        {/* =========================
-            REGISTER LINK
-        ========================= */}
 
         <div className="auth-footer">
 

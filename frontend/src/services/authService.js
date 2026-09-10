@@ -1,23 +1,34 @@
-import api from './api';
+import api from "./api";
+
 
 const login = async (loginData) => {
-    const response = await api.post('/auth/login', loginData);
 
-    if (response.data) {
-        localStorage.setItem('user', JSON.stringify(response.data));
-    }
+  const response = await api.post(
+    "/auth/login",
+    loginData
+  );
 
-    return response.data;
+  console.log(
+    "CARELINK BACKEND LOGIN RESPONSE:",
+    response.data
+  );
+
+  return response.data;
 };
+
 
 const register = async (registerData) => {
-    const response = await api.post('/auth/register', registerData);
-    return response.data;
+
+  const response = await api.post(
+    "/auth/register",
+    registerData
+  );
+
+  return response.data;
 };
 
-const authService = {
-    login,
-    register,
-};
 
-export default authService;
+export default {
+  login,
+  register,
+};

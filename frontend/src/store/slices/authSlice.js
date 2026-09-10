@@ -11,9 +11,7 @@ import authService from "../../services/authService";
 ========================================================= */
 
 const getStoredUser = () => {
-
   try {
-
     const storedUser =
       localStorage.getItem("user");
 
@@ -24,9 +22,7 @@ const getStoredUser = () => {
     return JSON.parse(storedUser);
 
   } catch (error) {
-
     localStorage.removeItem("user");
-
     return null;
   }
 };
@@ -37,25 +33,20 @@ const getStoredUser = () => {
 ========================================================= */
 
 const normalizeRole = (role) => {
-
   if (!role) {
     return "";
   }
 
-  let value =
-    String(role)
-      .trim()
-      .toUpperCase();
+  let normalizedRole = String(role)
+    .trim()
+    .toUpperCase();
 
-
-  if (value.startsWith("ROLE_")) {
-
-    value =
-      value.substring(5);
+  if (normalizedRole.startsWith("ROLE_")) {
+    normalizedRole =
+      normalizedRole.substring(5);
   }
 
-
-  return value;
+  return normalizedRole;
 };
 
 
@@ -64,7 +55,6 @@ const normalizeRole = (role) => {
 ========================================================= */
 
 export const login = createAsyncThunk(
-
   "auth/login",
 
   async (
@@ -74,24 +64,15 @@ export const login = createAsyncThunk(
 
     try {
 
-      /*
-       * Clear old session.
-       */
-
+      // Remove previous session
       localStorage.removeItem("user");
 
 
-      /*
-       * Login.
-       */
-
+      // Login using email + password
       const response =
         await authService.login({
-
           email: loginData.email,
-
           password: loginData.password,
-
         });
 
 
@@ -102,18 +83,55 @@ export const login = createAsyncThunk(
 
 
       /*
-       * Find returned user.
+       * Support different backend response formats.
        */
 
       const backendUser =
         response?.user ||
         response?.data?.user ||
-        response ||
-        {};
+        response;
 
 
       /*
-       * Get token.
+       * Get role from backend.
+       */
+
+      const backendRole =
+        backendUser?.role ||
+        backendUser?.userRole ||
+        backendUser?.roleName ||
+        backendUser?.roles?.[0] ||
+        response?.role ||
+        response?.userRole ||
+        response?.roleName ||
+        response?.roles?.[0] ||
+        "";
+
+
+      const role =
+        normalizeRole(backendRole);
+
+
+      console.log(
+        "CARELINK BACKEND ROLE:",
+        role
+      );
+
+
+      /*
+       * Do NOT default an unknown role to PATIENT.
+       */
+
+      if (!role) {
+
+        return rejectWithValue(
+          "Login successful, but the server did not return the user's role."
+        );
+      }
+
+
+      /*
+       * Token
        */
 
       const token =
@@ -126,7 +144,7 @@ export const login = createAsyncThunk(
 
 
       /*
-       * Get name.
+       * Name
        */
 
       const fullName =
@@ -134,11 +152,11 @@ export const login = createAsyncThunk(
         backendUser?.name ||
         response?.fullName ||
         response?.name ||
-        loginData.email.split("@")[0];
+        "";
 
 
       /*
-       * Get email.
+       * Email
        */
 
       const email =
@@ -148,83 +166,35 @@ export const login = createAsyncThunk(
 
 
       /*
-       * IMPORTANT:
-       *
-       * For the frontend dashboard we use the
-       * role selected on the Login page.
-       *
-       * This is why selecting Doctor will open
-       * the Doctor Dashboard.
-       */
-
-      const selectedRole =
-        normalizeRole(
-          loginData.role
-        );
-
-
-      /*
-       * Safety fallback only if no role was
-       * selected.
-       */
-
-      const backendRole =
-        normalizeRole(
-          backendUser?.role ||
-          response?.role ||
-          ""
-        );
-
-
-      const finalRole =
-        selectedRole ||
-        backendRole ||
-        "PATIENT";
-
-
-      /*
-       * Create frontend user.
+       * Final authenticated user
        */
 
       const user = {
-
         ...backendUser,
-
-        id:
-          backendUser?.id ||
-          response?.id,
 
         fullName,
 
         email,
 
-        role: finalRole,
+        role,
 
         token,
-
       };
 
 
       console.log(
-        "CARELINK LOGIN USER:",
+        "CARELINK FINAL USER:",
         user
       );
 
-
-      console.log(
-        "CARELINK SELECTED ROLE:",
-        selectedRole
-      );
-
-
       console.log(
         "CARELINK FINAL ROLE:",
-        finalRole
+        user.role
       );
 
 
       /*
-       * Store user.
+       * Save user
        */
 
       localStorage.setItem(
@@ -263,7 +233,6 @@ export const login = createAsyncThunk(
 ========================================================= */
 
 export const register = createAsyncThunk(
-
   "auth/register",
 
   async (
@@ -302,7 +271,6 @@ export const register = createAsyncThunk(
 ========================================================= */
 
 const initialState = {
-
   user: getStoredUser(),
 
   isLoading: false,
@@ -312,7 +280,6 @@ const initialState = {
   isSuccess: false,
 
   message: "",
-
 };
 
 
@@ -326,17 +293,12 @@ const authSlice = createSlice({
 
   initialState,
 
-
   reducers: {
 
     reset: (state) => {
-
       state.isLoading = false;
-
       state.isError = false;
-
       state.isSuccess = false;
-
       state.message = "";
     },
 
@@ -346,23 +308,18 @@ const authSlice = createSlice({
       state.user = null;
 
       state.isLoading = false;
-
       state.isError = false;
-
       state.isSuccess = false;
-
       state.message = "";
 
       localStorage.removeItem("user");
     },
-
   },
 
 
   extraReducers: (builder) => {
 
     builder
-
 
       /* LOGIN PENDING */
 
@@ -371,11 +328,8 @@ const authSlice = createSlice({
         (state) => {
 
           state.isLoading = true;
-
           state.isError = false;
-
           state.isSuccess = false;
-
           state.message = "";
 
           state.user = null;
@@ -390,9 +344,7 @@ const authSlice = createSlice({
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = false;
-
           state.isSuccess = true;
 
           state.user =
@@ -410,9 +362,7 @@ const authSlice = createSlice({
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = true;
-
           state.isSuccess = false;
 
           state.user = null;
@@ -431,11 +381,8 @@ const authSlice = createSlice({
         (state) => {
 
           state.isLoading = true;
-
           state.isError = false;
-
           state.isSuccess = false;
-
           state.message = "";
         }
       )
@@ -448,9 +395,7 @@ const authSlice = createSlice({
         (state) => {
 
           state.isLoading = false;
-
           state.isError = false;
-
           state.isSuccess = true;
 
           state.message = "";
@@ -465,9 +410,7 @@ const authSlice = createSlice({
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = true;
-
           state.isSuccess = false;
 
           state.message =
@@ -475,9 +418,7 @@ const authSlice = createSlice({
             "Registration failed";
         }
       );
-
   },
-
 });
 
 

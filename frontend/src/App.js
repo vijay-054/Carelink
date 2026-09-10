@@ -1,4 +1,5 @@
 import React from "react";
+
 import {
   BrowserRouter,
   Routes,
@@ -11,6 +12,8 @@ import Navbar from "./components/layout/Navbar";
 import Login from "./components/Login";
 import Register from "./components/Register";
 
+import Dashboard from "./components/dashboard/Dashboard";
+
 import AppointmentList from "./components/appointments/AppointmentList";
 import AppointmentForm from "./components/appointments/AppointmentForm";
 
@@ -22,295 +25,265 @@ import ManageDoctors from "./components/admin/ManageDoctors";
 import ManagePatients from "./components/admin/ManagePatients";
 
 
-/* =========================================================
-   HOME PAGE
-========================================================= */
+const Home = () => (
 
-const Home = () => {
-  return (
-    <div className="home-page">
+  <div className="home-page">
 
-      {/* ================= HERO ================= */}
+    <section className="hero-section">
 
-      <section className="hero-section">
+      <div className="hero-content">
 
-        <div className="hero-content">
+        <div className="hero-text">
 
-          <div className="hero-text">
+          <span className="hero-badge">
+            CARELINK HEALTHCARE
+          </span>
 
-            <span className="hero-badge">
-              CARELINK HEALTHCARE
-            </span>
+          <h1>
+            Hospital Appointment
+            <br />
+            Management System
+          </h1>
 
-            <h1>
-              Hospital Appointment
-              <br />
-              Management System
-            </h1>
+          <p>
+            CareLink helps you easily book,
+            manage, and track your hospital
+            appointments in one place.
+          </p>
 
-            <p>
-              CareLink helps you easily book, manage,
-              and track your hospital appointments
-              in one place.
-            </p>
+          <div className="hero-actions">
 
-            <div className="hero-actions">
+            <Link
+              to="/login"
+              className="primary-btn"
+            >
+              Get Started
+            </Link>
 
-              <Link
-                to="/login"
-                className="primary-btn"
-              >
-                Get Started
-              </Link>
-
-              <Link
-                to="/register"
-                className="secondary-btn"
-              >
-                Create Account
-              </Link>
-
-            </div>
+            <Link
+              to="/register"
+              className="secondary-btn"
+            >
+              Create Account
+            </Link>
 
           </div>
 
+        </div>
 
-          {/* ================= HOSPITAL ILLUSTRATION ================= */}
 
-          <div className="hero-illustration">
+        <div className="hero-illustration">
 
-            <div className="hospital-card">
+          <div className="hospital-card">
 
-              <div className="hospital-cross">
-                +
-              </div>
+            <div className="hospital-cross">
+              +
+            </div>
 
-              <div className="hospital-building">
+            <div className="hospital-building">
 
-                <div className="hospital-roof"></div>
+              <div className="hospital-roof"></div>
 
-                <div className="hospital-body">
+              <div className="hospital-body">
 
-                  <h3>HOSPITAL</h3>
+                <h3>
+                  HOSPITAL
+                </h3>
 
-                  <div className="hospital-windows">
+                <div className="hospital-windows">
 
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-
-                  </div>
-
-                  <div className="hospital-door"></div>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
 
                 </div>
 
+                <div className="hospital-door"></div>
+
               </div>
 
-              <div className="doctor-illustration">
-                👩‍⚕️
-              </div>
+            </div>
 
+            <div className="doctor-illustration">
+              👩‍⚕️
             </div>
 
           </div>
 
         </div>
 
-      </section>
+      </div>
+
+    </section>
 
 
-      {/* ================= FEATURES ================= */}
+    <section className="feature-section">
 
-      <section className="feature-section">
+      <div className="section-heading">
 
-        <div className="section-heading">
+        <span>
+          OUR SERVICES
+        </span>
 
-          <span>
-            OUR SERVICES
-          </span>
+        <h2>
+          Everything You Need
+        </h2>
 
-          <h2>
-            Everything You Need
-          </h2>
+        <p>
+          Simple and convenient healthcare
+          appointment management.
+        </p>
+
+      </div>
+
+
+      <div className="feature-grid">
+
+        <div className="feature-card">
+          <div className="feature-icon">
+            📅
+          </div>
+
+          <h3>
+            Easy Appointments
+          </h3>
 
           <p>
-            Simple and convenient healthcare appointment management.
+            Book and manage your
+            appointments easily.
           </p>
-
         </div>
 
 
-        <div className="feature-grid">
-
-          {/* Appointment */}
-
-          <div className="feature-card">
-
-            <div className="feature-icon">
-              📅
-            </div>
-
-            <h3>
-              Easy Appointments
-            </h3>
-
-            <p>
-              Book and manage your appointments easily.
-            </p>
-
+        <div className="feature-card">
+          <div className="feature-icon">
+            👨‍⚕️
           </div>
 
+          <h3>
+            Find Doctors
+          </h3>
 
-          {/* Doctors */}
-
-          <div className="feature-card">
-
-            <div className="feature-icon">
-              👨‍⚕️
-            </div>
-
-            <h3>
-              Find Doctors
-            </h3>
-
-            <p>
-              Browse doctors and select the right specialist.
-            </p>
-
-          </div>
-
-
-          {/* Schedule */}
-
-          <div className="feature-card">
-
-            <div className="feature-icon">
-              ⏰
-            </div>
-
-            <h3>
-              Schedule Management
-            </h3>
-
-            <p>
-              View available schedules and time slots.
-            </p>
-
-          </div>
-
-
-          {/* Security */}
-
-          <div className="feature-card">
-
-            <div className="feature-icon">
-              🔒
-            </div>
-
-            <h3>
-              Secure Access
-            </h3>
-
-            <p>
-              Role-based access for patients, doctors and admins.
-            </p>
-
-          </div>
-
+          <p>
+            Browse doctors and select
+            the right specialist.
+          </p>
         </div>
 
-      </section>
 
-    </div>
-  );
-};
+        <div className="feature-card">
+          <div className="feature-icon">
+            ⏰
+          </div>
 
+          <h3>
+            Schedule Management
+          </h3>
 
-/* =========================================================
-   APPLICATION ROUTES
-========================================================= */
-
-const App = () => {
-  return (
-    <BrowserRouter>
-
-      <Navbar />
-
-      <main>
-
-        <Routes>
-
-          {/* ================= PUBLIC ================= */}
-
-          <Route
-            path="/"
-            element={<Home />}
-          />
-
-          <Route
-            path="/login"
-            element={<Login />}
-          />
-
-          <Route
-            path="/register"
-            element={<Register />}
-          />
+          <p>
+            View available schedules
+            and time slots.
+          </p>
+        </div>
 
 
-          {/* ================= PATIENT ================= */}
+        <div className="feature-card">
+          <div className="feature-icon">
+            🔒
+          </div>
 
-          <Route
-            path="/doctor-list"
-            element={<DoctorList />}
-          />
+          <h3>
+            Secure Access
+          </h3>
 
-          <Route
-            path="/appointments"
-            element={<AppointmentList />}
-          />
+          <p>
+            Role-based access for patients,
+            doctors and admins.
+          </p>
+        </div>
 
-          <Route
-            path="/book-appointment"
-            element={<AppointmentForm />}
-          />
+      </div>
 
+    </section>
 
-          {/* ================= DOCTOR ================= */}
-
-          <Route
-            path="/schedule"
-            element={<DoctorSchedule />}
-          />
-
-          <Route
-            path="/consultations"
-            element={<DoctorConsultations />}
-          />
+  </div>
+);
 
 
-          {/* ================= CLINIC ADMIN ================= */}
+const App = () => (
 
-          <Route
-            path="/doctors"
-            element={<ManageDoctors />}
-          />
+  <BrowserRouter>
 
-          <Route
-            path="/patients"
-            element={<ManagePatients />}
-          />
+    <Navbar />
 
-        </Routes>
+    <main>
 
-      </main>
+      <Routes>
 
-    </BrowserRouter>
-  );
-};
+        <Route
+          path="/"
+          element={<Home />}
+        />
+
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/appointments"
+          element={<AppointmentList />}
+        />
+
+        <Route
+          path="/book-appointment"
+          element={<AppointmentForm />}
+        />
+
+        <Route
+          path="/doctor-list"
+          element={<DoctorList />}
+        />
+
+        <Route
+          path="/schedule"
+          element={<DoctorSchedule />}
+        />
+
+        <Route
+          path="/consultations"
+          element={<DoctorConsultations />}
+        />
+
+        <Route
+          path="/doctors"
+          element={<ManageDoctors />}
+        />
+
+        <Route
+          path="/patients"
+          element={<ManagePatients />}
+        />
+
+      </Routes>
+
+    </main>
+
+  </BrowserRouter>
+);
+
 
 export default App;

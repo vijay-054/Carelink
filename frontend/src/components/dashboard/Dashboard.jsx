@@ -6,7 +6,7 @@ import { logout } from "../../store/slices/authSlice";
 
 import DomainChart from "./DomainChart";
 import RecentActivity from "./RecentActivity";
-import StatCards from "./StatsCard";
+import StatCards from "./StatCards";
 
 const Dashboard = () => {
   const navigate = useNavigate();

@@ -25,15 +25,29 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+
+  /* =====================================================
+     LOGIN SUCCESS / ERROR
+  ===================================================== */
+
   useEffect(() => {
 
     if (isError) {
-      alert(message || "Login failed");
+
+      alert(
+        message || "Login failed"
+      );
+
       dispatch(reset());
     }
 
+
     if (isSuccess || user) {
-      navigate("/");
+
+      // After successful login,
+      // open the role-based dashboard.
+      navigate("/dashboard");
+
       dispatch(reset());
     }
 
@@ -45,6 +59,11 @@ const Login = () => {
     navigate,
     dispatch,
   ]);
+
+
+  /* =====================================================
+     SUBMIT
+  ===================================================== */
 
   const handleSubmit = (event) => {
 
@@ -58,18 +77,32 @@ const Login = () => {
     );
   };
 
+
   return (
     <div className="auth-page">
 
       <div className="auth-card">
 
-        <h2>Login</h2>
+        {/* =========================
+            HEADER
+        ========================= */}
+
+        <h2>
+          Login
+        </h2>
 
         <p className="auth-subtitle">
           Sign in to access your CareLink account.
         </p>
 
+
+        {/* =========================
+            FORM
+        ========================= */}
+
         <form onSubmit={handleSubmit}>
+
+          {/* EMAIL */}
 
           <div className="form-group">
 
@@ -91,6 +124,9 @@ const Login = () => {
 
           </div>
 
+
+          {/* PASSWORD */}
+
           <div className="form-group">
 
             <label htmlFor="password">
@@ -111,17 +147,27 @@ const Login = () => {
 
           </div>
 
+
+          {/* LOGIN BUTTON */}
+
           <button
             type="submit"
             className="submit-btn"
             disabled={isLoading}
           >
+
             {isLoading
               ? "Logging in..."
               : "Login"}
+
           </button>
 
         </form>
+
+
+        {/* =========================
+            REGISTER LINK
+        ========================= */}
 
         <div className="auth-footer">
 

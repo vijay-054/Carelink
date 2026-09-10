@@ -18,6 +18,7 @@ import {
   reset,
 } from "../store/slices/authSlice";
 
+
 const Register = () => {
 
   const dispatch = useDispatch();
@@ -32,13 +33,31 @@ const Register = () => {
     (state) => state.auth || {}
   );
 
+
+  /* =========================
+     FORM DATA
+  ========================= */
+
   const [formData, setFormData] = useState({
+
     fullName: "",
     email: "",
     password: "",
+
+    role: "PATIENT",
+
     bloodGroup: "",
     emergencyContact: "",
+
+    specialization: "",
+    experience: "",
+    consultationFee: "",
   });
+
+
+  /* =========================
+     SUCCESS / ERROR
+  ========================= */
 
   useEffect(() => {
 
@@ -54,6 +73,10 @@ const Register = () => {
 
     if (isSuccess) {
 
+      alert(
+        "Registration successful! Please login."
+      );
+
       navigate("/login");
 
       dispatch(reset());
@@ -67,38 +90,104 @@ const Register = () => {
     dispatch,
   ]);
 
+
+  /* =========================
+     HANDLE INPUT
+  ========================= */
+
   const handleChange = (event) => {
 
-    setFormData({
-      ...formData,
-      [event.target.name]:
-        event.target.value,
-    });
+    const {
+      name,
+      value,
+    } = event.target;
+
+    setFormData((previousData) => ({
+      ...previousData,
+      [name]: value,
+    }));
   };
+
+
+  /* =========================
+     HANDLE SUBMIT
+  ========================= */
 
   const handleSubmit = (event) => {
 
     event.preventDefault();
 
+    const dataToSend = {
+      fullName: formData.fullName,
+      email: formData.email,
+      password: formData.password,
+      role: formData.role,
+    };
+
+
+    /* =========================
+       PATIENT DATA
+    ========================= */
+
+    if (formData.role === "PATIENT") {
+
+      dataToSend.bloodGroup =
+        formData.bloodGroup;
+
+      dataToSend.emergencyContact =
+        formData.emergencyContact;
+    }
+
+
+    /* =========================
+       DOCTOR DATA
+    ========================= */
+
+    if (formData.role === "DOCTOR") {
+
+      dataToSend.specialization =
+        formData.specialization;
+
+      dataToSend.experience =
+        formData.experience;
+
+      dataToSend.consultationFee =
+        formData.consultationFee;
+    }
+
+
     dispatch(
-      register(formData)
+      register(dataToSend)
     );
   };
+
 
   return (
     <div className="auth-page">
 
       <div className="auth-card">
 
-        <h2>Register</h2>
+        {/* =========================
+            HEADER
+        ========================= */}
+
+        <h2>
+          Create Account
+        </h2>
 
         <p className="auth-subtitle">
-          Create your CareLink patient account.
+          Register for your CareLink account.
         </p>
+
 
         <form onSubmit={handleSubmit}>
 
+          {/* =========================
+              FULL NAME
+          ========================= */}
+
           <div className="form-group">
+
             <label htmlFor="fullName">
               Full Name *
             </label>
@@ -106,14 +195,22 @@ const Register = () => {
             <input
               id="fullName"
               name="fullName"
+              type="text"
               placeholder="Enter full name"
               value={formData.fullName}
               onChange={handleChange}
               required
             />
+
           </div>
 
+
+          {/* =========================
+              EMAIL
+          ========================= */}
+
           <div className="form-group">
+
             <label htmlFor="email">
               Email *
             </label>
@@ -127,9 +224,16 @@ const Register = () => {
               onChange={handleChange}
               required
             />
+
           </div>
 
+
+          {/* =========================
+              PASSWORD
+          ========================= */}
+
           <div className="form-group">
+
             <label htmlFor="password">
               Password *
             </label>
@@ -143,69 +247,251 @@ const Register = () => {
               onChange={handleChange}
               required
             />
+
           </div>
 
+
+          {/* =========================
+              ROLE
+          ========================= */}
+
           <div className="form-group">
-            <label htmlFor="bloodGroup">
-              Blood Group *
+
+            <label htmlFor="role">
+              Account Role *
             </label>
 
             <select
-              id="bloodGroup"
-              name="bloodGroup"
-              value={formData.bloodGroup}
+              id="role"
+              name="role"
+              value={formData.role}
               onChange={handleChange}
               required
             >
 
-              <option value="">
-                -- Select Blood Group --
+              <option value="PATIENT">
+                Patient
               </option>
 
-              <option value="A+">A+</option>
-              <option value="A-">A-</option>
-              <option value="B+">B+</option>
-              <option value="B-">B-</option>
-              <option value="AB+">AB+</option>
-              <option value="AB-">AB-</option>
-              <option value="O+">O+</option>
-              <option value="O-">O-</option>
+              <option value="DOCTOR">
+                Doctor
+              </option>
+
+              <option value="CLINIC_ADMIN">
+                Clinic Admin
+              </option>
 
             </select>
 
           </div>
 
-          <div className="form-group">
 
-            <label htmlFor="emergencyContact">
-              Emergency Contact *
-            </label>
+          {/* ==================================================
+              PATIENT FIELDS
+          ================================================== */}
 
-            <input
-              id="emergencyContact"
-              name="emergencyContact"
-              type="tel"
-              placeholder="Enter contact number"
-              value={
-                formData.emergencyContact
-              }
-              onChange={handleChange}
-              required
-            />
+          {formData.role === "PATIENT" && (
+            <>
 
-          </div>
+              <div className="form-group">
+
+                <label htmlFor="bloodGroup">
+                  Blood Group *
+                </label>
+
+                <select
+                  id="bloodGroup"
+                  name="bloodGroup"
+                  value={formData.bloodGroup}
+                  onChange={handleChange}
+                  required
+                >
+
+                  <option value="">
+                    -- Select Blood Group --
+                  </option>
+
+                  <option value="A+">
+                    A+
+                  </option>
+
+                  <option value="A-">
+                    A-
+                  </option>
+
+                  <option value="B+">
+                    B+
+                  </option>
+
+                  <option value="B-">
+                    B-
+                  </option>
+
+                  <option value="AB+">
+                    AB+
+                  </option>
+
+                  <option value="AB-">
+                    AB-
+                  </option>
+
+                  <option value="O+">
+                    O+
+                  </option>
+
+                  <option value="O-">
+                    O-
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div className="form-group">
+
+                <label htmlFor="emergencyContact">
+                  Emergency Contact *
+                </label>
+
+                <input
+                  id="emergencyContact"
+                  name="emergencyContact"
+                  type="tel"
+                  placeholder="Enter contact number"
+                  value={
+                    formData.emergencyContact
+                  }
+                  onChange={handleChange}
+                  required
+                />
+
+              </div>
+
+            </>
+          )}
+
+
+          {/* ==================================================
+              DOCTOR FIELDS
+          ================================================== */}
+
+          {formData.role === "DOCTOR" && (
+            <>
+
+              <div className="form-group">
+
+                <label htmlFor="specialization">
+                  Specialization *
+                </label>
+
+                <input
+                  id="specialization"
+                  name="specialization"
+                  type="text"
+                  placeholder="e.g. Cardiology"
+                  value={
+                    formData.specialization
+                  }
+                  onChange={handleChange}
+                  required
+                />
+
+              </div>
+
+
+              <div className="form-group">
+
+                <label htmlFor="experience">
+                  Experience (Years) *
+                </label>
+
+                <input
+                  id="experience"
+                  name="experience"
+                  type="number"
+                  min="0"
+                  placeholder="Enter years of experience"
+                  value={
+                    formData.experience
+                  }
+                  onChange={handleChange}
+                  required
+                />
+
+              </div>
+
+
+              <div className="form-group">
+
+                <label htmlFor="consultationFee">
+                  Consultation Fee *
+                </label>
+
+                <input
+                  id="consultationFee"
+                  name="consultationFee"
+                  type="number"
+                  min="0"
+                  placeholder="Enter consultation fee"
+                  value={
+                    formData.consultationFee
+                  }
+                  onChange={handleChange}
+                  required
+                />
+
+              </div>
+
+            </>
+          )}
+
+
+          {/* ==================================================
+              ADMIN INFORMATION
+          ================================================== */}
+
+          {formData.role === "CLINIC_ADMIN" && (
+
+            <div className="admin-registration-note">
+
+              <p>
+                You are registering as a
+                <strong> Clinic Administrator</strong>.
+              </p>
+
+              <small>
+                Administrator access should only be
+                granted to authorized hospital staff.
+              </small>
+
+            </div>
+
+          )}
+
+
+          {/* =========================
+              SUBMIT
+          ========================= */}
 
           <button
             type="submit"
             className="submit-btn"
             disabled={isLoading}
           >
+
             {isLoading
               ? "Registering..."
-              : "Register"}
+              : "Create Account"}
+
           </button>
 
         </form>
+
+
+        {/* =========================
+            LOGIN LINK
+        ========================= */}
 
         <div className="auth-footer">
 
@@ -222,5 +508,6 @@ const Register = () => {
     </div>
   );
 };
+
 
 export default Register;

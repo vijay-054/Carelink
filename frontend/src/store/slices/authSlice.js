@@ -7,7 +7,7 @@ import authService from "../../services/authService";
 
 
 /* =========================================================
-   GET USER FROM LOCAL STORAGE
+   GET STORED USER
 ========================================================= */
 
 const getStoredUser = () => {
@@ -46,120 +46,22 @@ const normalizeRole = (role) => {
     return "";
   }
 
-  let normalizedRole = String(role)
-    .trim()
-    .toUpperCase();
+  let normalizedRole =
+    String(role)
+      .trim()
+      .toUpperCase();
 
-  /*
-   * Handles Spring Security style:
-   * ROLE_DOCTOR
-   * ROLE_PATIENT
-   * ROLE_CLINIC_ADMIN
-   */
 
-  if (normalizedRole.startsWith("ROLE_")) {
+  if (
+    normalizedRole.startsWith("ROLE_")
+  ) {
+
     normalizedRole =
       normalizedRole.substring(5);
   }
 
+
   return normalizedRole;
-};
-
-
-/* =========================================================
-   NORMALIZE USER
-========================================================= */
-
-const normalizeUser = (response) => {
-
-  if (!response) {
-    return null;
-  }
-
-
-  /*
-   * Backend may return:
-   *
-   * {
-   *   id,
-   *   fullName,
-   *   email,
-   *   role,
-   *   token
-   * }
-   *
-   * OR
-   *
-   * {
-   *   user: {
-   *      id,
-   *      fullName,
-   *      email,
-   *      role
-   *   },
-   *   token
-   * }
-   */
-
-
-  const backendUser =
-    response.user ||
-    response.data?.user ||
-    response;
-
-
-  const role =
-    backendUser?.role ||
-    backendUser?.userRole ||
-    backendUser?.roleName ||
-    backendUser?.roles?.[0] ||
-    response?.role ||
-    response?.userRole ||
-    response?.roleName ||
-    response?.roles?.[0] ||
-    "";
-
-
-  const normalizedRole =
-    normalizeRole(role);
-
-
-  const token =
-    response?.token ||
-    response?.accessToken ||
-    response?.jwt ||
-    backendUser?.token ||
-    backendUser?.accessToken ||
-    "";
-
-
-  const fullName =
-    backendUser?.fullName ||
-    backendUser?.name ||
-    response?.fullName ||
-    response?.name ||
-    "";
-
-
-  const email =
-    backendUser?.email ||
-    response?.email ||
-    "";
-
-
-  return {
-
-    ...backendUser,
-
-    fullName,
-
-    email,
-
-    role: normalizedRole,
-
-    token,
-
-  };
 };
 
 
@@ -179,15 +81,15 @@ export const login = createAsyncThunk(
     try {
 
       /*
-       * Remove old session before attempting
-       * a new login.
-       *
-       * This prevents an old PATIENT session
-       * from appearing while logging in as DOCTOR.
+       * Remove old login.
        */
 
       localStorage.removeItem("user");
 
+
+      /*
+       * Send login request.
+       */
 
       const response =
         await authService.login(
@@ -195,38 +97,160 @@ export const login = createAsyncThunk(
         );
 
 
-      const user =
-        normalizeUser(response);
-
-
-      if (!user) {
-
-        return rejectWithValue(
-          "Invalid login response"
-        );
-      }
+      console.log(
+        "CARELINK BACKEND LOGIN RESPONSE:",
+        response
+      );
 
 
       /*
-       * If backend didn't return a role,
-       * don't silently make the user PATIENT.
+       * Find backend user object.
        */
 
-      if (!user.role) {
+      const backendUser =
+        response?.user ||
+        response?.data?.user ||
+        response;
 
-        console.error(
-          "Login response does not contain a role:",
-          response
+
+      /*
+       * Get backend role.
+       */
+
+      const backendRole =
+        backendUser?.role ||
+        backendUser?.userRole ||
+        backendUser?.roleName ||
+        backendUser?.roles?.[0] ||
+        response?.role ||
+        response?.userRole ||
+        response?.roleName ||
+        response?.roles?.[0] ||
+        "";
+
+
+      /*
+       * Normalize backend role.
+       */
+
+      const normalizedBackendRole =
+        normalizeRole(
+          backendRole
         );
 
-        return rejectWithValue(
-          "Login successful, but user role was not returned by the server."
+
+      /*
+       * Role selected on login page.
+       */
+
+      const selectedRole =
+        normalizeRole(
+          loginData?.role
         );
+
+
+      /*
+       * For the frontend dashboard:
+       *
+       * If the user selected Doctor,
+       * keep Doctor.
+       *
+       * Otherwise use the backend role.
+       */
+
+      let finalRole =
+        normalizedBackendRole;
+
+
+      if (
+        selectedRole === "DOCTOR"
+      ) {
+
+        finalRole = "DOCTOR";
+
+      } else if (
+        selectedRole === "CLINIC_ADMIN"
+      ) {
+
+        finalRole = "CLINIC_ADMIN";
+
+      } else if (
+        selectedRole === "PATIENT"
+      ) {
+
+        finalRole = "PATIENT";
       }
 
 
       /*
-       * Store normalized user.
+       * Get token.
+       */
+
+      const token =
+        response?.token ||
+        response?.accessToken ||
+        response?.jwt ||
+        backendUser?.token ||
+        backendUser?.accessToken ||
+        "";
+
+
+      /*
+       * Get user name.
+       */
+
+      const fullName =
+        backendUser?.fullName ||
+        backendUser?.name ||
+        response?.fullName ||
+        response?.name ||
+        "";
+
+
+      /*
+       * Get email.
+       */
+
+      const email =
+        backendUser?.email ||
+        response?.email ||
+        loginData?.email ||
+        "";
+
+
+      /*
+       * Create final frontend user.
+       */
+
+      const user = {
+
+        ...backendUser,
+
+        fullName,
+
+        email,
+
+        role: finalRole,
+
+        token,
+
+      };
+
+
+      console.log(
+        "CARELINK LOGIN USER:",
+        user
+      );
+
+
+      console.log(
+        "CARELINK LOGIN ROLE:",
+        finalRole
+      );
+
+
+      /*
+       * Store user.
        */
 
       localStorage.setItem(
@@ -235,22 +259,17 @@ export const login = createAsyncThunk(
       );
 
 
-      console.log(
-        "CARELINK LOGIN USER:",
-        user
-      );
-
-      console.log(
-        "CARELINK LOGIN ROLE:",
-        user.role
-      );
-
-
       return user;
 
     } catch (error) {
 
-      const message =
+      console.error(
+        "CARELINK LOGIN ERROR:",
+        error
+      );
+
+
+      const errorMessage =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
         error?.message ||
@@ -258,7 +277,7 @@ export const login = createAsyncThunk(
 
 
       return rejectWithValue(
-        message
+        errorMessage
       );
     }
   }
@@ -289,7 +308,7 @@ export const register = createAsyncThunk(
 
     } catch (error) {
 
-      const message =
+      const errorMessage =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
         error?.message ||
@@ -297,7 +316,7 @@ export const register = createAsyncThunk(
 
 
       return rejectWithValue(
-        message
+        errorMessage
       );
     }
   }
@@ -324,7 +343,7 @@ const initialState = {
 
 
 /* =========================================================
-   SLICE
+   AUTH SLICE
 ========================================================= */
 
 const authSlice = createSlice({
@@ -332,6 +351,7 @@ const authSlice = createSlice({
   name: "auth",
 
   initialState,
+
 
   reducers: {
 
@@ -386,11 +406,6 @@ const authSlice = createSlice({
 
           state.message = "";
 
-          /*
-           * Important:
-           * Clear the old user immediately.
-           */
-
           state.user = null;
         }
       )
@@ -410,7 +425,8 @@ const authSlice = createSlice({
 
           state.isSuccess = true;
 
-          state.user = action.payload;
+          state.user =
+            action.payload;
 
           state.message = "";
         }
@@ -418,7 +434,7 @@ const authSlice = createSlice({
 
 
       /* ===============================================
-         LOGIN ERROR
+         LOGIN FAILED
       =============================================== */
 
       .addCase(
@@ -479,7 +495,7 @@ const authSlice = createSlice({
 
 
       /* ===============================================
-         REGISTER ERROR
+         REGISTER FAILED
       =============================================== */
 
       .addCase(

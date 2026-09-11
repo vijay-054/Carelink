@@ -12,6 +12,7 @@
     "antd": "^6.6.2",
     "axios": "^1.20.0",
     "install": "^0.13.0",
+    "lucide-react": "^1.44.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-redux": "^9.3.0",

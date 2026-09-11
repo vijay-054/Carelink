@@ -1,291 +1,309 @@
-import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { logout } from "../../store/slices/authSlice";
-
 import "./Dashboard.css";
 
-
 const PatientDashboard = () => {
-
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [activePage, setActivePage] = useState("Dashboard");
 
-  const { user } = useSelector(
-    (state) => state.auth || {}
-  );
+  const handleNavigation = (label, path) => {
+    setActivePage(label);
 
-
-  const userName =
-    user?.fullName ||
-    user?.name ||
-    user?.email?.split("@")[0] ||
-    "Patient";
-
-
-  const handleLogout = () => {
-    dispatch(logout());
-    localStorage.removeItem("user");
-    navigate("/");
+    if (path) {
+      navigate(path);
+    }
   };
 
+  const menuItems = [
+    {
+      label: "Dashboard",
+      icon: "⌂",
+      path: "/dashboard",
+    },
+    {
+      label: "Find Doctors",
+      icon: "♟",
+      path: "/doctors",
+    },
+    {
+      label: "Book Appointment",
+      icon: "▣",
+      path: "/appointments/book",
+    },
+    {
+      label: "My Appointments",
+      icon: "▣",
+      path: "/appointments",
+    },
+    {
+      label: "Health Records",
+      icon: "▤",
+      path: "/health-records",
+    },
+    {
+      label: "Prescriptions",
+      icon: "▧",
+      path: "/prescriptions",
+    },
+    {
+      label: "Messages",
+      icon: "◯",
+      path: "/messages",
+    },
+    {
+      label: "Profile",
+      icon: "♟",
+      path: "/profile",
+    },
+    {
+      label: "Settings",
+      icon: "⚙",
+      path: "/settings",
+    },
+  ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("jwt");
+
+    navigate("/login");
+  };
 
   return (
-    <div className="care-dashboard patient-dashboard">
+    <div className="care-dashboard">
 
-
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
+      {/* ================= SIDEBAR ================= */}
 
       <aside className="dashboard-sidebar">
 
+        {/* LOGO */}
+
         <div className="dashboard-logo">
-          <div className="logo-heart">
-            ✚
-          </div>
+          <div className="logo-heart">+</div>
 
           <span>CareLink</span>
         </div>
 
+        {/* NAVIGATION */}
 
         <nav className="dashboard-nav">
 
-          <button className="dashboard-nav-item active">
-            <span>⌂</span>
-            Dashboard
-          </button>
+          {menuItems.map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              className={`dashboard-nav-item ${
+                activePage === item.label ? "active" : ""
+              }`}
+              onClick={() =>
+                handleNavigation(item.label, item.path)
+              }
+            >
+              <span>{item.icon}</span>
 
-
-          <button
-            className="dashboard-nav-item"
-            onClick={() => navigate("/doctor-list")}
-          >
-            <span>♙</span>
-            Find Doctors
-          </button>
-
-
-          <button
-            className="dashboard-nav-item"
-            onClick={() => navigate("/book-appointment")}
-          >
-            <span>▣</span>
-            Book Appointment
-          </button>
-
-
-          <button
-            className="dashboard-nav-item"
-            onClick={() => navigate("/appointments")}
-          >
-            <span>▣</span>
-            My Appointments
-          </button>
-
-
-          <button className="dashboard-nav-item">
-            <span>▤</span>
-            Health Records
-          </button>
-
-
-          <button className="dashboard-nav-item">
-            <span>▧</span>
-            Prescriptions
-          </button>
-
-
-          <button className="dashboard-nav-item">
-            <span>◯</span>
-            Messages
-          </button>
-
-
-          <button className="dashboard-nav-item">
-            <span>♙</span>
-            Profile
-          </button>
-
-
-          <button className="dashboard-nav-item">
-            <span>⚙</span>
-            Settings
-          </button>
+              <span className="dashboard-nav-label">
+                {item.label}
+              </span>
+            </button>
+          ))}
 
         </nav>
 
+        {/* LOGOUT */}
 
         <button
+          type="button"
           className="dashboard-logout"
           onClick={handleLogout}
         >
-          <span>⇥</span>
-          Logout
+          <span>↪</span>
+
+          <span>Logout</span>
         </button>
 
       </aside>
 
-
-      {/* =====================================================
-          MAIN CONTENT
-      ===================================================== */}
+      {/* ================= MAIN ================= */}
 
       <main className="dashboard-main">
-
 
         {/* TOP BAR */}
 
         <header className="dashboard-topbar">
 
-          <div />
+          <div className="dashboard-topbar-left">
+            <span className="dashboard-topbar-title">
+              Patient Portal
+            </span>
+          </div>
 
-          <div className="topbar-user">
+          <div className="dashboard-topbar-right">
 
-            <button className="notification-button">
-              ♧
-              <span className="notification-dot" />
+            <button
+              type="button"
+              className="dashboard-notification"
+              onClick={() => navigate("/messages")}
+              title="Messages"
+            >
+              ♢
             </button>
 
+            <button
+              type="button"
+              className="dashboard-profile-button"
+              onClick={() => navigate("/profile")}
+            >
+              <div className="dashboard-profile-avatar">
+                P
+              </div>
 
-            <div className="user-avatar patient-avatar">
-              {userName.charAt(0).toUpperCase()}
-            </div>
-
-
-            <div className="user-info">
-
-              <strong>
-                {userName}
-              </strong>
-
-              <span>
-                Patient
-              </span>
-
-            </div>
+              <div className="dashboard-profile-info">
+                <strong>Patient</strong>
+                <span>My Account</span>
+              </div>
+            </button>
 
           </div>
 
         </header>
 
+        {/* CONTENT */}
 
-        <div className="dashboard-content">
+        <section className="dashboard-content">
 
+          {/* HEADING */}
 
-          {/* =================================================
-              WELCOME
-          ================================================= */}
+          <div className="dashboard-heading">
 
-          <section className="dashboard-heading">
+            <div>
+              <span className="page-eyebrow">
+                CARELINK HEALTHCARE
+              </span>
 
-            <h1>
-              Hi, {userName}! <span>👋</span>
-            </h1>
+              <h1>Welcome back</h1>
 
-            <p>
-              Take charge of your health with CareLink.
-            </p>
+              <p>
+                Manage your healthcare appointments and records
+                from one place.
+              </p>
+            </div>
 
-          </section>
+          </div>
 
+          {/* HERO */}
 
-          {/* =================================================
-              HERO BANNER
-          ================================================= */}
-
-          <section className="patient-hero">
+          <div className="patient-hero">
 
             <div className="patient-hero-content">
 
+              <span className="patient-hero-eyebrow">
+                YOUR HEALTH, SIMPLIFIED
+              </span>
+
               <h2>
-                Better Health
-                <br />
-                Brighter Tomorrow
+                Take control of your healthcare.
               </h2>
 
               <p>
-                Book appointments, manage your
-                health records and stay connected
-                with your doctors.
+                Find the right doctor, book appointments, and
+                keep track of your healthcare journey with CareLink.
               </p>
 
-              <button
-                className="hero-button patient-button"
-                onClick={() =>
-                  navigate("/book-appointment")
-                }
-              >
-                <span>▣</span>
-                Book an Appointment
-              </button>
+              <div className="patient-hero-actions">
+
+                <button
+                  type="button"
+                  className="patient-button"
+                  onClick={() =>
+                    handleNavigation(
+                      "Find Doctors",
+                      "/doctors"
+                    )
+                  }
+                >
+                  Find a Doctor
+                  <span>→</span>
+                </button>
+
+                <button
+                  type="button"
+                  className="patient-secondary-button"
+                  onClick={() =>
+                    handleNavigation(
+                      "My Appointments",
+                      "/appointments"
+                    )
+                  }
+                >
+                  View Appointments
+                </button>
+
+              </div>
 
             </div>
 
+            <div className="patient-hero-visual">
 
-            <div className="patient-hero-art">
-
-              <div className="leaf leaf-one">
-                🌿
+              <div className="hero-medical-circle">
+                +
               </div>
 
-              <div className="patient-woman">
-                👩🏻
-              </div>
+              <div className="hero-floating-card">
+                <span>✓</span>
 
-              <div className="heart-shape">
-                ♥
+                <div>
+                  <strong>Care made simple</strong>
+                  <small>Everything in one place</small>
+                </div>
               </div>
 
             </div>
 
+          </div>
 
-            <div className="hero-script">
-              Your Health
-              <br />
-              Matters
-            </div>
+          {/* QUICK STATS */}
 
-          </section>
-
-
-          {/* =================================================
-              STATS
-          ================================================= */}
-
-          <section className="dashboard-stats">
-
+          <div className="dashboard-stats">
 
             <div className="dashboard-stat">
 
-              <div className="stat-icon mint">
-                ▣
+              <div className="stat-icon blue">
+                ♟
+              </div>
+
+              <div>
+                <span>Doctors</span>
+                <strong>Find Care</strong>
+              </div>
+
+            </div>
+
+            <div className="dashboard-stat">
+
+              <div className="stat-icon green">
+                ✓
               </div>
 
               <div>
                 <span>Appointments</span>
-                <strong>3</strong>
-                <small>Upcoming</small>
+                <strong>Manage Visits</strong>
               </div>
 
             </div>
 
-
             <div className="dashboard-stat">
 
-              <div className="stat-icon teal">
+              <div className="stat-icon purple">
                 ▤
               </div>
 
               <div>
                 <span>Health Records</span>
-                <strong>5</strong>
-                <small>Total Records</small>
+                <strong>View Records</strong>
               </div>
 
             </div>
-
 
             <div className="dashboard-stat">
 
@@ -295,362 +313,230 @@ const PatientDashboard = () => {
 
               <div>
                 <span>Prescriptions</span>
-                <strong>2</strong>
-                <small>Active</small>
+                <strong>View Medicines</strong>
               </div>
 
             </div>
 
+          </div>
 
-            <div className="dashboard-stat">
+          {/* QUICK ACTIONS */}
 
-              <div className="stat-icon coral">
-                ◯
+          <div className="dashboard-section-header">
+
+            <div>
+              <span className="section-eyebrow">
+                QUICK ACCESS
+              </span>
+
+              <h2>What would you like to do?</h2>
+            </div>
+
+          </div>
+
+          <div className="dashboard-quick-grid">
+
+            <button
+              type="button"
+              className="dashboard-card quick-action-card"
+              onClick={() =>
+                handleNavigation(
+                  "Find Doctors",
+                  "/doctors"
+                )
+              }
+            >
+              <div className="quick-action-icon blue">
+                ♟
               </div>
 
               <div>
-                <span>Messages</span>
-                <strong>1</strong>
-                <small>Unread</small>
+                <h3>Find a Doctor</h3>
+
+                <p>
+                  Browse doctors and find the right
+                  specialist for your needs.
+                </p>
               </div>
 
-            </div>
+              <span className="quick-arrow">
+                →
+              </span>
+            </button>
 
-          </section>
+            <button
+              type="button"
+              className="dashboard-card quick-action-card"
+              onClick={() =>
+                handleNavigation(
+                  "Book Appointment",
+                  "/appointments/book"
+                )
+              }
+            >
+              <div className="quick-action-icon green">
+                +
+              </div>
 
+              <div>
+                <h3>Book Appointment</h3>
 
-          {/* =================================================
-              APPOINTMENT + QUICK ACTIONS
-          ================================================= */}
+                <p>
+                  Schedule a consultation with a doctor
+                  at a convenient time.
+                </p>
+              </div>
 
-          <section className="two-column-grid">
+              <span className="quick-arrow">
+                →
+              </span>
+            </button>
 
+            <button
+              type="button"
+              className="dashboard-card quick-action-card"
+              onClick={() =>
+                handleNavigation(
+                  "My Appointments",
+                  "/appointments"
+                )
+              }
+            >
+              <div className="quick-action-icon purple">
+                ▣
+              </div>
 
-            {/* NEXT APPOINTMENT */}
+              <div>
+                <h3>My Appointments</h3>
 
-            <div className="dashboard-card appointment-card">
+                <p>
+                  Check your upcoming and previous
+                  appointments.
+                </p>
+              </div>
+
+              <span className="quick-arrow">
+                →
+              </span>
+            </button>
+
+            <button
+              type="button"
+              className="dashboard-card quick-action-card"
+              onClick={() =>
+                handleNavigation(
+                  "Health Records",
+                  "/health-records"
+                )
+              }
+            >
+              <div className="quick-action-icon orange">
+                ▤
+              </div>
+
+              <div>
+                <h3>Health Records</h3>
+
+                <p>
+                  Access your medical records and
+                  healthcare information.
+                </p>
+              </div>
+
+              <span className="quick-arrow">
+                →
+              </span>
+            </button>
+
+          </div>
+
+          {/* INFORMATION CARDS */}
+
+          <div className="dashboard-bottom-grid">
+
+            <div className="dashboard-card information-card">
 
               <div className="card-heading">
 
-                <h3>
-                  Next Appointment
-                </h3>
-
-              </div>
-
-
-              <div className="doctor-appointment">
-
-                <div className="doctor-photo">
-                  👩🏻‍⚕️
-                </div>
-
-                <div className="appointment-doctor">
-
-                  <strong>
-                    Dr. Ananya Sharma
-                  </strong>
-
-                  <span>
-                    Cardiologist
+                <div>
+                  <span className="section-eyebrow">
+                    CARELINK
                   </span>
 
-                  <small>
-                    ▣ &nbsp; Mon, 15 Sep 2025
-                  </small>
+                  <h3>Your healthcare companion</h3>
+                </div>
 
-                  <small>
-                    ◷ &nbsp; 10:00 AM
-                  </small>
-
-                  <small>
-                    ♧ &nbsp; City Care Hospital
-                  </small>
-
+                <div className="card-heading-icon">
+                  +
                 </div>
 
               </div>
 
+              <p>
+                CareLink helps you stay connected with
+                your healthcare providers and keep your
+                important healthcare information organized.
+              </p>
 
-              <div className="appointment-actions">
-
-                <button className="outline-button">
-                  View Details
-                </button>
-
-                <button className="green-button">
-                  Reschedule
-                </button>
-
-              </div>
-
-            </div>
-
-
-            {/* QUICK ACTIONS */}
-
-            <div className="dashboard-card">
-
-              <div className="card-heading">
-                <h3>Quick Actions</h3>
-              </div>
-
-
-              <div className="quick-action-grid">
-
-
-                <button
-                  className="quick-action green-action"
-                  onClick={() =>
-                    navigate("/book-appointment")
-                  }
-                >
-                  <span>▣</span>
-                  <small>Book Appointment</small>
-                </button>
-
-
-                <button
-                  className="quick-action blue-action"
-                  onClick={() =>
-                    navigate("/doctor-list")
-                  }
-                >
-                  <span>⌕</span>
-                  <small>Find Doctors</small>
-                </button>
-
-
-                <button className="quick-action orange-action">
-                  <span>▤</span>
-                  <small>View Prescriptions</small>
-                </button>
-
-
-                <button className="quick-action sky-action">
-                  <span>☁</span>
-                  <small>Upload Health Record</small>
-                </button>
-
-              </div>
-
-            </div>
-
-          </section>
-
-
-          {/* =================================================
-              RECOMMENDED DOCTORS
-          ================================================= */}
-
-          <section className="dashboard-card">
-
-            <div className="card-heading">
-
-              <h3>
-                Recommended Doctors
-              </h3>
-
-              <button className="view-all">
-                View All
+              <button
+                type="button"
+                className="text-action"
+                onClick={() =>
+                  handleNavigation(
+                    "Find Doctors",
+                    "/doctors"
+                  )
+                }
+              >
+                Explore CareLink
+                <span>→</span>
               </button>
 
             </div>
 
+            <div className="dashboard-card help-card">
 
-            <div className="recommended-doctors">
-
-
-              <DoctorMiniCard
-                avatar="👨🏻‍⚕️"
-                name="Dr. Rohan Mehta"
-                specialty="General Physician"
-                rating="4.8"
-                reviews="120"
-                onClick={() =>
-                  navigate("/doctor-list")
-                }
-              />
-
-
-              <DoctorMiniCard
-                avatar="👩🏻‍⚕️"
-                name="Dr. Priya Nair"
-                specialty="Dermatologist"
-                rating="4.7"
-                reviews="98"
-                onClick={() =>
-                  navigate("/doctor-list")
-                }
-              />
-
-
-              <DoctorMiniCard
-                avatar="👨🏻‍⚕️"
-                name="Dr. Arjun Patel"
-                specialty="Orthopedic"
-                rating="4.6"
-                reviews="76"
-                onClick={() =>
-                  navigate("/doctor-list")
-                }
-              />
-
-            </div>
-
-          </section>
-
-
-          {/* =================================================
-              BOTTOM
-          ================================================= */}
-
-          <section className="patient-bottom-grid">
-
-
-            {/* RECENT ACTIVITY */}
-
-            <div className="dashboard-card">
-
-              <div className="card-heading">
-
-                <h3>
-                  Recent Activity
-                </h3>
-
+              <div className="help-icon">
+                ?
               </div>
 
+              <div>
+                <span className="section-eyebrow">
+                  NEED HELP?
+                </span>
 
-              <ActivityItem
-                icon="▣"
-                text="Appointment booked with Dr. Ananya Sharma"
-                time="2 days ago"
-              />
+                <h3>We're here for you</h3>
 
-              <ActivityItem
-                icon="▤"
-                text="Prescription updated"
-                time="5 days ago"
-              />
+                <p>
+                  Have questions about your appointments
+                  or healthcare records?
+                </p>
 
-              <ActivityItem
-                icon="▧"
-                text="Health record uploaded"
-                time="1 week ago"
-              />
-
-              <ActivityItem
-                icon="▣"
-                text="Appointment completed with Dr. Karan Singh"
-                time="2 weeks ago"
-              />
-
-            </div>
-
-
-            {/* WELLNESS CARD */}
-
-            <div className="wellness-card">
-
-              <div className="wellness-icon">
-                🍎
+                <button
+                  type="button"
+                  className="text-action"
+                  onClick={() =>
+                    handleNavigation(
+                      "Messages",
+                      "/messages"
+                    )
+                  }
+                >
+                  Contact Support
+                  <span>→</span>
+                </button>
               </div>
 
-              <h3>
-                Small Steps
-                <br />
-                Big Changes
-              </h3>
-
-              <p>
-                Stay consistent, stay healthy!
-              </p>
-
             </div>
 
-          </section>
+          </div>
 
-        </div>
+        </section>
 
       </main>
 
     </div>
   );
 };
-
-
-/* =========================================================
-   DOCTOR MINI CARD
-========================================================= */
-
-const DoctorMiniCard = ({
-  avatar,
-  name,
-  specialty,
-  rating,
-  reviews,
-  onClick,
-}) => (
-
-  <div className="recommended-doctor">
-
-    <div className="recommended-avatar">
-      {avatar}
-    </div>
-
-    <strong>
-      {name}
-    </strong>
-
-    <span>
-      {specialty}
-    </span>
-
-    <div className="doctor-rating">
-      ★ {rating}
-      <small>
-        ({reviews} reviews)
-      </small>
-    </div>
-
-    <button onClick={onClick}>
-      Book Now
-    </button>
-
-  </div>
-);
-
-
-/* =========================================================
-   ACTIVITY
-========================================================= */
-
-const ActivityItem = ({
-  icon,
-  text,
-  time,
-}) => (
-
-  <div className="activity-item">
-
-    <div className="activity-icon">
-      {icon}
-    </div>
-
-    <div>
-
-      <strong>
-        {text}
-      </strong>
-
-      <span>
-        {time}
-      </span>
-
-    </div>
-
-  </div>
-);
-
 
 export default PatientDashboard;

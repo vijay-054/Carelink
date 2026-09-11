@@ -1,8 +1,6 @@
 import api from "./api";
 
-
 const login = async (loginData) => {
-
   const response = await api.post(
     "/auth/login",
     loginData
@@ -16,9 +14,7 @@ const login = async (loginData) => {
   return response.data;
 };
 
-
 const register = async (registerData) => {
-
   const response = await api.post(
     "/auth/register",
     registerData
@@ -27,8 +23,9 @@ const register = async (registerData) => {
   return response.data;
 };
 
-
-export default {
+const authService = {
   login,
   register,
 };
+
+export default authService;

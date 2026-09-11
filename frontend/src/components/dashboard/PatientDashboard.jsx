@@ -6,7 +6,6 @@ import {
   Bell,
   CalendarDays,
   CalendarPlus,
-  ClipboardList,
   FilePlus2,
   FileText,
   LayoutDashboard,

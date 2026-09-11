@@ -1388,3 +1388,412 @@
   }
 
 }
+
+
+
+/* =========================================================
+   CARELINK - PROFESSIONAL PATIENT SIDEBAR
+========================================================= */
+
+.care-dashboard {
+  min-height: 100vh !important;
+  background: #f7f9fc !important;
+}
+
+.dashboard-sidebar {
+  width: 235px !important;
+  min-width: 235px !important;
+  min-height: 100vh !important;
+
+  position: sticky;
+  top: 0;
+
+  background: #ffffff !important;
+  border-right: 1px solid #e5eaf0 !important;
+
+  padding: 24px 14px 18px !important;
+
+  box-shadow: 4px 0 20px rgba(15, 40, 60, 0.035);
+
+  z-index: 100;
+}
+
+/* LOGO */
+
+.dashboard-logo {
+  height: 52px;
+
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 10px !important;
+
+  padding: 0 12px 20px !important;
+
+  margin-bottom: 10px;
+
+  border-bottom: 1px solid #edf1f5;
+
+  color: #123b63 !important;
+
+  font-size: 21px !important;
+  font-weight: 800 !important;
+}
+
+.logo-heart {
+  width: 32px !important;
+  height: 32px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 9px !important;
+
+  background: #1677d2 !important;
+
+  color: #ffffff !important;
+
+  font-size: 17px !important;
+
+  box-shadow: 0 5px 12px rgba(22, 119, 210, 0.20);
+}
+
+/* NAVIGATION */
+
+.dashboard-nav {
+  display: flex !important;
+  flex-direction: column !important;
+
+  gap: 4px !important;
+
+  margin-top: 8px;
+}
+
+.dashboard-nav-item {
+  width: 100% !important;
+
+  min-height: 42px;
+
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 12px !important;
+
+  padding: 0 13px !important;
+
+  border: none !important;
+  border-radius: 9px !important;
+
+  background: transparent !important;
+
+  color: #536575 !important;
+
+  font-size: 12px !important;
+  font-weight: 500 !important;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.dashboard-nav-item span {
+  width: 22px !important;
+
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  color: #718292 !important;
+
+  font-size: 14px !important;
+}
+
+.dashboard-nav-item:hover {
+  background: #f1f7fd !important;
+
+  color: #1677d2 !important;
+
+  transform: translateX(2px);
+}
+
+.dashboard-nav-item:hover span {
+  color: #1677d2 !important;
+}
+
+/* ACTIVE */
+
+.dashboard-nav-item.active {
+  background: #e8f4ff !important;
+
+  color: #1268b5 !important;
+
+  font-weight: 700 !important;
+
+  box-shadow: inset 3px 0 0 #1677d2;
+}
+
+.dashboard-nav-item.active span {
+  color: #1677d2 !important;
+}
+
+/* LOGOUT */
+
+.dashboard-logout {
+  width: 100% !important;
+
+  min-height: 42px;
+
+  margin-top: auto !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  gap: 12px !important;
+
+  padding: 0 13px !important;
+
+  border: none !important;
+  border-radius: 9px !important;
+
+  background: transparent !important;
+
+  color: #687987 !important;
+
+  font-size: 12px !important;
+
+  cursor: pointer;
+
+  transition: 0.18s ease;
+}
+
+.dashboard-logout span {
+  width: 22px;
+
+  text-align: center;
+
+  font-size: 15px;
+}
+
+.dashboard-logout:hover {
+  background: #fff1f1 !important;
+
+  color: #d94b4b !important;
+}
+
+/* MAIN AREA */
+
+.dashboard-main {
+  min-width: 0;
+
+  flex: 1;
+
+  background: #f7f9fc !important;
+}
+
+/* TOP BAR */
+
+.dashboard-topbar {
+  height: 68px !important;
+
+  padding: 0 32px !important;
+
+  background: #ffffff !important;
+
+  border-bottom: 1px solid #e7edf2 !important;
+
+  box-shadow: 0 2px 12px rgba(20, 50, 70, 0.025);
+}
+
+/* CONTENT */
+
+.dashboard-content {
+  width: 100%;
+
+  max-width: 1450px;
+
+  padding: 30px 34px 50px !important;
+
+  margin: 0 auto;
+}
+
+/* DASHBOARD HEADING */
+
+.dashboard-heading {
+  margin-bottom: 22px !important;
+}
+
+.dashboard-heading h1 {
+  color: #102a43 !important;
+
+  font-size: 27px !important;
+
+  font-weight: 800 !important;
+
+  letter-spacing: -0.4px;
+}
+
+.dashboard-heading p {
+  color: #718191 !important;
+
+  font-size: 13px !important;
+}
+
+/* HERO */
+
+.patient-hero {
+  min-height: 205px !important;
+
+  margin-bottom: 20px !important;
+
+  border-radius: 16px !important;
+
+  background:
+    linear-gradient(
+      110deg,
+      #eaf6ff 0%,
+      #f3f9ff 55%,
+      #eef7ff 100%
+    ) !important;
+
+  border: 1px solid #dcecf8;
+
+  box-shadow: 0 8px 28px rgba(30, 80, 120, 0.055);
+}
+
+.patient-hero h2 {
+  color: #123b63 !important;
+
+  font-size: 27px !important;
+
+  font-weight: 800 !important;
+}
+
+.patient-hero p {
+  color: #60768a !important;
+
+  font-size: 12px !important;
+}
+
+.patient-button {
+  background: #1677d2 !important;
+
+  padding: 11px 16px !important;
+
+  border-radius: 8px !important;
+
+  box-shadow: 0 5px 14px rgba(22, 119, 210, 0.18);
+}
+
+.patient-button:hover {
+  background: #0f67bb !important;
+}
+
+/* STAT CARDS */
+
+.dashboard-stat {
+  background: #ffffff !important;
+
+  border: 1px solid #e4ebf1 !important;
+
+  border-radius: 12px !important;
+
+  padding: 17px !important;
+
+  box-shadow: 0 4px 18px rgba(20, 55, 80, 0.035);
+
+  transition: 0.2s ease;
+}
+
+.dashboard-stat:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 9px 24px rgba(20, 55, 80, 0.07);
+}
+
+.dashboard-stat strong {
+  color: #102a43 !important;
+
+  font-size: 21px !important;
+}
+
+/* CARDS */
+
+.dashboard-card {
+  background: #ffffff !important;
+
+  border: 1px solid #e4ebf1 !important;
+
+  border-radius: 13px !important;
+
+  box-shadow: 0 4px 18px rgba(20, 55, 80, 0.035) !important;
+}
+
+.card-heading h3 {
+  color: #19354d !important;
+
+  font-size: 14px !important;
+
+  font-weight: 750 !important;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .dashboard-sidebar {
+    width: 200px !important;
+    min-width: 200px !important;
+  }
+
+  .dashboard-content {
+    padding: 24px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .dashboard-sidebar {
+    width: 68px !important;
+    min-width: 68px !important;
+
+    padding: 18px 8px !important;
+  }
+
+  .dashboard-logo span {
+    display: none !important;
+  }
+
+  .dashboard-nav-item {
+    justify-content: center !important;
+
+    padding: 0 !important;
+  }
+
+  .dashboard-nav-item {
+    font-size: 0 !important;
+  }
+
+  .dashboard-nav-item span {
+    font-size: 17px !important;
+  }
+
+  .dashboard-logout {
+    justify-content: center !important;
+
+    font-size: 0 !important;
+
+    padding: 0 !important;
+  }
+
+  .dashboard-logout span {
+    font-size: 17px !important;
+  }
+
+  .dashboard-content {
+    padding: 20px 14px !important;
+  }
+}

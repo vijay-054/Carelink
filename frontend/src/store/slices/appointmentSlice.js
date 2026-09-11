@@ -1,127 +1,123 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import {
+  createAsyncThunk,
+  createSlice,
+} from "@reduxjs/toolkit";
+
 import appointmentService from "../../services/appointmentService";
 
-/*
- * ============================================================
- * GET MY APPOINTMENTS
- * ============================================================
- */
-export const getMyAppointments = createAsyncThunk(
-  "appointments/getMyAppointments",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response =
-        await appointmentService.getMyAppointments();
+/* =========================================================
+   GET MY APPOINTMENTS
+========================================================= */
 
-      return response?.data ?? response ?? [];
-    } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to load appointments"
-      );
+export const getMyAppointments =
+  createAsyncThunk(
+    "appointments/getMyAppointments",
+    async (_, { rejectWithValue }) => {
+      try {
+        return await appointmentService.getMyAppointments();
+      } catch (error) {
+        return rejectWithValue(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Failed to load appointments"
+        );
+      }
     }
-  }
-);
+  );
 
-/*
- * ============================================================
- * GET ALL APPOINTMENTS
- * ============================================================
- */
-export const getAllAppointments = createAsyncThunk(
-  "appointments/getAllAppointments",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response =
-        await appointmentService.getAllAppointments();
+/* =========================================================
+   GET ALL APPOINTMENTS
+========================================================= */
 
-      return response?.data ?? response ?? [];
-    } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to load appointments"
-      );
+export const getAllAppointments =
+  createAsyncThunk(
+    "appointments/getAllAppointments",
+    async (_, { rejectWithValue }) => {
+      try {
+        return await appointmentService.getAllAppointments();
+      } catch (error) {
+        return rejectWithValue(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Failed to load appointments"
+        );
+      }
     }
-  }
-);
+  );
 
-/*
- * ============================================================
- * BOOK APPOINTMENT
- * ============================================================
- */
-export const bookAppointment = createAsyncThunk(
-  "appointments/book",
-  async (appointmentData, { rejectWithValue }) => {
-    try {
-      const response =
-        await appointmentService.bookAppointment(
+/* =========================================================
+   BOOK APPOINTMENT
+========================================================= */
+
+export const bookAppointment =
+  createAsyncThunk(
+    "appointments/book",
+    async (
+      appointmentData,
+      { rejectWithValue }
+    ) => {
+      try {
+        return await appointmentService.bookAppointment(
           appointmentData
         );
-
-      return response?.data ?? response;
-    } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to book appointment"
-      );
+      } catch (error) {
+        return rejectWithValue(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Failed to book appointment"
+        );
+      }
     }
-  }
-);
+  );
 
-/*
- * ============================================================
- * CANCEL APPOINTMENT
- * ============================================================
- */
-export const cancelAppointment = createAsyncThunk(
-  "appointments/cancel",
-  async (id, { rejectWithValue }) => {
-    try {
-      const response =
-        await appointmentService.cancelAppointment(id);
+/* =========================================================
+   CANCEL APPOINTMENT
+========================================================= */
 
-      /*
-       * We don't need the API response to remove
-       * the appointment. The original ID is available
-       * through action.meta.arg in the fulfilled reducer.
-       */
-      return response?.data ?? response;
-    } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Failed to cancel appointment"
-      );
+export const cancelAppointment =
+  createAsyncThunk(
+    "appointments/cancel",
+    async (
+      appointmentId,
+      { rejectWithValue }
+    ) => {
+      try {
+        await appointmentService.cancelAppointment(
+          appointmentId
+        );
+
+        return appointmentId;
+      } catch (error) {
+        return rejectWithValue(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Failed to cancel appointment"
+        );
+      }
     }
-  }
-);
+  );
 
-/*
- * ============================================================
- * INITIAL STATE
- * ============================================================
- */
+/* =========================================================
+   INITIAL STATE
+========================================================= */
+
 const initialState = {
   items: [],
+
+  slots: [],
+
   isLoading: false,
   isError: false,
   error: null,
 
   filterStatus: "ALL",
   searchQuery: "",
-
-  slots: [],
 };
 
-/*
- * ============================================================
- * SLICE
- * ============================================================
- */
+/* =========================================================
+   SLICE
+========================================================= */
+
 const appointmentSlice = createSlice({
   name: "appointments",
 
@@ -129,27 +125,31 @@ const appointmentSlice = createSlice({
 
   reducers: {
     setFilterStatus: (state, action) => {
-      state.filterStatus = action.payload;
+      state.filterStatus =
+        action.payload;
     },
 
     setSearchQuery: (state, action) => {
-      state.searchQuery = action.payload;
+      state.searchQuery =
+        action.payload;
     },
 
     clearAppointmentError: (state) => {
       state.isError = false;
       state.error = null;
     },
+
+    clearAppointments: (state) => {
+      state.items = [];
+    },
   },
 
   extraReducers: (builder) => {
     builder
 
-      /*
-       * ========================================================
-       * GET MY APPOINTMENTS
-       * ========================================================
-       */
+      /* =====================================================
+         GET MY
+      ===================================================== */
 
       .addCase(
         getMyAppointments.pending,
@@ -167,9 +167,10 @@ const appointmentSlice = createSlice({
           state.isError = false;
           state.error = null;
 
-          state.items = Array.isArray(action.payload)
-            ? action.payload
-            : [];
+          state.items =
+            Array.isArray(action.payload)
+              ? action.payload
+              : [];
         }
       )
 
@@ -185,11 +186,9 @@ const appointmentSlice = createSlice({
         }
       )
 
-      /*
-       * ========================================================
-       * GET ALL APPOINTMENTS
-       * ========================================================
-       */
+      /* =====================================================
+         GET ALL
+      ===================================================== */
 
       .addCase(
         getAllAppointments.pending,
@@ -207,9 +206,10 @@ const appointmentSlice = createSlice({
           state.isError = false;
           state.error = null;
 
-          state.items = Array.isArray(action.payload)
-            ? action.payload
-            : [];
+          state.items =
+            Array.isArray(action.payload)
+              ? action.payload
+              : [];
         }
       )
 
@@ -225,11 +225,9 @@ const appointmentSlice = createSlice({
         }
       )
 
-      /*
-       * ========================================================
-       * BOOK APPOINTMENT
-       * ========================================================
-       */
+      /* =====================================================
+         BOOK
+      ===================================================== */
 
       .addCase(
         bookAppointment.pending,
@@ -247,12 +245,10 @@ const appointmentSlice = createSlice({
           state.isError = false;
           state.error = null;
 
-          /*
-           * T19:
-           * Add the newly booked appointment.
-           */
           if (action.payload) {
-            state.items.push(action.payload);
+            state.items.unshift(
+              action.payload
+            );
           }
         }
       )
@@ -269,11 +265,9 @@ const appointmentSlice = createSlice({
         }
       )
 
-      /*
-       * ========================================================
-       * CANCEL APPOINTMENT
-       * ========================================================
-       */
+      /* =====================================================
+         CANCEL
+      ===================================================== */
 
       .addCase(
         cancelAppointment.pending,
@@ -291,19 +285,15 @@ const appointmentSlice = createSlice({
           state.isError = false;
           state.error = null;
 
-          /*
-           * T18:
-           * The ID passed to cancelAppointment()
-           * is stored in action.meta.arg.
-           */
           const cancelledId =
-            action.meta?.arg;
+            action.payload;
 
-          state.items = state.items.filter(
-            (item) =>
-              String(item.id) !==
-              String(cancelledId)
-          );
+          state.items =
+            state.items.filter(
+              (item) =>
+                String(item.id) !==
+                String(cancelledId)
+            );
         }
       )
 
@@ -321,20 +311,15 @@ const appointmentSlice = createSlice({
   },
 });
 
-/*
- * ============================================================
- * ACTIONS
- * ============================================================
- */
+/* =========================================================
+   ACTIONS
+========================================================= */
+
 export const {
   setFilterStatus,
   setSearchQuery,
   clearAppointmentError,
+  clearAppointments,
 } = appointmentSlice.actions;
 
-/*
- * ============================================================
- * REDUCER
- * ============================================================
- */
 export default appointmentSlice.reducer;

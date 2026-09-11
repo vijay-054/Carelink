@@ -1,218 +1,287 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { bookAppointment } from "../../store/slices/appointmentSlice";
+import {
+  bookAppointment,
+  clearAppointmentError,
+} from "../../store/slices/appointmentSlice";
 
-const AppointmentForm = ({ doctor, onClose }) => {
+const AppointmentForm = ({ doctor, onClose, onSuccess }) => {
   const dispatch = useDispatch();
-
-  const [slot, setSlot] = useState("");
-  const [reason, setReason] = useState("");
-
-  const appointmentState = useSelector(
-    (state) => state.appointments || {}
-  );
 
   const {
     slots = [],
     isLoading = false,
     isError = false,
     error = null,
-    errorMessage = null,
-    message = null,
-  } = appointmentState;
+  } = useSelector((state) => state.appointments || {});
 
-  // ============================================================
-  // T15 — APPOINTMENT API ERROR
-  // ============================================================
+  const [slot, setSlot] = useState("");
+  const [reason, setReason] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    if (!isError) {
-      return;
+    dispatch(clearAppointmentError());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isError && error) {
+      setSubmitted(false);
+    }
+  }, [isError, error]);
+
+  const availableSlots = useMemo(() => {
+    if (Array.isArray(slots) && slots.length > 0) {
+      return slots;
     }
 
-    /*
-     * Check all common error locations.
-     */
-    let messageToShow = null;
-
-    if (typeof error === "string") {
-      messageToShow = error;
-    } else if (error && typeof error === "object") {
-      messageToShow =
-        error.message ||
-        error.error ||
-        error.errorMessage ||
-        error.data?.message ||
-        error.response?.data?.message;
+    if (Array.isArray(doctor?.availableSlots)) {
+      return doctor.availableSlots;
     }
 
-    /*
-     * Some Redux implementations store the message
-     * directly in errorMessage/message.
-     */
-    messageToShow =
-      messageToShow ||
-      errorMessage ||
-      message ||
-      "Something went wrong";
+    if (Array.isArray(doctor?.slots)) {
+      return doctor.slots;
+    }
 
-    window.alert(messageToShow);
-  }, [
-    isError,
-    error,
-    errorMessage,
-    message,
-  ]);
+    return [];
+  }, [slots, doctor]);
 
-  // ============================================================
-  // T9 — SLOT CHANGE
-  // ============================================================
+  const doctorName =
+    doctor?.name ||
+    doctor?.account?.name ||
+    doctor?.account?.email ||
+    doctor?.email ||
+    "Doctor";
 
-  const handleSlotChange = (event) => {
-    setSlot(event.target.value);
+  const specialization =
+    doctor?.specialization || "Medical Specialist";
+
+  const consultationFee =
+    doctor?.consultationFee ?? "Not specified";
+
+  const getSlotId = (item, index) => {
+    return item?.id ?? item?.slotId ?? index + 1;
   };
 
-  // ============================================================
-  // T8 — REASON CHANGE
-  // ============================================================
+  const getSlotText = (item, index) => {
+    if (item?.startTime && item?.endTime) {
+      return `${item.startTime} - ${item.endTime}`;
+    }
 
-  const handleReasonChange = (event) => {
-    setReason(event.target.value);
+    if (item?.startTime) {
+      return item.startTime;
+    }
+
+    if (item?.time) {
+      return item.time;
+    }
+
+    if (item?.dateTime) {
+      return item.dateTime;
+    }
+
+    return `Available slot ${index + 1}`;
   };
 
-  // ============================================================
-  // T26 — SUBMIT WITHOUT SLOT
-  // ============================================================
-
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!slot) {
-      window.alert("Please select a time slot");
+      return;
+    }
+
+    if (!doctor?.id) {
       return;
     }
 
     const appointmentData = {
-      doctorId: doctor?.id,
+      doctorId: doctor.id,
       slotId: Number(slot),
-      reasonForVisit: reason,
+      reasonForVisit: reason.trim(),
     };
 
-    dispatch(bookAppointment(appointmentData));
+    setSubmitted(true);
+
+    try {
+      const result = await dispatch(
+        bookAppointment(appointmentData)
+      ).unwrap();
+
+      if (result) {
+        onSuccess?.(result);
+      }
+
+      onClose?.();
+    } catch {
+      setSubmitted(false);
+    }
   };
 
-  // ============================================================
-  // SLOTS
-  // ============================================================
-
-  const availableSlots = Array.isArray(slots)
-    ? slots
-    : [];
-
-  // ============================================================
-  // UI
-  // ============================================================
-
   return (
-    <div className="appointment-modal">
-      <div className="appointment-form">
+    <div
+      className="appointment-modal-overlay"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget && !isLoading) {
+          onClose?.();
+        }
+      }}
+    >
+      <div
+        className="appointment-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="appointment-title"
+      >
+        {/* HEADER */}
+        <div className="appointment-modal-header">
+          <div>
+            <span className="modal-eyebrow">
+              APPOINTMENT
+            </span>
 
-        {/* CLOSE */}
+            <h2 id="appointment-title">
+              Book an Appointment
+            </h2>
 
-        <button
-          type="button"
-          aria-label="Close"
-          onClick={onClose}
-        >
-          ×
-        </button>
+            <p>
+              Choose a suitable time and tell the doctor
+              why you need a consultation.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="appointment-close-btn"
+            onClick={onClose}
+            disabled={isLoading}
+            aria-label="Close appointment form"
+          >
+            ×
+          </button>
+        </div>
 
         {/* DOCTOR */}
+        <div className="appointment-doctor-card">
+          <div className="appointment-doctor-avatar">
+            {doctorName.charAt(0).toUpperCase()}
+          </div>
 
-        <h2>
-          Book with Dr.{" "}
-          {doctor?.account?.email ||
-            doctor?.email ||
-            ""}
-        </h2>
+          <div className="appointment-doctor-info">
+            <h3>Dr. {doctorName}</h3>
+
+            <p>{specialization}</p>
+
+            <span>
+              Consultation Fee: ₹{consultationFee}
+            </span>
+          </div>
+        </div>
+
+        {/* ERROR */}
+        {isError && error && (
+          <div className="appointment-error">
+            <span>!</span>
+            <div>
+              <strong>Unable to book appointment</strong>
+              <p>{error}</p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
-
-          {/* TIME SLOT */}
-
-          <div className="form-group">
-            <label htmlFor="slot">
+          {/* SLOT */}
+          <div className="appointment-form-group">
+            <label htmlFor="appointment-slot">
               Select Time Slot
             </label>
 
             <select
-              id="slot"
-              name="slot"
+              id="appointment-slot"
               value={slot}
-              onChange={handleSlotChange}
+              onChange={(e) => setSlot(e.target.value)}
+              disabled={isLoading}
+              required
             >
               <option value="">
-                Select Time Slot
+                Choose an available time
               </option>
 
-              {availableSlots.map(
-                (item, index) => {
-                  const slotId =
-                    item?.id ??
-                    item?.slotId ??
-                    index + 1;
+              {availableSlots.map((item, index) => {
+                const slotId = getSlotId(item, index);
+                const slotText = getSlotText(item, index);
 
-                  const slotText =
-                    item?.startTime ||
-                    item?.time ||
-                    `Slot ${slotId}`;
-
-                  return (
-                    <option
-                      key={slotId}
-                      value={String(slotId)}
-                    >
-                      {slotText}
-                    </option>
-                  );
-                }
-              )}
-
-              {availableSlots.length === 0 && (
-                <option value="1">
-                  Slot 1
-                </option>
-              )}
+                return (
+                  <option
+                    key={slotId}
+                    value={slotId}
+                  >
+                    {slotText}
+                  </option>
+                );
+              })}
             </select>
+
+            {availableSlots.length === 0 && (
+              <small className="form-help error-text">
+                No available slots are currently provided
+                for this doctor.
+              </small>
+            )}
           </div>
 
           {/* REASON */}
-
-          <div className="form-group">
-            <label htmlFor="reason">
+          <div className="appointment-form-group">
+            <label htmlFor="appointment-reason">
               Reason for Visit
             </label>
 
             <textarea
-              id="reason"
-              name="reason"
-              placeholder="Describe your symptoms"
+              id="appointment-reason"
               value={reason}
-              onChange={handleReasonChange}
+              onChange={(e) =>
+                setReason(e.target.value)
+              }
+              placeholder="Briefly describe your symptoms or reason for consultation..."
+              rows={4}
+              maxLength={500}
+              disabled={isLoading}
             />
+
+            <div className="character-count">
+              {reason.length}/500
+            </div>
           </div>
 
-          {/* SUBMIT */}
+          {/* ACTIONS */}
+          <div className="appointment-form-actions">
+            <button
+              type="button"
+              className="appointment-cancel-btn"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
 
-          <button
-            type="submit"
-            disabled={!slot || isLoading}
-          >
-            {isLoading
-              ? "Booking..."
-              : "Confirm Booking"}
-          </button>
-
+            <button
+              type="submit"
+              className="appointment-submit-btn"
+              disabled={
+                !slot ||
+                availableSlots.length === 0 ||
+                isLoading ||
+                submitted
+              }
+            >
+              {isLoading ? (
+                <>
+                  <span className="button-spinner" />
+                  Booking...
+                </>
+              ) : (
+                "Confirm Appointment"
+              )}
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   BrowserRouter,
   Routes,
@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -18,22 +18,43 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminDoctorsPage from "./pages/AdminDoctorsPage";
 import AdminPatientsPage from "./pages/AdminPatientsPage";
 
-import { getMe } from "./store/slices/authSlice";
-
-
 /* =========================================================
    ROLE HELPER
 ========================================================= */
 
 const getRole = (user) => {
-  if (!user) return null;
+  if (!user) {
+    return null;
+  }
 
-  return (
+  let role =
     user.role ||
+    user.userRole ||
+    user.roleName ||
+    user.authority ||
     user.authorities?.[0]?.authority ||
     user.authorities?.[0] ||
-    null
-  );
+    null;
+
+  if (typeof role === "object") {
+    role =
+      role.name ||
+      role.role ||
+      role.authority ||
+      null;
+  }
+
+  if (!role) {
+    return null;
+  }
+
+  role = String(role).trim().toUpperCase();
+
+  if (role.startsWith("ROLE_")) {
+    role = role.substring(5);
+  }
+
+  return role;
 };
 
 
@@ -42,12 +63,41 @@ const getRole = (user) => {
 ========================================================= */
 
 const isAuthenticated = (user) => {
-  const token =
-    localStorage.getItem("token") ||
-    localStorage.getItem("authToken");
+  if (!user) {
+    return false;
+  }
 
-  return Boolean(token && user);
+  /*
+   * authSlice stores the JWT inside:
+   *
+   * user.token
+   *
+   * So we check that directly.
+   */
+
+  return Boolean(user.token);
 };
+
+
+/* =========================================================
+   LOADING SCREEN
+========================================================= */
+
+function LoadingScreen() {
+  return (
+    <div className="route-loading">
+      <div className="loading-logo">+</div>
+
+      <h2>CareLink</h2>
+
+      <div className="loading-spinner"></div>
+
+      <p>
+        Loading your healthcare portal...
+      </p>
+    </div>
+  );
+}
 
 
 /* =========================================================
@@ -60,16 +110,16 @@ function ProtectedRoute({ children }) {
   );
 
   if (isLoading) {
-    return (
-      <div className="route-loading">
-        <div className="loading-spinner"></div>
-        <p>Loading CareLink...</p>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!isAuthenticated(user)) {
-    return <Navigate to="/login" replace />;
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
   }
 
   return children;
@@ -80,33 +130,54 @@ function ProtectedRoute({ children }) {
    ROLE ROUTE
 ========================================================= */
 
-function RoleRoute({ allowedRoles, children }) {
+function RoleRoute({
+  allowedRoles,
+  children,
+}) {
   const { user } = useSelector(
     (state) => state.auth || {}
   );
 
   const role = getRole(user);
 
-  if (!allowedRoles.includes(role)) {
+  if (!role) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
 
-    if (role === "DOCTOR") {
-      return (
-        <Navigate
-          to="/doctor-dashboard"
-          replace
-        />
-      );
-    }
+  if (allowedRoles.includes(role)) {
+    return children;
+  }
 
-    if (role === "CLINIC_ADMIN") {
-      return (
-        <Navigate
-          to="/admin-dashboard"
-          replace
-        />
-      );
-    }
+  /*
+   * If the user tries to open another
+   * role's dashboard, send them to
+   * their own dashboard.
+   */
 
+  if (role === "DOCTOR") {
+    return (
+      <Navigate
+        to="/doctor-dashboard"
+        replace
+      />
+    );
+  }
+
+  if (role === "CLINIC_ADMIN") {
+    return (
+      <Navigate
+        to="/admin-dashboard"
+        replace
+      />
+    );
+  }
+
+  if (role === "PATIENT") {
     return (
       <Navigate
         to="/patient-dashboard"
@@ -115,7 +186,12 @@ function RoleRoute({ allowedRoles, children }) {
     );
   }
 
-  return children;
+  return (
+    <Navigate
+      to="/login"
+      replace
+    />
+  );
 }
 
 
@@ -163,9 +239,22 @@ function RoleDashboardRedirect() {
 
   /* PATIENT */
 
+  if (role === "PATIENT") {
+    return (
+      <Navigate
+        to="/patient-dashboard"
+        replace
+      />
+    );
+  }
+
+  /*
+   * Unknown role
+   */
+
   return (
     <Navigate
-      to="/patient-dashboard"
+      to="/login"
       replace
     />
   );
@@ -252,67 +341,27 @@ function AdminPatients() {
 ========================================================= */
 
 function App() {
-
-  const dispatch = useDispatch();
-
-  const {
-    user,
-    isLoading,
-  } = useSelector(
+  const { user, isLoading } = useSelector(
     (state) => state.auth || {}
   );
 
-
-  /* =======================================================
-     RESTORE LOGIN AFTER PAGE REFRESH
-  ======================================================= */
-
-  useEffect(() => {
-
-    const token =
-      localStorage.getItem("token") ||
-      localStorage.getItem("authToken");
-
-    if (token && !user) {
-      dispatch(getMe());
-    }
-
-  }, [dispatch, user]);
-
-
-  /* =======================================================
-     LOADING
-  ======================================================= */
+  /*
+   * No getMe() here.
+   *
+   * authSlice already restores the user
+   * from localStorage when the application starts.
+   */
 
   if (isLoading && !user) {
-    return (
-      <div className="route-loading">
-
-        <div className="loading-logo">
-          +
-        </div>
-
-        <h2>CareLink</h2>
-
-        <div className="loading-spinner"></div>
-
-        <p>
-          Loading your healthcare portal...
-        </p>
-
-      </div>
-    );
+    return <LoadingScreen />;
   }
-
 
   return (
     <BrowserRouter>
 
       <Routes>
 
-        {/* =================================================
-            HOME
-        ================================================= */}
+        {/* HOME */}
 
         <Route
           path="/"
@@ -322,9 +371,7 @@ function App() {
         />
 
 
-        {/* =================================================
-            LOGIN
-        ================================================= */}
+        {/* LOGIN */}
 
         <Route
           path="/login"
@@ -338,9 +385,7 @@ function App() {
         />
 
 
-        {/* =================================================
-            REGISTER
-        ================================================= */}
+        {/* REGISTER */}
 
         <Route
           path="/register"
@@ -354,9 +399,7 @@ function App() {
         />
 
 
-        {/* =================================================
-            DASHBOARD ENTRY
-        ================================================= */}
+        {/* GENERIC DASHBOARD */}
 
         <Route
           path="/dashboard"
@@ -366,9 +409,7 @@ function App() {
         />
 
 
-        {/* =================================================
-            PATIENT
-        ================================================= */}
+        {/* PATIENT DASHBOARD */}
 
         <Route
           path="/patient-dashboard"
@@ -378,9 +419,7 @@ function App() {
         />
 
 
-        {/* =================================================
-            DOCTOR
-        ================================================= */}
+        {/* DOCTOR DASHBOARD */}
 
         <Route
           path="/doctor-dashboard"
@@ -390,9 +429,7 @@ function App() {
         />
 
 
-        {/* =================================================
-            ADMIN
-        ================================================= */}
+        {/* ADMIN DASHBOARD */}
 
         <Route
           path="/admin-dashboard"
@@ -402,9 +439,7 @@ function App() {
         />
 
 
-        {/* =================================================
-            ADMIN DOCTORS
-        ================================================= */}
+        {/* ADMIN DOCTORS */}
 
         <Route
           path="/admin/doctors"
@@ -414,9 +449,7 @@ function App() {
         />
 
 
-        {/* =================================================
-            ADMIN PATIENTS
-        ================================================= */}
+        {/* ADMIN PATIENTS */}
 
         <Route
           path="/admin/patients"
@@ -426,9 +459,7 @@ function App() {
         />
 
 
-        {/* =================================================
-            FALLBACK
-        ================================================= */}
+        {/* FALLBACK */}
 
         <Route
           path="*"

@@ -5,19 +5,22 @@ import {
 
 import authService from "../../services/authService";
 
+
 /* =========================================================
    GET STORED USER
 ========================================================= */
 
 const getStoredUser = () => {
   try {
-    const storedUser = localStorage.getItem("user");
+    const storedUser =
+      localStorage.getItem("user");
 
     if (!storedUser) {
       return null;
     }
 
     return JSON.parse(storedUser);
+
   } catch (error) {
     localStorage.removeItem("user");
     return null;
@@ -34,7 +37,6 @@ const normalizeRole = (role) => {
     return "";
   }
 
-  // If backend sends roles as an object
   if (typeof role === "object") {
     role =
       role.name ||
@@ -43,12 +45,16 @@ const normalizeRole = (role) => {
       "";
   }
 
-  let normalizedRole = String(role)
-    .trim()
-    .toUpperCase();
+  let normalizedRole =
+    String(role)
+      .trim()
+      .toUpperCase();
 
-  if (normalizedRole.startsWith("ROLE_")) {
-    normalizedRole = normalizedRole.substring(5);
+  if (
+    normalizedRole.startsWith("ROLE_")
+  ) {
+    normalizedRole =
+      normalizedRole.substring(5);
   }
 
   return normalizedRole;
@@ -56,7 +62,7 @@ const normalizeRole = (role) => {
 
 
 /* =========================================================
-   GET ROLE FROM BACKEND RESPONSE
+   GET ROLE
 ========================================================= */
 
 const getBackendRole = (response) => {
@@ -76,13 +82,24 @@ const getBackendRole = (response) => {
     response?.roleName ||
     response?.authority;
 
-  // Handle roles array
-  if (!role && Array.isArray(backendUser?.roles)) {
-    role = backendUser.roles[0];
+  if (
+    !role &&
+    Array.isArray(
+      backendUser?.roles
+    )
+  ) {
+    role =
+      backendUser.roles[0];
   }
 
-  if (!role && Array.isArray(response?.roles)) {
-    role = response.roles[0];
+  if (
+    !role &&
+    Array.isArray(
+      response?.roles
+    )
+  ) {
+    role =
+      response.roles[0];
   }
 
   return normalizeRole(role);
@@ -96,29 +113,37 @@ const getBackendRole = (response) => {
 export const login = createAsyncThunk(
   "auth/login",
 
-  async (loginData, { rejectWithValue }) => {
+  async (
+    loginData,
+    { rejectWithValue }
+  ) => {
+
     try {
-      // Remove previous session
+
       localStorage.removeItem("user");
 
-      // Login ONLY with email and password
-      const response = await authService.login({
-        email: loginData.email,
-        password: loginData.password,
-      });
+      const response =
+        await authService.login({
+          email: loginData.email,
+          password: loginData.password,
+        });
+
 
       console.log(
-        "=========================================="
-      );
-
-      console.log(
-        "CARELINK BACKEND LOGIN RESPONSE:",
+        "CARELINK LOGIN RESPONSE:",
         response
       );
 
-      /* -----------------------------------------------------
-         BACKEND USER
-      ----------------------------------------------------- */
+
+      /*
+       * Your backend returns:
+       *
+       * {
+       *   token,
+       *   email,
+       *   role
+       * }
+       */
 
       const backendUser =
         response?.user ||
@@ -126,34 +151,29 @@ export const login = createAsyncThunk(
         response?.data ||
         response;
 
-      /* -----------------------------------------------------
-         ROLE FROM BACKEND
-      ----------------------------------------------------- */
 
-      const role = getBackendRole(response);
+      /* ROLE */
+
+      const role =
+        getBackendRole(response);
+
 
       console.log(
-        "CARELINK BACKEND ROLE:",
+        "CARELINK USER ROLE:",
         role
       );
 
-      /* -----------------------------------------------------
-         NEVER ASSUME PATIENT
-      ----------------------------------------------------- */
 
       if (!role) {
-        console.error(
-          "CARELINK ERROR: Backend did not return a role."
-        );
 
         return rejectWithValue(
-          "Login successful, but the server did not return the user's role."
+          "Login successful, but the server did not return a user role."
         );
+
       }
 
-      /* -----------------------------------------------------
-         TOKEN
-      ----------------------------------------------------- */
+
+      /* TOKEN */
 
       const token =
         response?.token ||
@@ -163,29 +183,35 @@ export const login = createAsyncThunk(
         backendUser?.accessToken ||
         "";
 
-      /* -----------------------------------------------------
-         NAME
-      ----------------------------------------------------- */
 
-      const fullName =
-        backendUser?.fullName ||
-        backendUser?.name ||
-        response?.fullName ||
-        response?.name ||
-        "";
+      if (!token) {
 
-      /* -----------------------------------------------------
-         EMAIL
-      ----------------------------------------------------- */
+        return rejectWithValue(
+          "Login failed because the server did not return a token."
+        );
+
+      }
+
+
+      /* EMAIL */
 
       const email =
         backendUser?.email ||
         response?.email ||
         loginData.email;
 
-      /* -----------------------------------------------------
-         FINAL USER
-      ----------------------------------------------------- */
+
+      /* NAME */
+
+      const fullName =
+        backendUser?.fullName ||
+        backendUser?.name ||
+        response?.fullName ||
+        response?.name ||
+        email;
+
+
+      /* FINAL USER */
 
       const user = {
         ...backendUser,
@@ -199,45 +225,56 @@ export const login = createAsyncThunk(
         token,
       };
 
+
       console.log(
         "CARELINK FINAL USER:",
         user
       );
 
-      console.log(
-        "CARELINK FINAL ROLE:",
-        user.role
-      );
 
-      console.log(
-        "=========================================="
-      );
-
-      /* -----------------------------------------------------
-         SAVE USER
-      ----------------------------------------------------- */
+      /* SAVE USER */
 
       localStorage.setItem(
         "user",
         JSON.stringify(user)
       );
 
+
+      /*
+       * Also save token separately.
+       *
+       * This makes the session easier
+       * to use elsewhere in the application.
+       */
+
+      localStorage.setItem(
+        "token",
+        token
+      );
+
+
       return user;
 
     } catch (error) {
+
       console.error(
         "CARELINK LOGIN ERROR:",
         error
       );
 
+
       const errorMessage =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
+        error?.response?.data ||
         error?.message ||
         "Login failed";
 
+
       return rejectWithValue(
-        errorMessage
+        typeof errorMessage === "string"
+          ? errorMessage
+          : "Login failed"
       );
     }
   }
@@ -248,31 +285,48 @@ export const login = createAsyncThunk(
    REGISTER
 ========================================================= */
 
-export const register = createAsyncThunk(
-  "auth/register",
+export const register =
+  createAsyncThunk(
+    "auth/register",
 
-  async (registerData, { rejectWithValue }) => {
-    try {
-      const response =
-        await authService.register(
-          registerData
+    async (
+      registerData,
+      { rejectWithValue }
+    ) => {
+
+      try {
+
+        const response =
+          await authService.register(
+            registerData
+          );
+
+        return response;
+
+      } catch (error) {
+
+        console.error(
+          "CARELINK REGISTER ERROR:",
+          error
         );
 
-      return response;
 
-    } catch (error) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        error?.message ||
-        "Registration failed";
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.response?.data ||
+          error?.message ||
+          "Registration failed";
 
-      return rejectWithValue(
-        errorMessage
-      );
+
+        return rejectWithValue(
+          typeof errorMessage === "string"
+            ? errorMessage
+            : "Registration failed"
+        );
+      }
     }
-  }
-);
+  );
 
 
 /* =========================================================
@@ -280,6 +334,7 @@ export const register = createAsyncThunk(
 ========================================================= */
 
 const initialState = {
+
   user: getStoredUser(),
 
   isLoading: false,
@@ -296,50 +351,62 @@ const initialState = {
    AUTH SLICE
 ========================================================= */
 
-const authSlice = createSlice({
+const authSlice =
+  createSlice({
 
-  name: "auth",
+    name: "auth",
 
-  initialState,
+    initialState,
 
-  reducers: {
+    reducers: {
 
-    reset: (state) => {
-      state.isLoading = false;
-      state.isError = false;
-      state.isSuccess = false;
-      state.message = "";
+      reset: (state) => {
+
+        state.isLoading = false;
+
+        state.isError = false;
+
+        state.isSuccess = false;
+
+        state.message = "";
+      },
+
+
+      logout: (state) => {
+
+        state.user = null;
+
+        state.isLoading = false;
+
+        state.isError = false;
+
+        state.isSuccess = false;
+
+        state.message = "";
+
+
+        localStorage.removeItem(
+          "user"
+        );
+
+        localStorage.removeItem(
+          "token"
+        );
+
+        localStorage.removeItem(
+          "authToken"
+        );
+      },
     },
 
-    logout: (state) => {
-      state.user = null;
 
-      state.isLoading = false;
+    extraReducers: (builder) => {
 
-      state.isError = false;
-
-      state.isSuccess = false;
-
-      state.message = "";
-
-      localStorage.removeItem("user");
-    },
-  },
-
-
-  /* =======================================================
-     EXTRA REDUCERS
-  ======================================================= */
-
-  extraReducers: (builder) => {
-
-    builder
-
-      /* ---------------------------------------------------
+      /* ===================================================
          LOGIN PENDING
-      --------------------------------------------------- */
+      =================================================== */
 
-      .addCase(
+      builder.addCase(
         login.pending,
         (state) => {
 
@@ -353,14 +420,14 @@ const authSlice = createSlice({
 
           state.user = null;
         }
-      )
+      );
 
 
-      /* ---------------------------------------------------
+      /* ===================================================
          LOGIN SUCCESS
-      --------------------------------------------------- */
+      =================================================== */
 
-      .addCase(
+      builder.addCase(
         login.fulfilled,
         (state, action) => {
 
@@ -370,18 +437,19 @@ const authSlice = createSlice({
 
           state.isSuccess = true;
 
-          state.user = action.payload;
+          state.user =
+            action.payload;
 
           state.message = "";
         }
-      )
+      );
 
 
-      /* ---------------------------------------------------
+      /* ===================================================
          LOGIN FAILED
-      --------------------------------------------------- */
+      =================================================== */
 
-      .addCase(
+      builder.addCase(
         login.rejected,
         (state, action) => {
 
@@ -397,14 +465,14 @@ const authSlice = createSlice({
             action.payload ||
             "Login failed";
         }
-      )
+      );
 
 
-      /* ---------------------------------------------------
+      /* ===================================================
          REGISTER PENDING
-      --------------------------------------------------- */
+      =================================================== */
 
-      .addCase(
+      builder.addCase(
         register.pending,
         (state) => {
 
@@ -416,14 +484,14 @@ const authSlice = createSlice({
 
           state.message = "";
         }
-      )
+      );
 
 
-      /* ---------------------------------------------------
+      /* ===================================================
          REGISTER SUCCESS
-      --------------------------------------------------- */
+      =================================================== */
 
-      .addCase(
+      builder.addCase(
         register.fulfilled,
         (state) => {
 
@@ -435,14 +503,14 @@ const authSlice = createSlice({
 
           state.message = "";
         }
-      )
+      );
 
 
-      /* ---------------------------------------------------
+      /* ===================================================
          REGISTER FAILED
-      --------------------------------------------------- */
+      =================================================== */
 
-      .addCase(
+      builder.addCase(
         register.rejected,
         (state, action) => {
 
@@ -457,17 +525,18 @@ const authSlice = createSlice({
             "Registration failed";
         }
       );
-  },
-});
+    },
+  });
 
 
 /* =========================================================
-   EXPORTS
+   EXPORT ACTIONS
 ========================================================= */
 
 export const {
   reset,
   logout,
 } = authSlice.actions;
+
 
 export default authSlice.reducer;

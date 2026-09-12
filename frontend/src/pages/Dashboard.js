@@ -10,7 +10,10 @@ const doctors = [
     specialty: "Cardiologist",
     experience: "12 Years",
     fee: "₹800",
+    rating: "4.9",
+    reviews: "128",
     initials: "EW",
+    next: "Tomorrow, 10:00 AM",
   },
   {
     id: 2,
@@ -18,7 +21,10 @@ const doctors = [
     specialty: "Dermatologist",
     experience: "9 Years",
     fee: "₹600",
+    rating: "4.8",
+    reviews: "94",
     initials: "AP",
+    next: "Wednesday, 2:30 PM",
   },
   {
     id: 3,
@@ -26,7 +32,10 @@ const doctors = [
     specialty: "Pediatrician",
     experience: "15 Years",
     fee: "₹700",
+    rating: "5.0",
+    reviews: "210",
     initials: "SJ",
+    next: "Friday, 9:00 AM",
   },
   {
     id: 4,
@@ -34,7 +43,10 @@ const doctors = [
     specialty: "Neurologist",
     experience: "11 Years",
     fee: "₹900",
+    rating: "4.7",
+    reviews: "88",
     initials: "MV",
+    next: "Next Monday, 11:15 AM",
   },
 ];
 
@@ -44,9 +56,10 @@ const Dashboard = () => {
 
   const { user } = useSelector((state) => state.auth || {});
 
+  const [activeSection, setActiveSection] = useState("Overview");
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showBooking, setShowBooking] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [showBooking, setShowBooking] = useState(false);
   const [toast, setToast] = useState("");
 
   const patientName =
@@ -62,6 +75,11 @@ const Dashboard = () => {
     }, 3000);
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
   const openBooking = (doctor) => {
     setSelectedDoctor(doctor);
     setShowBooking(true);
@@ -72,23 +90,26 @@ const Dashboard = () => {
     showToast("Appointment request submitted successfully!");
   };
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/login");
+  const handleNavigation = (section) => {
+    setActiveSection(section);
+
+    if (section === "Find Doctors") {
+      navigate("/patient-dashboard");
+    }
   };
 
   return (
     <div className="patient-dashboard">
 
       {/* Animated background */}
-      <div className="dashboard-bg">
-        <div className="bg-orb orb-one"></div>
-        <div className="bg-orb orb-two"></div>
-        <div className="bg-orb orb-three"></div>
+      <div className="dashboard-background">
+        <div className="dashboard-orb orb-one"></div>
+        <div className="dashboard-orb orb-two"></div>
+        <div className="dashboard-orb orb-three"></div>
       </div>
 
       {/* SIDEBAR */}
-      <aside className="dashboard-sidebar">
+      <aside className="patient-sidebar">
 
         <div className="brand">
           <div className="brand-icon">+</div>
@@ -99,7 +120,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="user-card">
+        <div className="portal-user">
           <div className="user-avatar">
             {patientName.charAt(0).toUpperCase()}
           </div>
@@ -112,23 +133,25 @@ const Dashboard = () => {
 
         <nav className="dashboard-nav">
 
-          <button className="nav-link active">
+          <button
+            className={activeSection === "Overview" ? "active" : ""}
+            onClick={() => setActiveSection("Overview")}
+          >
             <span>⌂</span>
-            Dashboard
+            Overview
           </button>
 
           <button
-            className="nav-link"
-            onClick={() => navigate("/patient-dashboard")}
+            className={activeSection === "Find Doctors" ? "active" : ""}
+            onClick={() => handleNavigation("Find Doctors")}
           >
             <span>♙</span>
             Find Doctors
           </button>
 
           <button
-            className="nav-link"
             onClick={() =>
-              showToast("You have no upcoming appointments.")
+              showToast("No appointments available yet")
             }
           >
             <span>▣</span>
@@ -136,9 +159,8 @@ const Dashboard = () => {
           </button>
 
           <button
-            className="nav-link"
             onClick={() =>
-              showToast("No health records available yet.")
+              showToast("No health records available yet")
             }
           >
             <span>▤</span>
@@ -146,9 +168,8 @@ const Dashboard = () => {
           </button>
 
           <button
-            className="nav-link"
             onClick={() =>
-              showToast("No active prescriptions.")
+              showToast("No prescriptions available yet")
             }
           >
             <span>▥</span>
@@ -156,9 +177,8 @@ const Dashboard = () => {
           </button>
 
           <button
-            className="nav-link"
             onClick={() =>
-              showToast("Messaging will be available soon.")
+              showToast("No messages available yet")
             }
           >
             <span>◯</span>
@@ -166,9 +186,8 @@ const Dashboard = () => {
           </button>
 
           <button
-            className="nav-link"
             onClick={() =>
-              showToast("Profile section selected.")
+              showToast("Profile settings selected")
             }
           >
             <span>♙</span>
@@ -176,9 +195,8 @@ const Dashboard = () => {
           </button>
 
           <button
-            className="nav-link"
             onClick={() =>
-              showToast("Settings section selected.")
+              showToast("Settings selected")
             }
           >
             <span>⚙</span>
@@ -188,7 +206,7 @@ const Dashboard = () => {
         </nav>
 
         <button
-          className="logout-link"
+          className="logout-button"
           onClick={handleLogout}
         >
           <span>↪</span>
@@ -197,26 +215,21 @@ const Dashboard = () => {
 
       </aside>
 
+      {/* MAIN */}
+      <main className="patient-main">
 
-      {/* MAIN CONTENT */}
-      <main className="dashboard-main">
-
-        {/* HEADER */}
-        <header className="dashboard-header">
+        {/* TOPBAR */}
+        <header className="patient-topbar">
 
           <div>
-            <span className="breadcrumb">
-              CareLink / Overview
-            </span>
+            <div className="breadcrumb">
+              CareLink <span>/</span> Overview
+            </div>
 
-            <h1>Dashboard</h1>
-
-            <p>
-              Manage your healthcare journey from one place.
-            </p>
+            <h2>Dashboard</h2>
           </div>
 
-          <div className="header-actions">
+          <div className="topbar-right">
 
             <button
               className="notification-button"
@@ -225,11 +238,12 @@ const Dashboard = () => {
               }
             >
               🔔
-              <span className="notification-dot"></span>
+              <span></span>
             </button>
 
-            <div className="header-user">
-              <div className="small-avatar">
+            <div className="top-user">
+
+              <div className="user-avatar small">
                 {patientName.charAt(0).toUpperCase()}
               </div>
 
@@ -237,31 +251,30 @@ const Dashboard = () => {
                 <strong>{patientName}</strong>
                 <span>Patient</span>
               </div>
+
             </div>
 
           </div>
 
           {showNotifications && (
-            <div className="notification-box">
+            <div className="notification-dropdown">
 
               <h3>Notifications</h3>
 
               <div className="notification-item">
-                <span>✓</span>
-
-                <div>
+                <div>✓</div>
+                <section>
                   <strong>Welcome to CareLink</strong>
-                  <p>Your account is ready.</p>
-                </div>
+                  <p>Your healthcare portal is ready.</p>
+                </section>
               </div>
 
               <div className="notification-item">
-                <span>!</span>
-
-                <div>
+                <div>!</div>
+                <section>
                   <strong>Health reminder</strong>
-                  <p>Keep your health records updated.</p>
-                </div>
+                  <p>Keep your medical records updated.</p>
+                </section>
               </div>
 
             </div>
@@ -269,427 +282,363 @@ const Dashboard = () => {
 
         </header>
 
+        {/* CONTENT */}
+        <div className="patient-content">
 
-        {/* WELCOME HERO */}
-        <section className="welcome-section">
+          {/* HERO */}
+          <section className="patient-hero">
 
-          <div className="welcome-text">
+            <div className="hero-content">
 
-            <span className="section-label">
-              CARELINK HEALTHCARE
-            </span>
-
-            <h2>
-              Good morning,{" "}
-              <span>{patientName.split(" ")[0]}!</span>
-            </h2>
-
-            <p>
-              Take control of your healthcare journey.
-              Book appointments, connect with trusted
-              doctors and manage your health information
-              easily.
-            </p>
-
-            <div className="welcome-actions">
-
-              <button
-                className="primary-action"
-                onClick={() =>
-                  document
-                    .getElementById("doctors-section")
-                    ?.scrollIntoView({
-                      behavior: "smooth",
-                    })
-                }
-              >
-                Find a Doctor →
-              </button>
-
-              <button
-                className="secondary-action"
-                onClick={() =>
-                  showToast(
-                    "You have no upcoming appointments."
-                  )
-                }
-              >
-                View Appointments
-              </button>
-
-            </div>
-
-          </div>
-
-          <div className="medical-visual">
-
-            <div className="pulse-ring ring-one"></div>
-            <div className="pulse-ring ring-two"></div>
-
-            <div className="medical-cross">
-              +
-            </div>
-
-            <div className="heartbeat">
-              ──╱╲──╱╲────
-            </div>
-
-          </div>
-
-        </section>
-
-
-        {/* TRUST STRIP */}
-        <section className="trust-strip">
-
-          <div>
-            <span className="trust-icon">✓</span>
-            <strong>Verified Doctors</strong>
-            <small>Trusted professionals</small>
-          </div>
-
-          <div>
-            <span className="trust-icon">▣</span>
-            <strong>Secure Records</strong>
-            <small>Your data stays protected</small>
-          </div>
-
-          <div>
-            <span className="trust-icon">⚡</span>
-            <strong>Easy Booking</strong>
-            <small>Book in a few clicks</small>
-          </div>
-
-        </section>
-
-
-        {/* STATISTICS */}
-        <section className="statistics-grid">
-
-          <div className="dashboard-stat">
-            <div className="stat-symbol blue-symbol">
-              ▣
-            </div>
-
-            <div>
-              <span>Total appointments</span>
-              <strong>0</strong>
-            </div>
-          </div>
-
-          <div className="dashboard-stat">
-            <div className="stat-symbol green-symbol">
-              ✓
-            </div>
-
-            <div>
-              <span>Completed visits</span>
-              <strong>0</strong>
-            </div>
-          </div>
-
-          <div className="dashboard-stat">
-            <div className="stat-symbol purple-symbol">
-              ♡
-            </div>
-
-            <div>
-              <span>Active prescriptions</span>
-              <strong>0</strong>
-            </div>
-          </div>
-
-          <div className="dashboard-stat">
-            <div className="stat-symbol orange-symbol">
-              ♥
-            </div>
-
-            <div>
-              <span>Medical records</span>
-              <strong>0</strong>
-            </div>
-          </div>
-
-        </section>
-
-
-        {/* QUICK ACTIONS */}
-        <section className="dashboard-section">
-
-          <div className="section-heading">
-
-            <div>
-              <span className="section-label">
-                GET STARTED
+              <span className="hero-label">
+                CARELINK HEALTHCARE
               </span>
 
-              <h2>Quick Actions</h2>
+              <h1>
+                Good morning,{" "}
+                <span>{patientName.split(" ")[0]}!</span>
+              </h1>
 
               <p>
-                Everything you need in one place.
+                Take control of your healthcare journey.
+                Book appointments, manage records and stay
+                connected with your doctors.
               </p>
-            </div>
 
-          </div>
-
-
-          <div className="quick-actions-grid">
-
-            <button
-              className="quick-action-card"
-              onClick={() =>
-                document
-                  .getElementById("doctors-section")
-                  ?.scrollIntoView({
-                    behavior: "smooth",
-                  })
-              }
-            >
-              <div className="quick-icon blue">
-                ♙
-              </div>
-
-              <div>
-                <h3>Find a Doctor</h3>
-                <p>
-                  Browse specialists and doctors
-                </p>
-              </div>
-
-              <span>→</span>
-            </button>
-
-
-            <button
-              className="quick-action-card"
-              onClick={() =>
-                showToast(
-                  "You have no upcoming appointments."
-                )
-              }
-            >
-              <div className="quick-icon green">
-                ▣
-              </div>
-
-              <div>
-                <h3>My Appointments</h3>
-                <p>
-                  Schedule or manage appointments
-                </p>
-              </div>
-
-              <span>→</span>
-            </button>
-
-
-            <button
-              className="quick-action-card"
-              onClick={() =>
-                showToast(
-                  "No health records available yet."
-                )
-              }
-            >
-              <div className="quick-icon purple">
-                ▤
-              </div>
-
-              <div>
-                <h3>Health Records</h3>
-                <p>
-                  Access your medical history
-                </p>
-              </div>
-
-              <span>→</span>
-            </button>
-
-
-            <button
-              className="quick-action-card"
-              onClick={() =>
-                showToast(
-                  "No active prescriptions available."
-                )
-              }
-            >
-              <div className="quick-icon orange">
-                ▥
-              </div>
-
-              <div>
-                <h3>Prescriptions</h3>
-                <p>
-                  Check your prescriptions
-                </p>
-              </div>
-
-              <span>→</span>
-            </button>
-
-          </div>
-
-        </section>
-
-
-        {/* DOCTORS */}
-        <section
-          className="dashboard-section"
-          id="doctors-section"
-        >
-
-          <div className="section-heading doctors-heading">
-
-            <div>
-              <span className="section-label">
-                OUR SPECIALISTS
-              </span>
-
-              <h2>Recommended Doctors</h2>
-
-              <p>
-                Top-rated specialists available for consultation.
-              </p>
-            </div>
-
-            <button
-              className="view-all-button"
-              onClick={() =>
-                showToast(
-                  "Doctor search will be available soon."
-                )
-              }
-            >
-              View all →
-            </button>
-
-          </div>
-
-
-          <div className="doctor-grid">
-
-            {doctors.map((doctor) => (
-
-              <div
-                className="doctor-card"
-                key={doctor.id}
-              >
-
-                <div className="doctor-card-top">
-
-                  <div className="doctor-avatar">
-                    {doctor.initials}
-                  </div>
-
-                  <span className="doctor-available">
-                    ● Available
-                  </span>
-
-                </div>
-
-                <h3>{doctor.name}</h3>
-
-                <p className="doctor-specialty">
-                  {doctor.specialty}
-                </p>
-
-                <div className="doctor-rating">
-                  ★ 4.9
-                  <span>
-                    Highly rated
-                  </span>
-                </div>
-
-                <div className="doctor-details">
-
-                  <div>
-                    <span>Experience</span>
-                    <strong>
-                      {doctor.experience}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <span>Consultation</span>
-                    <strong>
-                      {doctor.fee}
-                    </strong>
-                  </div>
-
-                </div>
+              <div className="hero-actions">
 
                 <button
-                  className="book-doctor-button"
+                  className="primary-action"
                   onClick={() =>
-                    openBooking(doctor)
+                    setActiveSection("Find Doctors")
                   }
                 >
-                  Book Appointment →
+                  Find a Doctor →
+                </button>
+
+                <button
+                  className="secondary-action"
+                  onClick={() =>
+                    showToast("You don't have any appointments yet")
+                  }
+                >
+                  View Appointments
                 </button>
 
               </div>
 
-            ))}
+            </div>
 
-          </div>
+            <div className="hero-visual">
 
-        </section>
+              <div className="heartbeat-circle">
+                <div>+</div>
+              </div>
 
+              <div className="heartbeat-line">
+                <span></span>
+              </div>
 
-        {/* SUPPORT */}
-        <section className="support-card">
+              <div className="floating-medical-card">
+                <strong>♥</strong>
+                <div>
+                  <b>Healthcare</b>
+                  <small>Made simpler</small>
+                </div>
+              </div>
 
-          <div className="support-icon">
-            ?
-          </div>
+            </div>
 
-          <div>
-            <span className="section-label">
-              NEED HELP?
-            </span>
+          </section>
 
-            <h2>
-              We're here for you
-            </h2>
+          {/* FEATURES */}
+          <section className="feature-strip">
 
-            <p>
-              Our CareLink support team is available
-              to help you with your healthcare journey.
-            </p>
-          </div>
+            <div>
+              <span>✓</span>
+              <div>
+                <strong>Verified Doctors</strong>
+                <small>Trusted professionals</small>
+              </div>
+            </div>
 
-          <button
-            className="support-button"
-            onClick={() =>
-              showToast(
-                "Support team contact feature coming soon."
-              )
-            }
-          >
-            Contact Support
-          </button>
+            <div>
+              <span>▣</span>
+              <div>
+                <strong>Secure Records</strong>
+                <small>Your data stays protected</small>
+              </div>
+            </div>
 
-        </section>
+            <div>
+              <span>⚡</span>
+              <div>
+                <strong>Easy Booking</strong>
+                <small>Book in a few clicks</small>
+              </div>
+            </div>
 
+          </section>
 
-        {/* FOOTER */}
-        <footer className="dashboard-footer">
-          <span>© 2026 CareLink</span>
-          <span>Secure Healthcare Platform</span>
-        </footer>
+          {/* STATS */}
+          <section className="stats-section">
+
+            <div className="stat-box">
+              <div className="stat-symbol blue">▣</div>
+
+              <div>
+                <span>Total appointments</span>
+                <strong>0</strong>
+                <small>No data</small>
+              </div>
+            </div>
+
+            <div className="stat-box">
+              <div className="stat-symbol green">✓</div>
+
+              <div>
+                <span>Completed visits</span>
+                <strong>0</strong>
+                <small>No data</small>
+              </div>
+            </div>
+
+            <div className="stat-box">
+              <div className="stat-symbol purple">♡</div>
+
+              <div>
+                <span>Active prescriptions</span>
+                <strong>0</strong>
+                <small>No data</small>
+              </div>
+            </div>
+
+            <div className="stat-box">
+              <div className="stat-symbol orange">♥</div>
+
+              <div>
+                <span>Medical records</span>
+                <strong>0</strong>
+                <small>No data</small>
+              </div>
+            </div>
+
+          </section>
+
+          {/* QUICK ACTIONS */}
+          <section className="dashboard-section">
+
+            <div className="section-header">
+
+              <div>
+                <span>CARE AT YOUR FINGERTIPS</span>
+                <h2>Quick Actions</h2>
+                <p>Everything you need in one place</p>
+              </div>
+
+            </div>
+
+            <div className="quick-actions">
+
+              <button
+                onClick={() =>
+                  setActiveSection("Find Doctors")
+                }
+              >
+                <div className="quick-icon blue-icon">
+                  ♙
+                </div>
+
+                <div>
+                  <h3>Find a Doctor</h3>
+                  <p>Browse specialists and doctors</p>
+                </div>
+
+                <span>→</span>
+              </button>
+
+              <button
+                onClick={() =>
+                  showToast("No appointments yet")
+                }
+              >
+                <div className="quick-icon green-icon">
+                  ▣
+                </div>
+
+                <div>
+                  <h3>My Appointments</h3>
+                  <p>Schedule or manage appointments</p>
+                </div>
+
+                <span>→</span>
+              </button>
+
+              <button
+                onClick={() =>
+                  showToast("No health records yet")
+                }
+              >
+                <div className="quick-icon purple-icon">
+                  ▤
+                </div>
+
+                <div>
+                  <h3>Health Records</h3>
+                  <p>Access clinical files and history</p>
+                </div>
+
+                <span>→</span>
+              </button>
+
+              <button
+                onClick={() =>
+                  showToast("No prescriptions yet")
+                }
+              >
+                <div className="quick-icon orange-icon">
+                  ▥
+                </div>
+
+                <div>
+                  <h3>Prescriptions</h3>
+                  <p>Check medicines and prescriptions</p>
+                </div>
+
+                <span>→</span>
+              </button>
+
+            </div>
+
+          </section>
+
+          {/* DOCTORS */}
+          <section className="dashboard-section">
+
+            <div className="section-header doctors-header">
+
+              <div>
+                <span>HEALTHCARE PROFESSIONALS</span>
+                <h2>Recommended Doctors</h2>
+                <p>Top-rated specialists near you</p>
+              </div>
+
+              <button
+                className="view-all-button"
+                onClick={() =>
+                  setActiveSection("Find Doctors")
+                }
+              >
+                View all →
+              </button>
+
+            </div>
+
+            <div className="doctor-grid">
+
+              {doctors.map((doctor) => (
+
+                <div
+                  className="modern-doctor-card"
+                  key={doctor.id}
+                >
+
+                  <div className="doctor-card-top">
+
+                    <div className="doctor-profile">
+                      {doctor.initials}
+                    </div>
+
+                    <span className="doctor-status">
+                      ● Available
+                    </span>
+
+                  </div>
+
+                  <h3>{doctor.name}</h3>
+
+                  <p className="doctor-specialty">
+                    {doctor.specialty}
+                  </p>
+
+                  <div className="doctor-rating">
+                    ★ {doctor.rating}
+                    <span>
+                      ({doctor.reviews} reviews)
+                    </span>
+                  </div>
+
+                  <div className="doctor-details">
+
+                    <div>
+                      <span>Experience</span>
+                      <strong>{doctor.experience}</strong>
+                    </div>
+
+                    <div>
+                      <span>Consultation</span>
+                      <strong>{doctor.fee}</strong>
+                    </div>
+
+                  </div>
+
+                  <div className="doctor-next">
+                    <span>Next Available</span>
+                    <strong>{doctor.next}</strong>
+                  </div>
+
+                  <button
+                    className="doctor-book-button"
+                    onClick={() => openBooking(doctor)}
+                  >
+                    Book Appointment
+                    <span>→</span>
+                  </button>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          </section>
+
+          {/* SUPPORT */}
+          <section className="support-card">
+
+            <div className="support-icon">
+              ?
+            </div>
+
+            <div>
+              <span>NEED HELP?</span>
+              <h2>We're here for you.</h2>
+              <p>
+                Our support team is available to help
+                you with your healthcare journey.
+              </p>
+            </div>
+
+            <button
+              onClick={() =>
+                showToast("Support team contacted")
+              }
+            >
+              Contact Support →
+            </button>
+
+          </section>
+
+        </div>
 
       </main>
-
 
       {/* BOOKING MODAL */}
       {showBooking && selectedDoctor && (
 
         <div
           className="booking-overlay"
-          onClick={() =>
-            setShowBooking(false)
-          }
+          onClick={() => setShowBooking(false)}
         >
 
           <div
@@ -701,89 +650,60 @@ const Dashboard = () => {
 
             <button
               className="modal-close"
-              onClick={() =>
-                setShowBooking(false)
-              }
+              onClick={() => setShowBooking(false)}
             >
               ×
             </button>
 
-            <span className="section-label">
+            <span className="hero-label">
               APPOINTMENT
             </span>
 
-            <h2>
-              Book an Appointment
-            </h2>
+            <h2>Book an Appointment</h2>
 
             <p>
-              Schedule a consultation with{" "}
-              {selectedDoctor.name}.
+              Schedule your consultation with{" "}
+              <strong>{selectedDoctor.name}</strong>.
             </p>
 
             <div className="selected-doctor">
 
-              <div className="doctor-avatar">
+              <div className="doctor-profile">
                 {selectedDoctor.initials}
               </div>
 
               <div>
-                <strong>
-                  {selectedDoctor.name}
-                </strong>
-
-                <span>
-                  {selectedDoctor.specialty}
-                </span>
+                <strong>{selectedDoctor.name}</strong>
+                <span>{selectedDoctor.specialty}</span>
               </div>
 
             </div>
 
-            <label>Select Date</label>
+            <label>Date</label>
 
             <input type="date" />
 
-            <label>Select Time</label>
+            <label>Time</label>
 
-            <select defaultValue="">
-              <option value="" disabled>
-                Choose a time
-              </option>
-
-              <option>
-                10:00 AM
-              </option>
-
-              <option>
-                11:00 AM
-              </option>
-
-              <option>
-                02:00 PM
-              </option>
-
-              <option>
-                04:00 PM
-              </option>
-
-              <option>
-                06:00 PM
-              </option>
+            <select>
+              <option>10:00 AM</option>
+              <option>11:00 AM</option>
+              <option>02:00 PM</option>
+              <option>04:00 PM</option>
+              <option>06:00 PM</option>
             </select>
 
-            <label>
-              Reason for Visit
-            </label>
+            <label>Reason for Visit</label>
 
             <textarea
               placeholder="Briefly describe your reason for consultation..."
-            />
+            ></textarea>
 
             <button
               className="confirm-booking"
               onClick={confirmBooking}
             >
-              Confirm Appointment
+              Confirm Appointment →
             </button>
 
           </div>
@@ -792,16 +712,12 @@ const Dashboard = () => {
 
       )}
 
-
       {/* TOAST */}
       {toast && (
 
         <div className="dashboard-toast">
-
           <span>✓</span>
-
           {toast}
-
         </div>
 
       )}

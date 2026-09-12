@@ -36,14 +36,13 @@ const Navbar = () => {
   }
 
 
-  const handleLogout = () => {
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("authToken");
 
-    dispatch(logout());
-
-    localStorage.removeItem("user");
-
-    navigate("/");
-  };
+  window.location.href = "/";
+};
 
 
   return (

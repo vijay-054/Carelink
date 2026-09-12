@@ -1,58 +1,614 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Link,
+  useNavigate,
+} from "react-router-dom";
 import "./App.css";
+
+/* =========================================================
+   DOCTORS
+========================================================= */
 
 const doctors = [
   {
     id: 1,
-    name: "Dr. Sarah Johnson",
-    specialty: "General Physician",
-    experience: "10 Years",
-    fee: "₹500",
-    status: "Available",
-    initials: "SJ",
-  },
-  {
-    id: 2,
-    name: "Dr. Michael Anderson",
+    name: "Dr. Emily Watson",
     specialty: "Cardiologist",
     experience: "12 Years",
     fee: "₹800",
-    status: "Available",
-    initials: "MA",
+    rating: "4.9",
+    reviews: "128 reviews",
+    available: "Tomorrow, 10:00 AM",
+    initials: "EW",
+  },
+  {
+    id: 2,
+    name: "Dr. Aris Patel",
+    specialty: "Dermatologist",
+    experience: "9 Years",
+    fee: "₹600",
+    rating: "4.8",
+    reviews: "94 reviews",
+    available: "Wednesday, 2:30 PM",
+    initials: "AP",
   },
   {
     id: 3,
-    name: "Dr. Emily Williams",
-    specialty: "Dermatologist",
-    experience: "8 Years",
-    fee: "₹600",
-    status: "Available",
-    initials: "EW",
+    name: "Dr. Sarah Jenkins",
+    specialty: "Pediatrician",
+    experience: "15 Years",
+    fee: "₹700",
+    rating: "5.0",
+    reviews: "210 reviews",
+    available: "Friday, 9:00 AM",
+    initials: "SJ",
+  },
+  {
+    id: 4,
+    name: "Dr. Marcus Vance",
+    specialty: "Neurologist",
+    experience: "11 Years",
+    fee: "₹900",
+    rating: "4.7",
+    reviews: "88 reviews",
+    available: "Next Monday, 11:15 AM",
+    initials: "MV",
   },
 ];
 
-function App() {
-  const [activePage, setActivePage] = useState("Dashboard");
-  const [search, setSearch] = useState("");
-  const [specialty, setSpecialty] = useState("All Specialties");
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showBooking, setShowBooking] = useState(false);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [toast, setToast] = useState("");
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const [notifications, setNotifications] = useState(2);
+/* =========================================================
+   AUTH HELPERS
+========================================================= */
 
-  const filteredDoctors = doctors.filter((doctor) => {
-    const searchMatch =
-      doctor.name.toLowerCase().includes(search.toLowerCase()) ||
-      doctor.specialty.toLowerCase().includes(search.toLowerCase());
+const getStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("carelinkUser"));
+  } catch {
+    return null;
+  }
+};
 
-    const specialtyMatch =
-      specialty === "All Specialties" ||
-      doctor.specialty === specialty;
+const isLoggedIn = () => {
+  return Boolean(localStorage.getItem("carelinkToken"));
+};
 
-    return searchMatch && specialtyMatch;
+/* =========================================================
+   PROTECTED ROUTE
+========================================================= */
+
+function ProtectedRoute({ children }) {
+  return isLoggedIn() ? children : <Navigate to="/login" replace />;
+}
+
+/* =========================================================
+   HOME
+========================================================= */
+
+function Home() {
+  const navigate = useNavigate();
+
+  return (
+    <div className="landing-page">
+
+      <div className="floating-shape shape-one"></div>
+      <div className="floating-shape shape-two"></div>
+      <div className="floating-shape shape-three"></div>
+
+      <header className="landing-navbar">
+        <Link to="/" className="landing-logo">
+          <span className="landing-logo-icon">+</span>
+          Care<span>Link</span>
+        </Link>
+
+        <div className="landing-nav-actions">
+          <Link to="/login" className="landing-login">
+            Login
+          </Link>
+
+          <Link to="/register" className="landing-register">
+            Register
+          </Link>
+        </div>
+      </header>
+
+      <main className="landing-content">
+
+        <div className="landing-text">
+
+          <span className="hero-badge">
+            CARELINK HEALTHCARE
+          </span>
+
+          <h1>
+            Your Health.
+            <br />
+            <span>Connected.</span>
+          </h1>
+
+          <p>
+            Book appointments, connect with trusted doctors,
+            manage your medical records and stay in control
+            of your healthcare journey.
+          </p>
+
+          <div className="landing-buttons">
+
+            <button
+              className="primary-btn large-btn"
+              onClick={() => navigate("/register")}
+            >
+              Get Started →
+            </button>
+
+            <button
+              className="secondary-btn large-btn"
+              onClick={() => navigate("/login")}
+            >
+              Sign In
+            </button>
+
+          </div>
+
+          <div className="hero-features">
+            <span>✓ Verified Doctors</span>
+            <span>✓ Secure Records</span>
+            <span>✓ Easy Booking</span>
+          </div>
+
+        </div>
+
+        <div className="landing-art">
+
+          <div className="medical-orbit orbit-one"></div>
+          <div className="medical-orbit orbit-two"></div>
+
+          <div className="medical-heart">
+            +
+          </div>
+
+          <div className="floating-card card-one">
+            <span>✓</span>
+            <div>
+              <strong>Secure Records</strong>
+              <small>Your data is protected</small>
+            </div>
+          </div>
+
+          <div className="floating-card card-two">
+            <span>♥</span>
+            <div>
+              <strong>Trusted Care</strong>
+              <small>Top healthcare professionals</small>
+            </div>
+          </div>
+
+          <div className="floating-card card-three">
+            <span>▣</span>
+            <div>
+              <strong>Easy Booking</strong>
+              <small>Book in a few clicks</small>
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  );
+}
+
+/* =========================================================
+   REGISTER
+========================================================= */
+
+function Register() {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
+
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleRegister = (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!form.name || !form.email || !form.password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    if (form.password.length < 6) {
+      setError("Password must contain at least 6 characters.");
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    const user = {
+      name: form.name,
+      email: form.email,
+      role: "PATIENT",
+    };
+
+    localStorage.setItem(
+      "carelinkRegisteredUser",
+      JSON.stringify({
+        ...user,
+        password: form.password,
+      })
+    );
+
+    navigate("/login", {
+      state: {
+        registered: true,
+      },
+    });
+  };
+
+  return (
+    <div className="auth-page">
+
+      <div className="auth-background">
+        <div className="auth-circle circle-one"></div>
+        <div className="auth-circle circle-two"></div>
+        <div className="auth-circle circle-three"></div>
+      </div>
+
+      <Link to="/" className="auth-brand">
+        <span>+</span>
+        Care<span>Link</span>
+      </Link>
+
+      <div className="auth-card">
+
+        <div className="auth-side">
+
+          <div className="auth-side-content">
+
+            <span className="hero-badge">
+              CARELINK HEALTHCARE
+            </span>
+
+            <h1>
+              Start your
+              <br />
+              <span>health journey.</span>
+            </h1>
+
+            <p>
+              Create your CareLink account and manage
+              appointments, doctors and health records
+              from one simple platform.
+            </p>
+
+            <div className="auth-points">
+              <div>✓ Easy appointment booking</div>
+              <div>✓ Trusted healthcare professionals</div>
+              <div>✓ Secure medical information</div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div className="auth-form-container">
+
+          <div className="auth-heading">
+            <span className="page-tag">
+              CREATE ACCOUNT
+            </span>
+
+            <h2>Create your account</h2>
+
+            <p>
+              Join CareLink and take control of your healthcare.
+            </p>
+          </div>
+
+          <form onSubmit={handleRegister}>
+
+            {error && (
+              <div className="auth-error">
+                {error}
+              </div>
+            )}
+
+            <label>Full Name</label>
+
+            <input
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              placeholder="Enter your full name"
+            />
+
+            <label>Email Address</label>
+
+            <input
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+            />
+
+            <label>Password</label>
+
+            <input
+              type="password"
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              placeholder="Create a password"
+            />
+
+            <label>Confirm Password</label>
+
+            <input
+              type="password"
+              name="confirmPassword"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm your password"
+            />
+
+            <button
+              type="submit"
+              className="auth-submit"
+            >
+              Create Account →
+            </button>
+
+          </form>
+
+          <div className="auth-footer">
+            Already have an account?
+            <Link to="/login"> Sign in</Link>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+function Login() {
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    setError("");
+
+    const registeredUser = JSON.parse(
+      localStorage.getItem("carelinkRegisteredUser")
+    );
+
+    if (!registeredUser) {
+      setError("No account found. Please register first.");
+      return;
+    }
+
+    if (
+      email !== registeredUser.email ||
+      password !== registeredUser.password
+    ) {
+      setError("Invalid email or password.");
+      return;
+    }
+
+    localStorage.setItem(
+      "carelinkUser",
+      JSON.stringify({
+        name: registeredUser.name,
+        email: registeredUser.email,
+        role: "PATIENT",
+      })
+    );
+
+    localStorage.setItem(
+      "carelinkToken",
+      "carelink-demo-token"
+    );
+
+    navigate("/dashboard");
+  };
+
+  return (
+    <div className="auth-page">
+
+      <div className="auth-background">
+        <div className="auth-circle circle-one"></div>
+        <div className="auth-circle circle-two"></div>
+        <div className="auth-circle circle-three"></div>
+      </div>
+
+      <Link to="/" className="auth-brand">
+        <span>+</span>
+        Care<span>Link</span>
+      </Link>
+
+      <div className="login-wrapper">
+
+        <div className="login-visual">
+
+          <span className="hero-badge">
+            PATIENT PORTAL
+          </span>
+
+          <h1>
+            Welcome
+            <br />
+            <span>back.</span>
+          </h1>
+
+          <p>
+            Continue your healthcare journey with
+            CareLink. Manage your appointments,
+            records and doctors in one place.
+          </p>
+
+          <div className="login-medical-animation">
+            <div className="login-pulse-ring"></div>
+            <div className="login-pulse-ring second"></div>
+
+            <div className="login-plus">
+              +
+            </div>
+          </div>
+
+        </div>
+
+        <div className="login-card">
+
+          <div className="auth-heading">
+
+            <span className="page-tag">
+              WELCOME BACK
+            </span>
+
+            <h2>Sign in to CareLink</h2>
+
+            <p>
+              Enter your details to access your dashboard.
+            </p>
+
+          </div>
+
+          <form onSubmit={handleLogin}>
+
+            {error && (
+              <div className="auth-error">
+                {error}
+              </div>
+            )}
+
+            <label>Email Address</label>
+
+            <div className="input-wrapper">
+              <span>✉</span>
+
+              <input
+                type="email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <label>Password</label>
+
+            <div className="input-wrapper">
+              <span>●</span>
+
+              <input
+                type="password"
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="auth-submit"
+            >
+              Sign In →
+            </button>
+
+          </form>
+
+          <div className="auth-footer">
+            Don't have an account?
+            <Link to="/register"> Create account</Link>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function Dashboard() {
+
+  const navigate = useNavigate();
+
+  const storedUser = getStoredUser();
+
+  const userName =
+    storedUser?.name || "Vijay Raj";
+
+  const [activePage, setActivePage] =
+    useState("Dashboard");
+
+  const [search, setSearch] =
+    useState("");
+
+  const [showNotifications, setShowNotifications] =
+    useState(false);
+
+  const [showBooking, setShowBooking] =
+    useState(false);
+
+  const [selectedDoctor, setSelectedDoctor] =
+    useState(null);
+
+  const [toast, setToast] =
+    useState("");
+
+  const [mobileMenu, setMobileMenu] =
+    useState(false);
+
+  const [appointments, setAppointments] =
+    useState([]);
+
+  useEffect(() => {
+    const saved =
+      JSON.parse(
+        localStorage.getItem("carelinkAppointments")
+      ) || [];
+
+    setAppointments(saved);
+  }, []);
 
   const showToast = (message) => {
     setToast(message);
@@ -62,13 +618,16 @@ function App() {
     }, 3000);
   };
 
-  const navigateTo = (page) => {
-    setActivePage(page);
-    setMobileMenu(false);
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+  const handleLogout = () => {
+
+    localStorage.removeItem("carelinkToken");
+    localStorage.removeItem("carelinkUser");
+
+    showToast("Logged out successfully");
+
+    setTimeout(() => {
+      navigate("/");
+    }, 500);
   };
 
   const openBooking = (doctor) => {
@@ -76,20 +635,47 @@ function App() {
     setShowBooking(true);
   };
 
-  const closeBooking = () => {
-    setShowBooking(false);
-    setSelectedDoctor(null);
-  };
-
   const bookAppointment = () => {
-    closeBooking();
-    showToast("Appointment request submitted successfully!");
+
+    if (!selectedDoctor) return;
+
+    const newAppointment = {
+      id: Date.now(),
+      doctor: selectedDoctor.name,
+      specialty: selectedDoctor.specialty,
+      date: "Tomorrow",
+      time: selectedDoctor.available,
+    };
+
+    const updated = [
+      ...appointments,
+      newAppointment,
+    ];
+
+    setAppointments(updated);
+
+    localStorage.setItem(
+      "carelinkAppointments",
+      JSON.stringify(updated)
+    );
+
+    setShowBooking(false);
+
+    showToast(
+      "Appointment booked successfully!"
+    );
   };
 
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-    setNotifications(0);
-  };
+  const filteredDoctors =
+    doctors.filter(
+      (doctor) =>
+        doctor.name
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        doctor.specialty
+          .toLowerCase()
+          .includes(search.toLowerCase())
+    );
 
   const menuItems = [
     { name: "Dashboard", icon: "⌂" },
@@ -102,29 +688,55 @@ function App() {
     { name: "Settings", icon: "⚙" },
   ];
 
+  const goTo = (page) => {
+    setActivePage(page);
+    setMobileMenu(false);
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <div className="app">
+    <div className="dashboard-app">
 
-      {/* ================= SIDEBAR ================= */}
+      {/* MOBILE OVERLAY */}
 
-      <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
+      {mobileMenu && (
+        <div
+          className="mobile-overlay"
+          onClick={() => setMobileMenu(false)}
+        />
+      )}
+
+      {/* SIDEBAR */}
+
+      <aside
+        className={`sidebar ${
+          mobileMenu ? "sidebar-open" : ""
+        }`}
+      >
 
         <div className="logo">
-          <div className="logo-icon">+</div>
+
+          <div className="logo-icon">
+            +
+          </div>
 
           <span>
             Care<span>Link</span>
           </span>
+
         </div>
 
         <div className="patient-mini">
 
           <div className="avatar">
-            V
+            {userName.charAt(0).toUpperCase()}
           </div>
 
           <div>
-            <strong>Vijay Raj</strong>
+            <strong>{userName}</strong>
             <small>Patient</small>
           </div>
 
@@ -137,25 +749,17 @@ function App() {
             <button
               key={item.name}
               className={`nav-item ${
-                activePage === item.name ? "active" : ""
+                activePage === item.name
+                  ? "active"
+                  : ""
               }`}
-              onClick={() => navigateTo(item.name)}
+              onClick={() => goTo(item.name)}
             >
-
               <span className="nav-icon">
                 {item.icon}
               </span>
 
-              <span>
-                {item.name}
-              </span>
-
-              {activePage === item.name && (
-                <span className="nav-active-dot">
-                  •
-                </span>
-              )}
-
+              <span>{item.name}</span>
             </button>
 
           ))}
@@ -164,47 +768,57 @@ function App() {
 
         <div className="sidebar-bottom">
 
-          <div className="sidebar-help">
-            <div className="help-icon">
-              ?
-            </div>
+          <div className="support-box">
+            <strong>Need help?</strong>
 
-            <div>
-              <strong>Need help?</strong>
-              <small>Contact support</small>
-            </div>
+            <p>
+              Our support team is available
+              24/7 for you.
+            </p>
+
+            <button
+              onClick={() =>
+                showToast(
+                  "Support team will contact you."
+                )
+              }
+            >
+              Contact Support
+            </button>
           </div>
 
           <button
             className="logout-btn"
-            onClick={() => showToast("Logout clicked")}
+            onClick={handleLogout}
           >
             <span>↪</span>
-            <span>Logout</span>
+            Logout
           </button>
 
         </div>
 
       </aside>
 
-      {/* ================= MAIN ================= */}
+      {/* MAIN */}
 
       <main className="main">
 
-        {/* ================= TOPBAR ================= */}
+        {/* TOPBAR */}
 
         <header className="topbar">
 
           <button
             className="mobile-menu-btn"
-            onClick={() => setMobileMenu(!mobileMenu)}
+            onClick={() =>
+              setMobileMenu(!mobileMenu)
+            }
           >
             ☰
           </button>
 
           <div className="topbar-title">
 
-            <span className="topbar-label">
+            <span>
               PATIENT PORTAL
             </span>
 
@@ -221,37 +835,31 @@ function App() {
           <div className="top-actions">
 
             <button
-              className={`notification-btn ${
-                showNotifications ? "notification-active" : ""
-              }`}
-              onClick={toggleNotifications}
-              aria-label="Notifications"
+              className="notification-btn"
+              onClick={() =>
+                setShowNotifications(
+                  !showNotifications
+                )
+              }
             >
-
               🔔
 
-              {notifications > 0 && (
-                <span className="notification-dot">
-                  {notifications}
-                </span>
-              )}
+              <span className="notification-dot"></span>
 
             </button>
 
             <div className="profile-top">
 
               <div className="avatar small">
-                V
+                {userName.charAt(0).toUpperCase()}
               </div>
 
               <div>
-                <strong>Vijay Raj</strong>
+                <strong>{userName}</strong>
                 <small>Patient</small>
               </div>
 
-              <span>
-                ⌄
-              </span>
+              <span>⌄</span>
 
             </div>
 
@@ -261,57 +869,40 @@ function App() {
 
             <div className="notification-panel">
 
-              <div className="notification-header">
-
-                <div>
-                  <h3>Notifications</h3>
-                  <span>Stay updated</span>
-                </div>
-
-                <button
-                  onClick={() => setShowNotifications(false)}
-                >
-                  ×
-                </button>
-
-              </div>
+              <h3>Notifications</h3>
 
               <div className="notification">
 
-                <span className="notification-circle success">
+                <span className="notification-circle">
                   ✓
                 </span>
 
                 <div>
-                  <strong>Welcome to CareLink</strong>
+                  <strong>
+                    Welcome to CareLink
+                  </strong>
 
                   <p>
                     Your account is ready to use.
                   </p>
-
-                  <small>
-                    Just now
-                  </small>
                 </div>
 
               </div>
 
               <div className="notification">
 
-                <span className="notification-circle warning">
+                <span className="notification-circle">
                   !
                 </span>
 
                 <div>
-                  <strong>Health reminder</strong>
+                  <strong>
+                    Health reminder
+                  </strong>
 
                   <p>
                     Keep your medical records updated.
                   </p>
-
-                  <small>
-                    Today
-                  </small>
                 </div>
 
               </div>
@@ -322,77 +913,69 @@ function App() {
 
         </header>
 
-        {/* ================= CONTENT ================= */}
+        {/* CONTENT */}
 
         <section className="content">
 
-          {/* =====================================================
-              DASHBOARD
-          ===================================================== */}
+          {/* ================= DASHBOARD ================= */}
 
           {activePage === "Dashboard" && (
 
             <>
 
+              <div className="breadcrumb">
+                Patient Portal <span>/</span> Overview
+              </div>
+
               {/* WELCOME */}
 
               <div className="welcome-card">
 
-                <div className="welcome-glow"></div>
-
                 <div className="welcome-content">
 
                   <span className="welcome-tag">
-                    <span className="status-dot"></span>
                     CARELINK HEALTHCARE
                   </span>
 
                   <h1>
-                    Good morning,
-                    <span> Vijay!</span>
+                    Good morning,{" "}
+                    <span>{userName}!</span>
                   </h1>
 
                   <p>
-                    Take control of your healthcare journey.
-                    Book appointments, manage records and stay
-                    connected with your doctors.
+                    Take control of your healthcare
+                    journey. Book appointments,
+                    manage records and stay connected
+                    with your doctors.
                   </p>
 
                   <div className="welcome-buttons">
 
                     <button
                       className="primary-btn"
-                      onClick={() => navigateTo("Find Doctors")}
+                      onClick={() =>
+                        goTo("Find Doctors")
+                      }
                     >
-                      Find a Doctor
-                      <span>→</span>
+                      Find a Doctor →
                     </button>
 
                     <button
                       className="secondary-btn"
-                      onClick={() => navigateTo("Appointments")}
+                      onClick={() =>
+                        goTo("Appointments")
+                      }
                     >
                       View Appointments
                     </button>
 
                   </div>
 
-                  <div className="welcome-trust">
+                  <div className="welcome-checks">
 
-                    <div>
-                      <span>✓</span>
-                      Verified Doctors
-                    </div>
-
-                    <div>
-                      <span>✓</span>
-                      Secure Records
-                    </div>
-
-                    <div>
-                      <span>✓</span>
-                      Easy Booking
-                    </div>
+                    <span>✓ Verified Doctors</span>
+                    <span>✓ Secure Records</span>
+                    <span>✓ Easy Booking</span>
 
                   </div>
 
@@ -400,29 +983,26 @@ function App() {
 
                 <div className="medical-art">
 
-                  <div className="medical-ring ring-one"></div>
-                  <div className="medical-ring ring-two"></div>
+                  <div className="art-ring ring-one"></div>
+
+                  <div className="art-ring ring-two"></div>
 
                   <div className="pulse-circle">
                     +
                   </div>
 
-                  <div className="pulse-line"></div>
-
-                  <div className="floating-card floating-card-one">
-                    <span>♥</span>
-                    <div>
-                      <strong>Healthcare</strong>
-                      <small>Made simple</small>
-                    </div>
+                  <div className="pulse-wave">
+                    ~
                   </div>
 
-                  <div className="floating-card floating-card-two">
+                  <div className="art-badge badge-safe">
                     <span>✓</span>
-                    <div>
-                      <strong>Secure</strong>
-                      <small>Your data is safe</small>
-                    </div>
+                    Secure
+                  </div>
+
+                  <div className="art-badge badge-care">
+                    <span>♥</span>
+                    Healthcare
                   </div>
 
                 </div>
@@ -441,13 +1021,11 @@ function App() {
 
                   <div>
                     <span>Appointments</span>
-                    <strong>0</strong>
+                    <strong>{appointments.length}</strong>
                     <small>Total appointments</small>
                   </div>
 
-                  <div className="stat-arrow">
-                    →
-                  </div>
+                  <b>→</b>
 
                 </div>
 
@@ -463,9 +1041,7 @@ function App() {
                     <small>Completed visits</small>
                   </div>
 
-                  <div className="stat-arrow">
-                    →
-                  </div>
+                  <b>→</b>
 
                 </div>
 
@@ -481,9 +1057,7 @@ function App() {
                     <small>Active prescriptions</small>
                   </div>
 
-                  <div className="stat-arrow">
-                    →
-                  </div>
+                  <b>→</b>
 
                 </div>
 
@@ -499,9 +1073,7 @@ function App() {
                     <small>Medical records</small>
                   </div>
 
-                  <div className="stat-arrow">
-                    →
-                  </div>
+                  <b>→</b>
 
                 </div>
 
@@ -516,9 +1088,7 @@ function App() {
                     SHORTCUTS
                   </span>
 
-                  <h2>
-                    Quick Actions
-                  </h2>
+                  <h2>Quick Actions</h2>
 
                   <p>
                     Everything you need in one place
@@ -529,93 +1099,45 @@ function App() {
 
               <div className="quick-grid">
 
-                <button
-                  className="quick-card"
-                  onClick={() => navigateTo("Find Doctors")}
-                >
+                <QuickAction
+                  icon="♙"
+                  title="Find a Doctor"
+                  description="Browse specialists and doctors"
+                  className="blue-bg"
+                  onClick={() =>
+                    goTo("Find Doctors")
+                  }
+                />
 
-                  <div className="quick-icon blue-bg">
-                    ♙
-                  </div>
+                <QuickAction
+                  icon="▣"
+                  title="My Appointments"
+                  description="Schedule or manage appointments"
+                  className="green-bg"
+                  onClick={() =>
+                    goTo("Appointments")
+                  }
+                />
 
-                  <div>
-                    <h3>Find a Doctor</h3>
-                    <p>
-                      Browse specialists and doctors
-                    </p>
-                  </div>
+                <QuickAction
+                  icon="▤"
+                  title="Health Records"
+                  description="Access medical history"
+                  className="purple-bg"
+                  onClick={() =>
+                    goTo("Health Records")
+                  }
+                />
 
-                  <span className="quick-arrow">
-                    →
-                  </span>
-
-                </button>
-
-                <button
-                  className="quick-card"
-                  onClick={() => navigateTo("Appointments")}
-                >
-
-                  <div className="quick-icon green-bg">
-                    ▣
-                  </div>
-
-                  <div>
-                    <h3>My Appointments</h3>
-                    <p>
-                      View and manage appointments
-                    </p>
-                  </div>
-
-                  <span className="quick-arrow">
-                    →
-                  </span>
-
-                </button>
-
-                <button
-                  className="quick-card"
-                  onClick={() => navigateTo("Health Records")}
-                >
-
-                  <div className="quick-icon purple-bg">
-                    ▤
-                  </div>
-
-                  <div>
-                    <h3>Health Records</h3>
-                    <p>
-                      Access your medical history
-                    </p>
-                  </div>
-
-                  <span className="quick-arrow">
-                    →
-                  </span>
-
-                </button>
-
-                <button
-                  className="quick-card"
-                  onClick={() => navigateTo("Prescriptions")}
-                >
-
-                  <div className="quick-icon orange-bg">
-                    ▥
-                  </div>
-
-                  <div>
-                    <h3>Prescriptions</h3>
-                    <p>
-                      Check your prescriptions
-                    </p>
-                  </div>
-
-                  <span className="quick-arrow">
-                    →
-                  </span>
-
-                </button>
+                <QuickAction
+                  icon="▥"
+                  title="Prescriptions"
+                  description="Check your prescriptions"
+                  className="orange-bg"
+                  onClick={() =>
+                    goTo("Prescriptions")
+                  }
+                />
 
               </div>
 
@@ -628,21 +1150,20 @@ function App() {
                     OUR SPECIALISTS
                   </span>
 
-                  <h2>
-                    Recommended Doctors
-                  </h2>
+                  <h2>Recommended Doctors</h2>
 
                   <p>
-                    Connect with trusted healthcare professionals
+                    Top-rated specialists near you
                   </p>
                 </div>
 
                 <button
                   className="view-all"
-                  onClick={() => navigateTo("Find Doctors")}
+                  onClick={() =>
+                    goTo("Find Doctors")
+                  }
                 >
-                  View all
-                  <span>→</span>
+                  View all →
                 </button>
 
               </div>
@@ -665,9 +1186,7 @@ function App() {
 
           )}
 
-          {/* =====================================================
-              FIND DOCTORS
-          ===================================================== */}
+          {/* ================= FIND DOCTORS ================= */}
 
           {activePage === "Find Doctors" && (
 
@@ -676,15 +1195,14 @@ function App() {
               <div className="page-title">
 
                 <span className="page-tag">
-                  CARELINK / DOCTORS
+                  CARELINK
                 </span>
 
-                <h1>
-                  Find Your Doctor
-                </h1>
+                <h1>Find Your Doctor</h1>
 
                 <p>
-                  Choose the right specialist for your healthcare needs.
+                  Choose the right specialist for your
+                  healthcare needs.
                 </p>
 
               </div>
@@ -693,9 +1211,7 @@ function App() {
 
                 <div className="search-box">
 
-                  <span>
-                    🔍
-                  </span>
+                  🔍
 
                   <input
                     value={search}
@@ -705,74 +1221,32 @@ function App() {
                     placeholder="Search doctors or specialties..."
                   />
 
-                  {search && (
-                    <button
-                      className="clear-search"
-                      onClick={() => setSearch("")}
-                    >
-                      ×
-                    </button>
-                  )}
-
                 </div>
 
-                <select
-                  value={specialty}
-                  onChange={(e) =>
-                    setSpecialty(e.target.value)
-                  }
-                >
+                <select>
                   <option>
                     All Specialties
                   </option>
-
-                  <option>
-                    General Physician
-                  </option>
-
                   <option>
                     Cardiologist
                   </option>
-
                   <option>
                     Dermatologist
                   </option>
-
+                  <option>
+                    Pediatrician
+                  </option>
+                  <option>
+                    Neurologist
+                  </option>
                 </select>
-
-              </div>
-
-              <div className="results-info">
-
-                <span>
-                  Showing{" "}
-                  <strong>
-                    {filteredDoctors.length}
-                  </strong>{" "}
-                  doctors
-                </span>
-
-                {(search ||
-                  specialty !== "All Specialties") && (
-
-                  <button
-                    onClick={() => {
-                      setSearch("");
-                      setSpecialty("All Specialties");
-                    }}
-                  >
-                    Clear filters
-                  </button>
-
-                )}
 
               </div>
 
               <div className="doctor-grid">
 
-                {filteredDoctors.length > 0 ? (
-
-                  filteredDoctors.map((doctor) => (
+                {filteredDoctors.map(
+                  (doctor) => (
 
                     <DoctorCard
                       key={doctor.id}
@@ -780,36 +1254,7 @@ function App() {
                       onBook={openBooking}
                     />
 
-                  ))
-
-                ) : (
-
-                  <div className="empty-state">
-
-                    <div className="empty-state-icon">
-                      🔍
-                    </div>
-
-                    <h2>
-                      No doctors found
-                    </h2>
-
-                    <p>
-                      Try another doctor name or specialty.
-                    </p>
-
-                    <button
-                      className="primary-btn"
-                      onClick={() => {
-                        setSearch("");
-                        setSpecialty("All Specialties");
-                      }}
-                    >
-                      Reset Search
-                    </button>
-
-                  </div>
-
+                  )
                 )}
 
               </div>
@@ -818,9 +1263,7 @@ function App() {
 
           )}
 
-          {/* =====================================================
-              APPOINTMENTS
-          ===================================================== */}
+          {/* ================= APPOINTMENTS ================= */}
 
           {activePage === "Appointments" && (
 
@@ -829,55 +1272,108 @@ function App() {
               <div className="page-title">
 
                 <span className="page-tag">
-                  CARELINK / APPOINTMENTS
+                  APPOINTMENTS
                 </span>
 
-                <h1>
-                  My Appointments
-                </h1>
+                <h1>My Appointments</h1>
 
                 <p>
-                  View and manage your upcoming appointments.
+                  View and manage your upcoming
+                  appointments.
                 </p>
 
               </div>
 
-              <div className="appointment-empty">
+              {appointments.length === 0 ? (
 
-                <div className="empty-icon">
-                  ▣
+                <div className="appointment-empty">
+
+                  <div className="empty-icon">
+                    ▣
+                  </div>
+
+                  <h2>
+                    No appointments yet
+                  </h2>
+
+                  <p>
+                    You haven't booked any appointments.
+                    Find a doctor and schedule your
+                    first visit.
+                  </p>
+
+                  <button
+                    className="primary-btn"
+                    onClick={() =>
+                      goTo("Find Doctors")
+                    }
+                  >
+                    Find a Doctor →
+                  </button>
+
                 </div>
 
-                <span className="empty-small-label">
-                  YOUR SCHEDULE
-                </span>
+              ) : (
 
-                <h2>
-                  No appointments yet
-                </h2>
+                <div className="appointment-list">
 
-                <p>
-                  You haven't booked any appointments.
-                  Find a doctor and schedule your first visit.
-                </p>
+                  {appointments.map(
+                    (appointment) => (
 
-                <button
-                  className="primary-btn"
-                  onClick={() => navigateTo("Find Doctors")}
-                >
-                  Find a Doctor
-                  <span>→</span>
-                </button>
+                      <div
+                        className="appointment-card"
+                        key={appointment.id}
+                      >
 
-              </div>
+                        <div className="doctor-avatar">
+                          {appointment.doctor
+                            .split(" ")
+                            .slice(1)
+                            .map((x) =>
+                              x[0]
+                            )
+                            .join("")
+                            .slice(0, 2)}
+                        </div>
+
+                        <div className="appointment-info">
+
+                          <strong>
+                            {appointment.doctor}
+                          </strong>
+
+                          <span>
+                            {appointment.specialty}
+                          </span>
+
+                        </div>
+
+                        <div className="appointment-time">
+
+                          <strong>
+                            {appointment.date}
+                          </strong>
+
+                          <span>
+                            {appointment.time}
+                          </span>
+
+                        </div>
+
+                      </div>
+
+                    )
+                  )}
+
+                </div>
+
+              )}
 
             </div>
 
           )}
 
-          {/* =====================================================
-              HEALTH RECORDS
-          ===================================================== */}
+          {/* ================= OTHER PAGES ================= */}
 
           {activePage === "Health Records" && (
 
@@ -887,15 +1383,13 @@ function App() {
               description="Keep your medical history organized and accessible."
               action="Add Health Record"
               onAction={() =>
-                showToast("Health record feature selected")
+                showToast(
+                  "Health record feature selected"
+                )
               }
             />
 
           )}
-
-          {/* =====================================================
-              PRESCRIPTIONS
-          ===================================================== */}
 
           {activePage === "Prescriptions" && (
 
@@ -905,15 +1399,13 @@ function App() {
               description="View and manage your current prescriptions."
               action="View Prescriptions"
               onAction={() =>
-                showToast("No prescriptions available")
+                showToast(
+                  "No prescriptions available"
+                )
               }
             />
 
           )}
-
-          {/* =====================================================
-              MESSAGES
-          ===================================================== */}
 
           {activePage === "Messages" && (
 
@@ -923,24 +1415,22 @@ function App() {
               description="Stay connected with your healthcare providers."
               action="Start a Conversation"
               onAction={() =>
-                showToast("Messaging feature selected")
+                showToast(
+                  "Messaging feature selected"
+                )
               }
             />
 
           )}
 
-          {/* =====================================================
-              PROFILE
-          ===================================================== */}
-
           {activePage === "Profile" && (
 
-            <div className="page-card profile-page">
+            <div className="page-card">
 
               <div className="profile-header">
 
                 <div className="large-avatar">
-                  V
+                  {userName.charAt(0).toUpperCase()}
                 </div>
 
                 <div>
@@ -949,9 +1439,7 @@ function App() {
                     PATIENT PROFILE
                   </span>
 
-                  <h1>
-                    Vijay Raj
-                  </h1>
+                  <h1>{userName}</h1>
 
                   <p>
                     Manage your personal information
@@ -965,17 +1453,15 @@ function App() {
 
                 <div>
                   <label>Full Name</label>
-                  <strong>Vijay Raj</strong>
+                  <strong>{userName}</strong>
                 </div>
 
                 <div>
                   <label>Email</label>
-                  <strong>vijay@example.com</strong>
-                </div>
-
-                <div>
-                  <label>Phone</label>
-                  <strong>+91 XXXXX XXXXX</strong>
+                  <strong>
+                    {storedUser?.email ||
+                      "Not available"}
+                  </strong>
                 </div>
 
                 <div>
@@ -983,24 +1469,18 @@ function App() {
                   <strong>Patient</strong>
                 </div>
 
-              </div>
+                <div>
+                  <label>Appointments</label>
+                  <strong>
+                    {appointments.length}
+                  </strong>
+                </div>
 
-              <button
-                className="primary-btn"
-                onClick={() =>
-                  showToast("Profile editing selected")
-                }
-              >
-                Edit Profile
-              </button>
+              </div>
 
             </div>
 
           )}
-
-          {/* =====================================================
-              SETTINGS
-          ===================================================== */}
 
           {activePage === "Settings" && (
 
@@ -1012,9 +1492,7 @@ function App() {
                   SETTINGS
                 </span>
 
-                <h1>
-                  Account Settings
-                </h1>
+                <h1>Account Settings</h1>
 
                 <p>
                   Manage your CareLink preferences.
@@ -1024,25 +1502,36 @@ function App() {
 
               <div className="settings-list">
 
-                <Setting
-                  title="Notifications"
-                  description="Receive appointment and health reminders."
-                  active
-                />
+                <div className="setting-item">
 
-                <Setting
-                  title="Appointment Reminders"
-                  description="Get reminders before scheduled visits."
-                  active
-                />
+                  <div>
+                    <h3>Notifications</h3>
+                    <p>
+                      Receive appointment and health reminders.
+                    </p>
+                  </div>
+
+                  <div className="toggle active-toggle"></div>
+
+                </div>
 
                 <div className="setting-item">
 
                   <div>
-                    <h3>
-                      Privacy
-                    </h3>
+                    <h3>Appointment Reminders</h3>
+                    <p>
+                      Get reminders before scheduled visits.
+                    </p>
+                  </div>
 
+                  <div className="toggle active-toggle"></div>
+
+                </div>
+
+                <div className="setting-item">
+
+                  <div>
+                    <h3>Privacy</h3>
                     <p>
                       Manage your account privacy settings.
                     </p>
@@ -1071,15 +1560,15 @@ function App() {
 
       </main>
 
-      {/* =====================================================
-          BOOKING MODAL
-      ===================================================== */}
+      {/* BOOKING MODAL */}
 
       {showBooking && selectedDoctor && (
 
         <div
           className="modal-overlay"
-          onClick={closeBooking}
+          onClick={() =>
+            setShowBooking(false)
+          }
         >
 
           <div
@@ -1091,7 +1580,9 @@ function App() {
 
             <button
               className="close-modal"
-              onClick={closeBooking}
+              onClick={() =>
+                setShowBooking(false)
+              }
             >
               ×
             </button>
@@ -1105,7 +1596,8 @@ function App() {
             </h2>
 
             <p className="modal-subtitle">
-              Schedule a consultation with your selected doctor.
+              Schedule a consultation with your
+              selected doctor.
             </p>
 
             <div className="selected-doctor">
@@ -1122,67 +1614,37 @@ function App() {
                 <span>
                   {selectedDoctor.specialty}
                 </span>
-
-                <small>
-                  {selectedDoctor.experience} experience
-                </small>
               </div>
 
             </div>
 
-            <label>
-              Select Date
-            </label>
+            <label>Select Date</label>
 
             <input type="date" />
 
-            <label>
-              Select Time
-            </label>
+            <label>Select Time</label>
 
             <select>
 
-              <option>
-                10:00 AM
-              </option>
-
-              <option>
-                11:00 AM
-              </option>
-
-              <option>
-                02:00 PM
-              </option>
-
-              <option>
-                04:00 PM
-              </option>
-
-              <option>
-                06:00 PM
-              </option>
+              <option>10:00 AM</option>
+              <option>11:00 AM</option>
+              <option>02:00 PM</option>
+              <option>04:00 PM</option>
+              <option>06:00 PM</option>
 
             </select>
 
-            <label>
-              Reason for Visit
-            </label>
+            <label>Reason for Visit</label>
 
             <textarea
               placeholder="Briefly describe your symptoms or reason for consultation..."
-            ></textarea>
-
-            <div className="booking-note">
-              <span>🔒</span>
-              Your appointment information is kept secure.
-            </div>
+            />
 
             <button
               className="confirm-btn"
               onClick={bookAppointment}
             >
               Confirm Appointment
-              <span>→</span>
             </button>
 
           </div>
@@ -1191,33 +1653,15 @@ function App() {
 
       )}
 
-      {/* =====================================================
-          TOAST
-      ===================================================== */}
+      {/* TOAST */}
 
       {toast && (
 
         <div className="toast">
 
-          <span>
-            ✓
-          </span>
+          <span>✓</span>
 
-          <div>
-            <strong>
-              Success
-            </strong>
-
-            <p>
-              {toast}
-            </p>
-          </div>
-
-          <button
-            onClick={() => setToast("")}
-          >
-            ×
-          </button>
+          {toast}
 
         </div>
 
@@ -1227,15 +1671,50 @@ function App() {
   );
 }
 
-/* ============================================================
+/* =========================================================
+   QUICK ACTION
+========================================================= */
+
+function QuickAction({
+  icon,
+  title,
+  description,
+  className,
+  onClick,
+}) {
+  return (
+    <button
+      className="quick-card"
+      onClick={onClick}
+    >
+
+      <div
+        className={`quick-icon ${className}`}
+      >
+        {icon}
+      </div>
+
+      <div>
+
+        <h3>{title}</h3>
+
+        <p>{description}</p>
+
+      </div>
+
+      <span>→</span>
+
+    </button>
+  );
+}
+
+/* =========================================================
    DOCTOR CARD
-============================================================ */
+========================================================= */
 
 function DoctorCard({ doctor, onBook }) {
   return (
     <div className="doctor-card">
-
-      <div className="doctor-card-glow"></div>
 
       <div className="doctor-top">
 
@@ -1244,40 +1723,44 @@ function DoctorCard({ doctor, onBook }) {
         </div>
 
         <span className="available">
-          <span></span>
-          {doctor.status}
+          ● Available
         </span>
 
       </div>
 
-      <h3>
-        {doctor.name}
-      </h3>
+      <h3>{doctor.name}</h3>
 
       <p className="specialty">
         {doctor.specialty}
       </p>
 
+      <div className="doctor-rating">
+        ★ {doctor.rating}
+        <span>
+          ({doctor.reviews})
+        </span>
+      </div>
+
       <div className="doctor-info">
 
-        <span>
-          Experience
-        </span>
-
-        <strong>
-          {doctor.experience}
-        </strong>
+        <span>Experience</span>
+        <strong>{doctor.experience}</strong>
 
       </div>
 
       <div className="doctor-info">
 
-        <span>
-          Consultation
-        </span>
+        <span>Consultation</span>
+        <strong>{doctor.fee}</strong>
+
+      </div>
+
+      <div className="doctor-available">
+
+        <span>Next Available</span>
 
         <strong>
-          {doctor.fee}
+          {doctor.available}
         </strong>
 
       </div>
@@ -1286,17 +1769,16 @@ function DoctorCard({ doctor, onBook }) {
         className="book-btn"
         onClick={() => onBook(doctor)}
       >
-        Book Appointment
-        <span>→</span>
+        Book Appointment →
       </button>
 
     </div>
   );
 }
 
-/* ============================================================
+/* =========================================================
    SIMPLE PAGE
-============================================================ */
+========================================================= */
 
 function SimplePage({
   icon,
@@ -1314,13 +1796,9 @@ function SimplePage({
           CARELINK
         </span>
 
-        <h1>
-          {title}
-        </h1>
+        <h1>{title}</h1>
 
-        <p>
-          {description}
-        </p>
+        <p>{description}</p>
 
       </div>
 
@@ -1330,17 +1808,14 @@ function SimplePage({
           {icon}
         </div>
 
-        <span className="empty-small-label">
-          CARELINK
-        </span>
-
         <h2>
           Nothing here yet
         </h2>
 
         <p>
-          Your {title.toLowerCase()} will appear here
-          when information becomes available.
+          Your {title.toLowerCase()} will
+          appear here when information
+          becomes available.
         </p>
 
         <button
@@ -1348,7 +1823,6 @@ function SimplePage({
           onClick={onAction}
         >
           {action}
-          <span>→</span>
         </button>
 
       </div>
@@ -1357,42 +1831,56 @@ function SimplePage({
   );
 }
 
-/* ============================================================
-   SETTING
-============================================================ */
+/* =========================================================
+   APP ROUTER
+========================================================= */
 
-function Setting({
-  title,
-  description,
-  active,
-}) {
-  const [enabled, setEnabled] = useState(active);
+function App() {
 
   return (
-    <div className="setting-item">
 
-      <div>
-        <h3>
-          {title}
-        </h3>
+    <BrowserRouter>
 
-        <p>
-          {description}
-        </p>
-      </div>
+      <Routes>
 
-      <button
-        type="button"
-        className={`toggle ${
-          enabled ? "active-toggle" : ""
-        }`}
-        onClick={() => setEnabled(!enabled)}
-        aria-label={`Toggle ${title}`}
-      >
-        <span></span>
-      </button>
+        <Route
+          path="/"
+          element={<Home />}
+        />
 
-    </div>
+        <Route
+          path="/login"
+          element={<Login />}
+        />
+
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/"
+              replace
+            />
+          }
+        />
+
+      </Routes>
+
+    </BrowserRouter>
+
   );
 }
 

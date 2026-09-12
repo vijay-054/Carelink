@@ -37,13 +37,15 @@ const Navbar = () => {
    * 2. Remove saved authentication data
    * 3. Navigate to home page
    */
-  const handleLogout = () => {
-    try {
-      // Clear Redux auth state
-      dispatch(logout());
-    } catch (error) {
-      console.error("Redux logout error:", error);
-    }
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("carelinkToken");
+  localStorage.removeItem("carelinkUser");
+
+  navigate("/", { replace: true });
+};
 
     // Clear browser storage
     localStorage.removeItem("token");
@@ -204,6 +206,6 @@ const Navbar = () => {
       </div>
     </nav>
   );
-};
+;
 
 export default Navbar;

@@ -10,7 +10,9 @@ const Navbar = () => {
   const user = useSelector((state) => state.auth?.user);
 
   const getRole = () => {
-    if (!user) return "";
+    if (!user) {
+      return "";
+    }
 
     let role =
       user.role ||
@@ -48,32 +50,32 @@ const Navbar = () => {
   return (
     <nav className="navbar">
 
-      {/* Brand */}
+      {/* ================= BRAND ================= */}
       <Link to="/" className="navbar-brand">
         <span className="brand-icon">+</span>
         <span>CareLink</span>
       </Link>
 
-      {/* Navigation */}
+      {/* ================= NAVIGATION ================= */}
       <div className="navbar-links">
 
         <Link to="/">
           Overview
         </Link>
 
-        {role === "PATIENT" && (
+        {user && role === "PATIENT" && (
           <Link to="/appointments">
             My Appointments
           </Link>
         )}
 
-        {role === "DOCTOR" && (
+        {user && role === "DOCTOR" && (
           <Link to="/consultations">
             Consultations
           </Link>
         )}
 
-        {role === "CLINIC_ADMIN" && (
+        {user && role === "CLINIC_ADMIN" && (
           <>
             <Link to="/admin/doctors">
               Doctors
@@ -87,20 +89,39 @@ const Navbar = () => {
 
       </div>
 
-      {/* User section */}
+      {/* ================= USER / LOGIN ================= */}
       <div className="navbar-user">
 
-        {user && (
+        {!user ? (
+
+          /* T2: NOT AUTHENTICATED */
+          <Link
+            to="/login"
+            className="login-link"
+          >
+            Login
+          </Link>
+
+        ) : (
+
+          /* AUTHENTICATED USER */
           <>
             <div className="navbar-avatar">
-              {(user.fullName || user.name || "U")
+              {(
+                user.fullName ||
+                user.name ||
+                user.email ||
+                "U"
+              )
                 .charAt(0)
                 .toUpperCase()}
             </div>
 
             <div className="navbar-user-info">
               <strong>
-                {user.fullName || user.name || user.email}
+                {user.fullName ||
+                  user.name ||
+                  user.email}
               </strong>
 
               <span>

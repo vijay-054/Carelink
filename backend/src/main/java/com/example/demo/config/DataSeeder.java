@@ -27,26 +27,82 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+
+        // ================================
+        // 1. CREATE DEFAULT DOCTOR
+        // ================================
+
         String doctorEmail = "doctor@carelink.com";
 
         if (!accountRepository.existsByEmail(doctorEmail)) {
-            // 1. Create Doctor Account
+
             Account doctorAccount = new Account();
+
             doctorAccount.setEmail(doctorEmail);
-            doctorAccount.setPassword(passwordEncoder.encode("password123"));
-            doctorAccount.setRole(Account.Role.DOCTOR);
+
+            doctorAccount.setPassword(
+                    passwordEncoder.encode("password123")
+            );
+
+            doctorAccount.setRole(
+                    Account.Role.DOCTOR
+            );
+
             doctorAccount.setActive(true);
+
             doctorAccount = accountRepository.save(doctorAccount);
 
-            // 2. Create Doctor Profile
+
+            // Create Doctor Profile
             DoctorProfile doctorProfile = new DoctorProfile();
+
             doctorProfile.setAccount(doctorAccount);
-            doctorProfile.setSpecialization("General Physician");
-            doctorProfile.setConsultationFee(new BigDecimal("50.00"));
+
+            doctorProfile.setSpecialization(
+                    "General Physician"
+            );
+
+            doctorProfile.setConsultationFee(
+                    new BigDecimal("50.00")
+            );
+
             doctorProfile.setYearsOfExperience(10);
+
             doctorProfileRepository.save(doctorProfile);
 
-            System.out.println("Default Doctor created: " + doctorEmail);
+            System.out.println(
+                    "Default Doctor created: " + doctorEmail
+            );
+        }
+
+
+        // ================================
+        // 2. CREATE DEFAULT ADMIN
+        // ================================
+
+        String adminEmail = "admin@carelink.com";
+
+        if (!accountRepository.existsByEmail(adminEmail)) {
+
+            Account adminAccount = new Account();
+
+            adminAccount.setEmail(adminEmail);
+
+            adminAccount.setPassword(
+                    passwordEncoder.encode("admin123")
+            );
+
+            adminAccount.setRole(
+                    Account.Role.CLINIC_ADMIN
+            );
+
+            adminAccount.setActive(true);
+
+            accountRepository.save(adminAccount);
+
+            System.out.println(
+                    "Default Admin created: " + adminEmail
+            );
         }
     }
 }

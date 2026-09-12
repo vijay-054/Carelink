@@ -1,3 +1,4 @@
+import AdminDoctorPage from "./pages/AdminDoctorPage";
 import "./App.css";
 import React from "react";
 import {

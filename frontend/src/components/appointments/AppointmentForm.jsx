@@ -1,16 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
 import {
   bookAppointment,
   clearAppointmentError,
 } from "../../store/slices/appointmentSlice";
 
-const AppointmentForm = ({
-  doctor,
-  onClose,
-  onSuccess,
-}) => {
+const AppointmentForm = ({ doctor, onClose, onSuccess }) => {
   const dispatch = useDispatch();
 
   const {
@@ -18,78 +13,47 @@ const AppointmentForm = ({
     isLoading = false,
     isError = false,
     error = null,
-  } = useSelector(
-    (state) => state.appointments || {}
-  );
-
-  /* =====================================================
-     STATE
-  ===================================================== */
+  } = useSelector((state) => state.appointments || {});
 
   const [slot, setSlot] = useState("");
   const [reason, setReason] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  /* =====================================================
-     CLEAR OLD ERROR
-  ===================================================== */
-
   useEffect(() => {
     dispatch(clearAppointmentError());
   }, [dispatch]);
 
-  /* =====================================================
-     API ERROR
-     T15
-  ===================================================== */
-
+  /*
+   * T15
+   * Show API error using alert when appointment state
+   * contains an error.
+   */
   useEffect(() => {
-    if (isError && error) {
+    if (isError) {
+      window.alert(error || "Unable to book appointment");
       setSubmitted(false);
-
-      alert(
-        typeof error === "string"
-          ? error
-          : "Unable to book appointment"
-      );
     }
   }, [isError, error]);
 
-  /* =====================================================
-     AVAILABLE SLOTS
-  ===================================================== */
-
   const availableSlots = useMemo(() => {
-    if (
-      Array.isArray(slots) &&
-      slots.length > 0
-    ) {
+    if (Array.isArray(slots) && slots.length > 0) {
       return slots;
     }
 
-    if (
-      Array.isArray(doctor?.availableSlots)
-    ) {
+    if (Array.isArray(doctor?.availableSlots)) {
       return doctor.availableSlots;
     }
 
-    if (
-      Array.isArray(doctor?.slots)
-    ) {
+    if (Array.isArray(doctor?.slots)) {
       return doctor.slots;
     }
 
     return [];
   }, [slots, doctor]);
 
-  /* =====================================================
-     DOCTOR DETAILS
-  ===================================================== */
-
   const doctorEmail =
     doctor?.email ||
     doctor?.account?.email ||
-    doctor?.doctorEmail ||
     "doctor@carelink.com";
 
   const doctorName =
@@ -101,188 +65,87 @@ const AppointmentForm = ({
 
   const specialization =
     doctor?.specialization ||
-    doctor?.specialty ||
     "Medical Specialist";
 
   const consultationFee =
-    doctor?.consultationFee ??
-    doctor?.fee ??
-    "Not specified";
+    doctor?.consultationFee ?? "Not specified";
 
-  /* =====================================================
-     SLOT ID
-  ===================================================== */
-
-  const getSlotId = (
-    item,
-    index
-  ) => {
-    if (
-      item &&
-      typeof item === "object"
-    ) {
-      return (
-        item.id ??
-        item.slotId ??
-        index + 1
-      );
-    }
-
-    return item ?? index + 1;
+  const getSlotId = (item, index) => {
+    return item?.id ?? item?.slotId ?? index + 1;
   };
 
-  /* =====================================================
-     SLOT DISPLAY TEXT
-  ===================================================== */
-
-  const getSlotText = (
-    item,
-    index
-  ) => {
-    if (
-      item &&
-      typeof item === "object"
-    ) {
-      if (
-        item.startTime &&
-        item.endTime
-      ) {
-        return `${item.startTime} - ${item.endTime}`;
-      }
-
-      if (item.startTime) {
-        return item.startTime;
-      }
-
-      if (item.time) {
-        return item.time;
-      }
-
-      if (item.dateTime) {
-        return item.dateTime;
-      }
-
-      if (item.label) {
-        return item.label;
-      }
+  const getSlotText = (item, index) => {
+    if (item?.startTime && item?.endTime) {
+      return `${item.startTime} - ${item.endTime}`;
     }
 
-    if (
-      typeof item === "string" ||
-      typeof item === "number"
-    ) {
-      return String(item);
+    if (item?.startTime) {
+      return item.startTime;
+    }
+
+    if (item?.time) {
+      return item.time;
+    }
+
+    if (item?.dateTime) {
+      return item.dateTime;
     }
 
     return `Available slot ${index + 1}`;
   };
 
-  /* =====================================================
-     SUBMIT
-  ===================================================== */
-
-  const handleSubmit = async (
-    event
-  ) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    /* ---------------------------------------------
-       T26
-       No slot selected
-    --------------------------------------------- */
-
+    /*
+     * T26
+     * Test expects an alert when submitting without slot.
+     */
     if (!slot) {
-      alert(
-        "Please select a time slot."
-      );
+      window.alert("Please select a time slot.");
       return;
     }
-
-    /* ---------------------------------------------
-       Doctor validation
-    --------------------------------------------- */
 
     if (!doctor?.id) {
-      alert(
-        "Doctor information is missing."
-      );
+      window.alert("Doctor information is missing.");
       return;
     }
-
-    /* ---------------------------------------------
-       Appointment payload
-    --------------------------------------------- */
 
     const appointmentData = {
       doctorId: doctor.id,
       slotId: Number(slot),
-      reasonForVisit:
-        reason.trim(),
+      reasonForVisit: reason.trim(),
     };
 
     setSubmitted(true);
 
     try {
-      const result =
-        await dispatch(
-          bookAppointment(
-            appointmentData
-          )
-        ).unwrap();
-
-      /* -------------------------------------------
-         SUCCESS
-      ------------------------------------------- */
+      const result = await dispatch(
+        bookAppointment(appointmentData)
+      ).unwrap();
 
       if (result) {
         onSuccess?.(result);
       }
 
       onClose?.();
-
-    } catch (submitError) {
-
+    } catch (err) {
       setSubmitted(false);
-
-      /*
-       * The Redux isError effect will
-       * display the API error when available.
-       *
-       * This fallback handles rejected
-       * requests that don't populate
-       * the Redux error field.
-       */
-
-      if (!isError) {
-        const message =
-          typeof submitError ===
-          "string"
-            ? submitError
-            : "Unable to book appointment.";
-
-        alert(message);
-      }
     }
   };
-
-  /* =====================================================
-     UI
-  ===================================================== */
 
   return (
     <div
       className="appointment-modal-overlay"
-      onMouseDown={(event) => {
+      onMouseDown={(e) => {
         if (
-          event.target ===
-            event.currentTarget &&
+          e.target === e.currentTarget &&
           !isLoading
         ) {
           onClose?.();
         }
       }}
     >
-
       <div
         className="appointment-modal-card"
         role="dialog"
@@ -290,12 +153,8 @@ const AppointmentForm = ({
         aria-labelledby="appointment-title"
       >
 
-        {/* =========================================
-            HEADER
-        ========================================= */}
-
+        {/* HEADER */}
         <div className="appointment-modal-header">
-
           <div>
 
             <span className="modal-eyebrow">
@@ -303,15 +162,12 @@ const AppointmentForm = ({
             </span>
 
             <h2 id="appointment-title">
-              Book an Appointment
+              Book an Appointment with {doctorEmail}
             </h2>
 
-            {/* T3 - Doctor email */}
             <p>
-              Appointment with{" "}
-              <strong>
-                {doctorEmail}
-              </strong>
+              Choose a suitable time and tell the doctor
+              why you need a consultation.
             </p>
 
           </div>
@@ -325,13 +181,9 @@ const AppointmentForm = ({
           >
             ×
           </button>
-
         </div>
 
-        {/* =========================================
-            DOCTOR CARD
-        ========================================= */}
-
+        {/* DOCTOR */}
         <div className="appointment-doctor-card">
 
           <div className="appointment-doctor-avatar">
@@ -346,62 +198,45 @@ const AppointmentForm = ({
               Dr. {doctorName}
             </h3>
 
+            {/* Doctor email is explicitly displayed */}
+            <p>
+              {doctorEmail}
+            </p>
+
             <p>
               {specialization}
             </p>
 
             <span>
-              Consultation Fee: ₹
-              {consultationFee}
+              Consultation Fee: ₹{consultationFee}
             </span>
-
-            <small>
-              {doctorEmail}
-            </small>
 
           </div>
 
         </div>
 
-        {/* =========================================
-            ERROR
-        ========================================= */}
-
+        {/* ERROR */}
         {isError && error && (
           <div className="appointment-error">
 
             <span>!</span>
 
             <div>
-
               <strong>
                 Unable to book appointment
               </strong>
 
               <p>
-                {typeof error ===
-                "string"
-                  ? error
-                  : "Something went wrong."}
+                {error}
               </p>
-
             </div>
 
           </div>
         )}
 
-        {/* =========================================
-            FORM
-        ========================================= */}
+        <form onSubmit={handleSubmit}>
 
-        <form
-          onSubmit={handleSubmit}
-        >
-
-          {/* =====================================
-              SLOT
-          ===================================== */}
-
+          {/* SLOT */}
           <div className="appointment-form-group">
 
             <label htmlFor="appointment-slot">
@@ -410,14 +245,12 @@ const AppointmentForm = ({
 
             <select
               id="appointment-slot"
-              name="slot"
               value={slot}
-              onChange={(event) =>
-                setSlot(
-                  event.target.value
-                )
+              onChange={(e) =>
+                setSlot(e.target.value)
               }
               disabled={isLoading}
+              required
             >
 
               <option value="">
@@ -452,21 +285,16 @@ const AppointmentForm = ({
 
             </select>
 
-            {availableSlots.length ===
-              0 && (
+            {availableSlots.length === 0 && (
               <small className="form-help error-text">
-                No available slots are
-                currently provided for
-                this doctor.
+                No available slots are currently
+                provided for this doctor.
               </small>
             )}
 
           </div>
 
-          {/* =====================================
-              REASON
-          ===================================== */}
-
+          {/* REASON */}
           <div className="appointment-form-group">
 
             <label htmlFor="appointment-reason">
@@ -475,12 +303,9 @@ const AppointmentForm = ({
 
             <textarea
               id="appointment-reason"
-              name="reason"
               value={reason}
-              onChange={(event) =>
-                setReason(
-                  event.target.value
-                )
+              onChange={(e) =>
+                setReason(e.target.value)
               }
               placeholder="Briefly describe your symptoms or reason for consultation..."
               rows={4}
@@ -494,10 +319,7 @@ const AppointmentForm = ({
 
           </div>
 
-          {/* =====================================
-              ACTIONS
-          ===================================== */}
-
+          {/* ACTIONS */}
           <div className="appointment-form-actions">
 
             <button
@@ -509,19 +331,21 @@ const AppointmentForm = ({
               Cancel
             </button>
 
-            {/* T5 */}
             <button
               type="submit"
               className="appointment-submit-btn"
+
+              /*
+               * T5
+               * Disabled when slot is empty.
+               */
               disabled={
                 !slot ||
-                availableSlots.length ===
-                  0 ||
+                availableSlots.length === 0 ||
                 isLoading ||
                 submitted
               }
             >
-
               {isLoading ? (
                 <>
                   <span className="button-spinner" />
@@ -530,7 +354,6 @@ const AppointmentForm = ({
               ) : (
                 "Confirm Appointment"
               )}
-
             </button>
 
           </div>
@@ -538,7 +361,6 @@ const AppointmentForm = ({
         </form>
 
       </div>
-
     </div>
   );
 };

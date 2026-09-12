@@ -1,6 +1,6 @@
-import AdminDoctorsPage from "./pages/AdminDoctorPage";
-import "./App.css";
 import React from "react";
+import "./App.css";
+
 import {
   BrowserRouter,
   Routes,
@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 
 import AdminDoctorsPage from "./pages/AdminDoctorsPage";
 import AdminPatientsPage from "./pages/AdminPatientsPage";
+
 
 /* =========================================================
    ROLE HELPER
@@ -68,14 +69,6 @@ const isAuthenticated = (user) => {
   if (!user) {
     return false;
   }
-
-  /*
-   * authSlice stores the JWT inside:
-   *
-   * user.token
-   *
-   * So we check that directly.
-   */
 
   return Boolean(user.token);
 };
@@ -155,12 +148,6 @@ function RoleRoute({
     return children;
   }
 
-  /*
-   * If the user tries to open another
-   * role's dashboard, send them to
-   * their own dashboard.
-   */
-
   if (role === "DOCTOR") {
     return (
       <Navigate
@@ -170,7 +157,10 @@ function RoleRoute({
     );
   }
 
-  if (role === "CLINIC_ADMIN") {
+  if (
+    role === "CLINIC_ADMIN" ||
+    role === "ADMIN"
+  ) {
     return (
       <Navigate
         to="/admin-dashboard"
@@ -217,8 +207,6 @@ function RoleDashboardRedirect() {
 
   const role = getRole(user);
 
-  /* DOCTOR */
-
   if (role === "DOCTOR") {
     return (
       <Navigate
@@ -228,9 +216,10 @@ function RoleDashboardRedirect() {
     );
   }
 
-  /* ADMIN */
-
-  if (role === "CLINIC_ADMIN") {
+  if (
+    role === "CLINIC_ADMIN" ||
+    role === "ADMIN"
+  ) {
     return (
       <Navigate
         to="/admin-dashboard"
@@ -238,8 +227,6 @@ function RoleDashboardRedirect() {
       />
     );
   }
-
-  /* PATIENT */
 
   if (role === "PATIENT") {
     return (
@@ -249,10 +236,6 @@ function RoleDashboardRedirect() {
       />
     );
   }
-
-  /*
-   * Unknown role
-   */
 
   return (
     <Navigate
@@ -300,7 +283,12 @@ function DoctorPage() {
 function AdminPage() {
   return (
     <ProtectedRoute>
-      <RoleRoute allowedRoles={["CLINIC_ADMIN"]}>
+      <RoleRoute
+        allowedRoles={[
+          "CLINIC_ADMIN",
+          "ADMIN",
+        ]}
+      >
         <AdminDashboard />
       </RoleRoute>
     </ProtectedRoute>
@@ -315,7 +303,12 @@ function AdminPage() {
 function AdminDoctors() {
   return (
     <ProtectedRoute>
-      <RoleRoute allowedRoles={["CLINIC_ADMIN"]}>
+      <RoleRoute
+        allowedRoles={[
+          "CLINIC_ADMIN",
+          "ADMIN",
+        ]}
+      >
         <AdminDoctorsPage />
       </RoleRoute>
     </ProtectedRoute>
@@ -330,7 +323,12 @@ function AdminDoctors() {
 function AdminPatients() {
   return (
     <ProtectedRoute>
-      <RoleRoute allowedRoles={["CLINIC_ADMIN"]}>
+      <RoleRoute
+        allowedRoles={[
+          "CLINIC_ADMIN",
+          "ADMIN",
+        ]}
+      >
         <AdminPatientsPage />
       </RoleRoute>
     </ProtectedRoute>
@@ -347,20 +345,12 @@ function App() {
     (state) => state.auth || {}
   );
 
-  /*
-   * No getMe() here.
-   *
-   * authSlice already restores the user
-   * from localStorage when the application starts.
-   */
-
   if (isLoading && !user) {
     return <LoadingScreen />;
   }
 
   return (
     <BrowserRouter>
-
       <Routes>
 
         {/* HOME */}
@@ -471,7 +461,6 @@ function App() {
         />
 
       </Routes>
-
     </BrowserRouter>
   );
 }

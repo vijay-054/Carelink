@@ -7,12 +7,9 @@ const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const {
-    isLoading,
-    isError,
-    isSuccess,
-    message,
-  } = useSelector((state) => state.auth || {});
+  const { isLoading, isError, isSuccess, message } = useSelector(
+    (state) => state.auth || {}
+  );
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -46,6 +43,11 @@ const Register = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    if (!fullName || !email || !password) {
+      alert("Please fill all required fields.");
+      return;
+    }
+
     dispatch(
       register({
         fullName,
@@ -59,12 +61,16 @@ const Register = () => {
   return (
     <div className="auth-page">
       <div className="auth-background">
-        <div className="floating-circle circle-one"></div>
-        <div className="floating-circle circle-two"></div>
-        <div className="floating-circle circle-three"></div>
+        <div className="medical-orb orb-one"></div>
+        <div className="medical-orb orb-two"></div>
+        <div className="medical-orb orb-three"></div>
+
+        <div className="floating-cross cross-one">+</div>
+        <div className="floating-cross cross-two">+</div>
+        <div className="floating-cross cross-three">+</div>
       </div>
 
-      <div className="auth-card">
+      <div className="auth-card register-card">
         <div className="auth-logo">
           <div className="auth-logo-icon">+</div>
           <div>
@@ -73,15 +79,19 @@ const Register = () => {
           </div>
         </div>
 
-        <h2>Create your account</h2>
+        <div className="auth-heading">
+          <span className="auth-tag">JOIN CARELINK</span>
 
-        <p className="auth-subtitle">
-          Join CareLink and manage your healthcare in one place.
-        </p>
+          <h2>Create your account</h2>
+
+          <p>
+            Register to manage your healthcare journey securely.
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="fullName">Full Name</label>
+            <label htmlFor="fullName">Full Name *</label>
 
             <input
               id="fullName"
@@ -95,7 +105,7 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">Email *</label>
 
             <input
               id="email"
@@ -109,7 +119,7 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Password *</label>
 
             <input
               id="password"
@@ -118,13 +128,13 @@ const Register = () => {
               placeholder="Create a password"
               value={password}
               onChange={handleChange}
-              required
               minLength={6}
+              required
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="role">Account Type</label>
+            <label htmlFor="role">Register As *</label>
 
             <select
               id="role"
@@ -142,7 +152,7 @@ const Register = () => {
             className="submit-btn"
             disabled={isLoading}
           >
-            {isLoading ? "Creating account..." : "Create Account"}
+            {isLoading ? "Creating Account..." : "Create Account →"}
           </button>
         </form>
 

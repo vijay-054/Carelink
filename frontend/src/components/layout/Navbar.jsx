@@ -1,211 +1,96 @@
 import React from "react";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
-
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
-
-import {
-  logout,
-} from "../../store/slices/authSlice";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../store/slices/authSlice";
 
 const Navbar = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
+  const dispatch = useDispatch();
 
-  const { user } = useSelector(
-    (state) => state.auth || {}
-  );
+  const { user } = useSelector((state) => state.auth || {});
 
-  /*
-   * Dashboard has its own sidebar and topbar.
-   * Therefore don't render the main navbar there.
-   */
-  if (location.pathname === "/dashboard") {
-    return null;
-  }
-
-  /*
-   * Proper logout:
-   * 1. Clear Redux authentication state
-   * 2. Remove saved authentication data
-   * 3. Navigate to home page
-   */
-const handleLogout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  localStorage.removeItem("authToken");
-  localStorage.removeItem("carelinkToken");
-  localStorage.removeItem("carelinkUser");
-
-  navigate("/", { replace: true });
-};
-
-    // Clear browser storage
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("authToken");
-
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("authToken");
-
-    // Go back to home page
-    navigate("/", { replace: true });
-
-    // Refresh application state
-    window.location.reload();
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
   };
 
   return (
     <nav className="navbar">
-
       {/* Brand */}
-      <Link
-        to="/"
-        className="brand"
-      >
-        <span className="brand-plus">+</span>
-        <span>CareLink</span>
+      <Link to="/" className="navbar-brand">
+        <span className="brand-icon">+</span>
+        <span>Care<span className="brand-highlight">Link</span></span>
       </Link>
 
       {/* Navigation */}
-      <div className="nav-links">
-
-        {/* Guest User */}
-        {!user ? (
+      <div className="navbar-links">
+        {user && (
           <>
-            <Link
-              to="/login"
-              className={
-                location.pathname === "/login"
-                  ? "nav-link active"
-                  : "nav-link"
-              }
-            >
-              Login
-            </Link>
+            <Link to="/">Dashboard</Link>
 
-            <Link
-              to="/register"
-              className={
-                location.pathname === "/register"
-                  ? "nav-link active"
-                  : "nav-link"
-              }
-            >
-              Register
-            </Link>
-          </>
-        ) : (
-
-          /* Logged-in User */
-          <>
-            {/* Patient */}
             {user.role === "PATIENT" && (
-              <Link
-                to="/appointments"
-                className={
-                  location.pathname === "/appointments"
-                    ? "nav-link active"
-                    : "nav-link"
-                }
-              >
-                My Appointments
+              <Link to="/patient-dashboard">
+                Appointments
               </Link>
             )}
 
-            {/* Doctor */}
             {user.role === "DOCTOR" && (
-              <>
-                <Link
-                  to="/schedule"
-                  className={
-                    location.pathname === "/schedule"
-                      ? "nav-link active"
-                      : "nav-link"
-                  }
-                >
-                  My Schedule
-                </Link>
-
-                <Link
-                  to="/consultations"
-                  className={
-                    location.pathname === "/consultations"
-                      ? "nav-link active"
-                      : "nav-link"
-                  }
-                >
-                  Consultations
-                </Link>
-              </>
+              <Link to="/doctor-dashboard">
+                Doctor Dashboard
+              </Link>
             )}
 
-            {/* Clinic Admin */}
             {user.role === "CLINIC_ADMIN" && (
-              <>
-                <Link
-                  to="/doctors"
-                  className={
-                    location.pathname === "/doctors"
-                      ? "nav-link active"
-                      : "nav-link"
-                  }
-                >
-                  Manage Doctors
-                </Link>
-
-                <Link
-                  to="/patients"
-                  className={
-                    location.pathname === "/patients"
-                      ? "nav-link active"
-                      : "nav-link"
-                  }
-                >
-                  Manage Patients
-                </Link>
-
-                <Link
-                  to="/appointments"
-                  className={
-                    location.pathname === "/appointments"
-                      ? "nav-link active"
-                      : "nav-link"
-                  }
-                >
-                  All Appointments
-                </Link>
-              </>
+              <Link to="/admin-dashboard">
+                Admin Dashboard
+              </Link>
             )}
+          </>
+        )}
+      </div>
 
-            {/* User profile indicator */}
-            <span className="user-indicator">
-              <span className="user-dot"></span>
-              {user.name || user.email || "User"}
-            </span>
+      {/* User section */}
+      <div className="navbar-user">
+        {user ? (
+          <>
+            <div className="navbar-avatar">
+              {(user.fullName || user.email || "U")
+                .charAt(0)
+                .toUpperCase()}
+            </div>
 
-            {/* Logout */}
+            <div className="navbar-user-info">
+              <strong>
+                {user.fullName || user.email}
+              </strong>
+
+              <small>
+                {user.role || "User"}
+              </small>
+            </div>
+
             <button
               type="button"
+              className="navbar-logout"
               onClick={handleLogout}
-              className="logout-btn"
             >
               Logout
             </button>
           </>
-        )}
+        ) : (
+          <>
+            <Link to="/login" className="navbar-login">
+              Login
+            </Link>
 
+            <Link to="/register" className="navbar-register">
+              Register
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );
-;
+};
 
 export default Navbar;

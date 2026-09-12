@@ -24,14 +24,18 @@ const DoctorDashboard = () => {
     "Doctor";
 
 
-  const handleLogout = () => {
+const handleLogout = () => {
 
-    dispatch(logout());
+  dispatch(logout());
 
-    localStorage.removeItem("user");
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("carelinkToken");
+  localStorage.removeItem("carelinkUser");
 
-    navigate("/");
-  };
+  window.location.href = "/";
+};
 
 
   return (

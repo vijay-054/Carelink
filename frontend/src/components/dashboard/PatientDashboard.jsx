@@ -36,11 +36,18 @@ const PatientDashboard = () => {
     user?.email?.split("@")[0] ||
     "Patient";
 
-  const handleLogout = () => {
-    dispatch(logout());
-    localStorage.removeItem("user");
-    navigate("/");
-  };
+const handleLogout = () => {
+
+  dispatch(logout());
+
+  localStorage.removeItem("user");
+  localStorage.removeItem("token");
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("carelinkToken");
+  localStorage.removeItem("carelinkUser");
+
+  window.location.href = "/";
+};
 
   return (
     <div className="care-dashboard patient-dashboard">

@@ -31,10 +31,29 @@ const Login = () => {
       return;
     }
 
-    if (isSuccess && user) {
-      navigate("/dashboard");
-      dispatch(reset());
-    }
+if (isSuccess && user) {
+
+  const role = String(
+    user.role ||
+    user.userRole ||
+    user.roleName ||
+    user.authority ||
+    ""
+  )
+    .replace("ROLE_", "")
+    .trim()
+    .toUpperCase();
+
+  if (role === "DOCTOR") {
+    navigate("/doctor-dashboard");
+  } else if (role === "CLINIC_ADMIN") {
+    navigate("/admin-dashboard");
+  } else {
+    navigate("/dashboard");
+  }
+
+  dispatch(reset());
+}
   }, [
     isError,
     isSuccess,

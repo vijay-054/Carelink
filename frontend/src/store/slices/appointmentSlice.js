@@ -184,6 +184,7 @@ const appointmentSlice = createSlice({
         (state, action) => {
           state.isLoading = false;
           state.isError = true;
+
           state.error =
             action.payload ||
             "Failed to load appointments";
@@ -221,6 +222,7 @@ const appointmentSlice = createSlice({
         (state, action) => {
           state.isLoading = false;
           state.isError = true;
+
           state.error =
             action.payload ||
             "Failed to load doctor appointments";
@@ -258,6 +260,7 @@ const appointmentSlice = createSlice({
         (state, action) => {
           state.isLoading = false;
           state.isError = true;
+
           state.error =
             action.payload ||
             "Failed to load appointments";
@@ -265,7 +268,7 @@ const appointmentSlice = createSlice({
       )
 
       /* =====================================================
-         BOOK
+         BOOK APPOINTMENT
       ===================================================== */
 
       .addCase(
@@ -305,7 +308,7 @@ const appointmentSlice = createSlice({
       )
 
       /* =====================================================
-         CANCEL
+         CANCEL APPOINTMENT
       ===================================================== */
 
       .addCase(

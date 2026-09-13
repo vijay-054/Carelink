@@ -6,7 +6,6 @@ import api from "./api";
 
 const getMyAppointments = async () => {
   const response = await api.get("/appointments/my");
-
   return response.data;
 };
 
@@ -16,7 +15,6 @@ const getMyAppointments = async () => {
 
 const getDoctorAppointments = async () => {
   const response = await api.get("/appointments/doctor");
-
   return response.data;
 };
 
@@ -26,7 +24,6 @@ const getDoctorAppointments = async () => {
 
 const getAllAppointments = async () => {
   const response = await api.get("/appointments");
-
   return response.data;
 };
 

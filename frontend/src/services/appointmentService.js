@@ -10,7 +10,6 @@ const getMyAppointments = async () => {
   return response.data;
 };
 
-
 /* =========================================================
    GET DOCTOR APPOINTMENTS
 ========================================================= */
@@ -20,7 +19,6 @@ const getDoctorAppointments = async () => {
 
   return response.data;
 };
-
 
 /* =========================================================
    GET ALL APPOINTMENTS - ADMIN
@@ -32,9 +30,8 @@ const getAllAppointments = async () => {
   return response.data;
 };
 
-
 /* =========================================================
-   BOOK APPOINTMENT - PATIENT
+   BOOK APPOINTMENT
 ========================================================= */
 
 const bookAppointment = async (appointmentData) => {
@@ -45,7 +42,6 @@ const bookAppointment = async (appointmentData) => {
 
   return response.data;
 };
-
 
 /* =========================================================
    CANCEL APPOINTMENT
@@ -59,9 +55,8 @@ const cancelAppointment = async (appointmentId) => {
   return response.data;
 };
 
-
 /* =========================================================
-   EXPORT SERVICE
+   EXPORT
 ========================================================= */
 
 const appointmentService = {

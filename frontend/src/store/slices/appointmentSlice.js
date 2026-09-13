@@ -5,7 +5,6 @@ import {
 
 import appointmentService from "../../services/appointmentService";
 
-
 /* =========================================================
    GET MY APPOINTMENTS - PATIENT
 ========================================================= */
@@ -13,22 +12,18 @@ import appointmentService from "../../services/appointmentService";
 export const getMyAppointments =
   createAsyncThunk(
     "appointments/getMyAppointments",
-
     async (_, { rejectWithValue }) => {
       try {
         return await appointmentService.getMyAppointments();
-
       } catch (error) {
         return rejectWithValue(
           error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Failed to load appointments"
+            error?.message ||
+            "Failed to load appointments"
         );
       }
     }
   );
-
 
 /* =========================================================
    GET DOCTOR APPOINTMENTS
@@ -37,22 +32,18 @@ export const getMyAppointments =
 export const getDoctorAppointments =
   createAsyncThunk(
     "appointments/getDoctorAppointments",
-
     async (_, { rejectWithValue }) => {
       try {
         return await appointmentService.getDoctorAppointments();
-
       } catch (error) {
         return rejectWithValue(
           error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Failed to load doctor appointments"
+            error?.message ||
+            "Failed to load doctor appointments"
         );
       }
     }
   );
-
 
 /* =========================================================
    GET ALL APPOINTMENTS - ADMIN
@@ -61,54 +52,43 @@ export const getDoctorAppointments =
 export const getAllAppointments =
   createAsyncThunk(
     "appointments/getAllAppointments",
-
     async (_, { rejectWithValue }) => {
       try {
         return await appointmentService.getAllAppointments();
-
       } catch (error) {
         return rejectWithValue(
           error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Failed to load appointments"
+            error?.message ||
+            "Failed to load appointments"
         );
       }
     }
   );
 
-
 /* =========================================================
-   BOOK APPOINTMENT - PATIENT
+   BOOK APPOINTMENT
 ========================================================= */
 
 export const bookAppointment =
   createAsyncThunk(
     "appointments/book",
-
     async (
       appointmentData,
       { rejectWithValue }
     ) => {
-
       try {
-
         return await appointmentService.bookAppointment(
           appointmentData
         );
-
       } catch (error) {
-
         return rejectWithValue(
           error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Failed to book appointment"
+            error?.message ||
+            "Failed to book appointment"
         );
       }
     }
   );
-
 
 /* =========================================================
    CANCEL APPOINTMENT
@@ -117,148 +97,96 @@ export const bookAppointment =
 export const cancelAppointment =
   createAsyncThunk(
     "appointments/cancel",
-
     async (
       appointmentId,
       { rejectWithValue }
     ) => {
-
       try {
-
         await appointmentService.cancelAppointment(
           appointmentId
         );
 
         return appointmentId;
-
       } catch (error) {
-
         return rejectWithValue(
           error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error?.message ||
-          "Failed to cancel appointment"
+            error?.message ||
+            "Failed to cancel appointment"
         );
       }
     }
   );
-
 
 /* =========================================================
    INITIAL STATE
 ========================================================= */
 
 const initialState = {
-
   items: [],
 
   slots: [],
 
   isLoading: false,
-
   isError: false,
-
   error: null,
 
   filterStatus: "ALL",
-
   searchQuery: "",
 };
-
 
 /* =========================================================
    SLICE
 ========================================================= */
 
 const appointmentSlice = createSlice({
-
   name: "appointments",
 
   initialState,
 
   reducers: {
 
-    /* =====================================================
-       FILTER STATUS
-    ===================================================== */
-
     setFilterStatus: (state, action) => {
-
-      state.filterStatus =
-        action.payload;
+      state.filterStatus = action.payload;
     },
-
-
-    /* =====================================================
-       SEARCH
-    ===================================================== */
 
     setSearchQuery: (state, action) => {
-
-      state.searchQuery =
-        action.payload;
+      state.searchQuery = action.payload;
     },
 
-
-    /* =====================================================
-       CLEAR ERROR
-    ===================================================== */
-
     clearAppointmentError: (state) => {
-
       state.isError = false;
-
       state.error = null;
     },
 
-
-    /* =====================================================
-       CLEAR APPOINTMENTS
-    ===================================================== */
-
     clearAppointments: (state) => {
-
       state.items = [];
     },
   },
-
-
-  /* =======================================================
-     EXTRA REDUCERS
-  ======================================================= */
 
   extraReducers: (builder) => {
 
     builder
 
-
-      /* ===================================================
+      /* =====================================================
          GET MY APPOINTMENTS
-      =================================================== */
+      ===================================================== */
 
       .addCase(
         getMyAppointments.pending,
-
         (state) => {
 
           state.isLoading = true;
-
           state.isError = false;
-
           state.error = null;
         }
       )
 
-
       .addCase(
         getMyAppointments.fulfilled,
-
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = false;
-
           state.error = null;
 
           state.items =
@@ -268,14 +196,11 @@ const appointmentSlice = createSlice({
         }
       )
 
-
       .addCase(
         getMyAppointments.rejected,
-
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = true;
 
           state.error =
@@ -284,40 +209,27 @@ const appointmentSlice = createSlice({
         }
       )
 
-
-      /* ===================================================
+      /* =====================================================
          GET DOCTOR APPOINTMENTS
-      =================================================== */
+      ===================================================== */
 
       .addCase(
         getDoctorAppointments.pending,
-
         (state) => {
 
           state.isLoading = true;
-
           state.isError = false;
-
           state.error = null;
         }
       )
 
-
       .addCase(
         getDoctorAppointments.fulfilled,
-
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = false;
-
           state.error = null;
-
-          /*
-           * These are appointments belonging
-           * to the currently logged-in doctor.
-           */
 
           state.items =
             Array.isArray(action.payload)
@@ -326,14 +238,11 @@ const appointmentSlice = createSlice({
         }
       )
 
-
       .addCase(
         getDoctorAppointments.rejected,
-
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = true;
 
           state.error =
@@ -342,34 +251,26 @@ const appointmentSlice = createSlice({
         }
       )
 
-
-      /* ===================================================
-         GET ALL APPOINTMENTS - ADMIN
-      =================================================== */
+      /* =====================================================
+         GET ALL APPOINTMENTS
+      ===================================================== */
 
       .addCase(
         getAllAppointments.pending,
-
         (state) => {
 
           state.isLoading = true;
-
           state.isError = false;
-
           state.error = null;
         }
       )
 
-
       .addCase(
         getAllAppointments.fulfilled,
-
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = false;
-
           state.error = null;
 
           state.items =
@@ -379,14 +280,11 @@ const appointmentSlice = createSlice({
         }
       )
 
-
       .addCase(
         getAllAppointments.rejected,
-
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = true;
 
           state.error =
@@ -395,34 +293,26 @@ const appointmentSlice = createSlice({
         }
       )
 
-
-      /* ===================================================
+      /* =====================================================
          BOOK APPOINTMENT
-      =================================================== */
+      ===================================================== */
 
       .addCase(
         bookAppointment.pending,
-
         (state) => {
 
           state.isLoading = true;
-
           state.isError = false;
-
           state.error = null;
         }
       )
 
-
       .addCase(
         bookAppointment.fulfilled,
-
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = false;
-
           state.error = null;
 
           if (action.payload) {
@@ -434,14 +324,11 @@ const appointmentSlice = createSlice({
         }
       )
 
-
       .addCase(
         bookAppointment.rejected,
-
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = true;
 
           state.error =
@@ -450,43 +337,30 @@ const appointmentSlice = createSlice({
         }
       )
 
-
-      /* ===================================================
+      /* =====================================================
          CANCEL APPOINTMENT
-      =================================================== */
+      ===================================================== */
 
       .addCase(
         cancelAppointment.pending,
-
         (state) => {
 
           state.isLoading = true;
-
           state.isError = false;
-
           state.error = null;
         }
       )
 
-
       .addCase(
         cancelAppointment.fulfilled,
-
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = false;
-
           state.error = null;
 
           const cancelledId =
             action.payload;
-
-          /*
-           * Remove cancelled appointment
-           * from Redux state.
-           */
 
           state.items =
             state.items.filter(
@@ -497,14 +371,11 @@ const appointmentSlice = createSlice({
         }
       )
 
-
       .addCase(
         cancelAppointment.rejected,
-
         (state, action) => {
 
           state.isLoading = false;
-
           state.isError = true;
 
           state.error =
@@ -514,7 +385,6 @@ const appointmentSlice = createSlice({
       );
   },
 });
-
 
 /* =========================================================
    ACTIONS
@@ -527,9 +397,8 @@ export const {
   clearAppointments,
 } = appointmentSlice.actions;
 
-
 /* =========================================================
    REDUCER
 ========================================================= */
 
-export default appointmentSlice.reducer;  
+export default appointmentSlice.reducer;

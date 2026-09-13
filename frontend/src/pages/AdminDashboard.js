@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../store/slices/authSlice";
+import React from "react";
+import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
+import "../components/dashboard/Dashboard.css";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();

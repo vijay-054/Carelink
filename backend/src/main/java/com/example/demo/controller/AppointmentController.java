@@ -20,7 +20,6 @@ public class AppointmentController {
 
     private final AppointmentService appointmentService;
 
-
     /* =========================================================
        BOOK APPOINTMENT - PATIENT
     ========================================================= */
@@ -38,7 +37,6 @@ public class AppointmentController {
                 )
         );
     }
-
 
     /* =========================================================
        CANCEL APPOINTMENT
@@ -58,9 +56,8 @@ public class AppointmentController {
         return ResponseEntity.noContent().build();
     }
 
-
     /* =========================================================
-       GET PATIENT APPOINTMENTS
+       PATIENT APPOINTMENTS
     ========================================================= */
 
     @GetMapping("/my")
@@ -75,9 +72,8 @@ public class AppointmentController {
         );
     }
 
-
     /* =========================================================
-       GET DOCTOR APPOINTMENTS
+       DOCTOR APPOINTMENTS
     ========================================================= */
 
     @GetMapping("/doctor")
@@ -92,9 +88,8 @@ public class AppointmentController {
         );
     }
 
-
     /* =========================================================
-       GET ALL APPOINTMENTS - ADMIN
+       ALL APPOINTMENTS - ADMIN
     ========================================================= */
 
     @GetMapping

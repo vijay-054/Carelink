@@ -15,7 +15,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Doctor's appointments
     List<Appointment> findByDoctorId(Long doctorId);
 
-    // Count patient's pending appointments
+    // Patient pending appointment limit
     long countByPatientIdAndStatus(
             Long patientId,
             Appointment.AppointmentStatus status

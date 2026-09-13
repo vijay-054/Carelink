@@ -21,7 +21,7 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
 
     /* =========================================================
-       BOOK APPOINTMENT - PATIENT
+       PATIENT BOOKS APPOINTMENT
     ========================================================= */
 
     @PostMapping("/book")
@@ -57,7 +57,7 @@ public class AppointmentController {
     }
 
     /* =========================================================
-       GET MY APPOINTMENTS - PATIENT
+       PATIENT APPOINTMENTS
     ========================================================= */
 
     @GetMapping("/my")
@@ -73,7 +73,7 @@ public class AppointmentController {
     }
 
     /* =========================================================
-       GET MY APPOINTMENTS - DOCTOR
+       DOCTOR APPOINTMENTS
     ========================================================= */
 
     @GetMapping("/doctor")
@@ -89,7 +89,7 @@ public class AppointmentController {
     }
 
     /* =========================================================
-       GET ALL APPOINTMENTS - ADMIN
+       ADMIN - ALL APPOINTMENTS
     ========================================================= */
 
     @GetMapping

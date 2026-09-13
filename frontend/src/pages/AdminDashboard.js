@@ -1,186 +1,104 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { logout } from "../store/slices/authSlice";
 import React from "react";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import "../components/dashboard/Dashboard.css";
 
-
 const AdminDashboard = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   const { user } = useSelector((state) => state.auth || {});
 
-  const [activeSection, setActiveSection] = useState("Overview");
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [toast, setToast] = useState("");
-
-  const adminName =
+  // Get user name safely
+  const userName =
     user?.fullName ||
     user?.name ||
+    user?.email?.split("@")[0] ||
     "Admin";
 
-  const showToast = (message) => {
-    setToast(message);
+  // Get role safely
+  let role =
+    user?.role ||
+    user?.userRole ||
+    user?.roleName ||
+    user?.authority ||
+    user?.authorities?.[0]?.authority ||
+    user?.authorities?.[0] ||
+    "";
 
-    setTimeout(() => {
-      setToast("");
-    }, 3000);
-  };
+  if (typeof role === "object") {
+    role =
+      role?.name ||
+      role?.role ||
+      role?.authority ||
+      "";
+  }
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/login");
-  };
+  role = String(role).trim().toUpperCase();
 
-  const goToDoctors = () => {
-    setActiveSection("Doctors");
-    navigate("/admin/doctors");
-  };
+  if (role.startsWith("ROLE_")) {
+    role = role.substring(5);
+  }
 
-  const goToPatients = () => {
-    setActiveSection("Patients");
-    navigate("/admin/patients");
-  };
+  // If not logged in, go to login
+  if (!user?.token) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
-    <div className="admin-dashboard">
-
-      {/* Animated background */}
-      <div className="admin-background">
-        <div className="admin-orb admin-orb-one"></div>
-        <div className="admin-orb admin-orb-two"></div>
-        <div className="admin-orb admin-orb-three"></div>
-
-        <div className="admin-floating-cross cross-one">+</div>
-        <div className="admin-floating-cross cross-two">+</div>
-      </div>
+    <div className="care-dashboard admin-dashboard">
 
       {/* SIDEBAR */}
-      <aside className="admin-sidebar">
+      <aside className="dashboard-sidebar">
 
-        <div className="admin-brand">
-
-          <div className="admin-brand-icon">
+        <div className="dashboard-logo">
+          <div className="logo-heart">
             +
           </div>
 
-          <div>
-            <h2>CareLink</h2>
-            <span>Admin Portal</span>
-          </div>
-
+          <span>CareLink</span>
         </div>
 
-        {/* ADMIN PROFILE */}
-        <div className="admin-profile">
+        <nav className="dashboard-nav">
 
-          <div className="admin-avatar">
-            {adminName.charAt(0).toUpperCase()}
-          </div>
-
-          <div>
-            <strong>{adminName}</strong>
-            <span>Clinic Admin</span>
-          </div>
-
-        </div>
-
-        {/* NAVIGATION */}
-        <nav className="admin-nav">
-
-          <button
-            className={
-              activeSection === "Overview"
-                ? "active"
-                : ""
-            }
-            onClick={() => {
-              setActiveSection("Overview");
-              navigate("/admin-dashboard");
-            }}
-          >
-            <span>⌂</span>
-            Overview
+          <button className="dashboard-nav-item active">
+            <span>▣</span>
+            Dashboard
           </button>
 
-          <button
-            className={
-              activeSection === "Doctors"
-                ? "active"
-                : ""
-            }
-            onClick={goToDoctors}
-          >
-            <span>♙</span>
+          <button className="dashboard-nav-item">
+            <span>👨‍⚕️</span>
             Doctors
           </button>
 
-          <button
-            className={
-              activeSection === "Patients"
-                ? "active"
-                : ""
-            }
-            onClick={goToPatients}
-          >
-            <span>♙</span>
+          <button className="dashboard-nav-item">
+            <span>👥</span>
             Patients
           </button>
 
-          <button
-            onClick={() =>
-              showToast(
-                "Appointment management selected"
-              )
-            }
-          >
-            <span>▣</span>
+          <button className="dashboard-nav-item">
+            <span>📅</span>
             Appointments
           </button>
 
-          <button
-            onClick={() =>
-              showToast(
-                "Medical records selected"
-              )
-            }
-          >
-            <span>▤</span>
-            Health Records
-          </button>
-
-          <button
-            onClick={() =>
-              showToast(
-                "Reports section selected"
-              )
-            }
-          >
-            <span>▥</span>
+          <button className="dashboard-nav-item">
+            <span>📊</span>
             Reports
           </button>
 
-          <button
-            onClick={() =>
-              showToast(
-                "Settings selected"
-              )
-            }
-          >
+          <button className="dashboard-nav-item">
             <span>⚙</span>
             Settings
           </button>
 
         </nav>
 
-        {/* LOGOUT */}
         <button
-          className="admin-logout"
-          onClick={handleLogout}
+          className="dashboard-logout"
+          onClick={() => {
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+            localStorage.removeItem("authToken");
+
+            window.location.href = "/login";
+          }}
         >
           <span>↪</span>
           Logout
@@ -189,502 +107,356 @@ const AdminDashboard = () => {
       </aside>
 
       {/* MAIN */}
-      <main className="admin-main">
+      <main className="dashboard-main">
 
         {/* TOP BAR */}
-        <header className="admin-topbar">
+        <header className="dashboard-topbar">
 
           <div>
-
-            <div className="admin-breadcrumb">
-              CareLink
-              <span>/</span>
-              Admin Portal
-            </div>
-
-            <h2>Administration Dashboard</h2>
-
+            <span className="dashboard-page-label">
+              ADMIN PORTAL
+            </span>
           </div>
 
-          <div className="admin-top-actions">
+          <div className="topbar-user">
 
             <button
-              className="admin-notification"
-              onClick={() =>
-                setShowNotifications(
-                  !showNotifications
-                )
-              }
+              className="notification-button"
+              aria-label="Notifications"
             >
               🔔
-              <span></span>
+              <span className="notification-dot" />
             </button>
 
-            <div className="admin-top-user">
+            <div className="user-avatar">
+              {userName.charAt(0).toUpperCase()}
+            </div>
 
-              <div className="admin-avatar small">
-                {adminName.charAt(0).toUpperCase()}
-              </div>
-
-              <div>
-                <strong>{adminName}</strong>
-                <span>Clinic Admin</span>
-              </div>
-
+            <div className="user-info">
+              <strong>{userName}</strong>
+              <span>
+                {role || "Clinic Admin"}
+              </span>
             </div>
 
           </div>
-
-          {/* NOTIFICATIONS */}
-          {showNotifications && (
-            <div className="admin-notification-panel">
-
-              <h3>Notifications</h3>
-
-              <div className="admin-notification-item">
-
-                <div>✓</div>
-
-                <section>
-                  <strong>System ready</strong>
-                  <p>
-                    CareLink administration portal
-                    is ready.
-                  </p>
-                </section>
-
-              </div>
-
-              <div className="admin-notification-item">
-
-                <div>!</div>
-
-                <section>
-                  <strong>System reminder</strong>
-                  <p>
-                    Review doctor and patient
-                    information regularly.
-                  </p>
-                </section>
-
-              </div>
-
-            </div>
-          )}
 
         </header>
 
         {/* CONTENT */}
-        <div className="admin-content">
+        <div className="dashboard-content">
 
-          {/* WELCOME */}
-          <section className="admin-hero">
+          {/* HEADING */}
+          <section className="dashboard-heading">
 
-            <div className="admin-hero-content">
+            <span className="modal-eyebrow">
+              ADMINISTRATION
+            </span>
 
-              <span className="admin-label">
-                CARELINK ADMINISTRATION
-              </span>
+            <h1>
+              Welcome, {userName}! 👋
+            </h1>
 
-              <h1>
-                Welcome back,{" "}
-                <span>{adminName.split(" ")[0]}!</span>
-              </h1>
+            <p>
+              Manage your CareLink healthcare system
+              from one place.
+            </p>
+
+          </section>
+
+          {/* HERO */}
+          <section className="patient-hero">
+
+            <div className="patient-hero-content">
+
+              <h2>
+                CareLink<br />
+                Administration
+              </h2>
 
               <p>
-                Manage doctors, patients,
-                appointments and healthcare
-                operations from one secure portal.
+                Manage doctors, patients, appointments
+                and healthcare operations efficiently.
               </p>
-
-              <div className="admin-hero-actions">
-
-                <button
-                  className="admin-primary-btn"
-                  onClick={goToDoctors}
-                >
-                  Manage Doctors →
-                </button>
-
-                <button
-                  className="admin-secondary-btn"
-                  onClick={goToPatients}
-                >
-                  View Patients
-                </button>
-
-              </div>
 
             </div>
 
-            <div className="admin-hero-visual">
-
-              <div className="admin-pulse-circle">
-                +
+            <div className="patient-hero-art">
+              <div className="leaf leaf-one">
+                🌿
               </div>
 
-              <div className="admin-pulse-line">
-                <span></span>
+              <div className="patient-woman">
+                🧑‍⚕️
               </div>
 
-              <div className="admin-floating-card">
-
-                <strong>✓</strong>
-
-                <div>
-                  <b>System Status</b>
-                  <small>All systems operational</small>
-                </div>
-
+              <div className="heart-shape">
+                ♥
               </div>
+            </div>
 
+            <div className="hero-script">
+              Better Care<br />
+              Better Management
             </div>
 
           </section>
 
-          {/* STATISTICS */}
-          <section className="admin-stats">
+          {/* STATS */}
+          <section className="dashboard-stats">
 
-            <div className="admin-stat-card">
+            <div className="dashboard-stat">
 
-              <div className="admin-stat-icon blue">
-                ♙
+              <div className="stat-icon mint">
+                👨‍⚕️
               </div>
 
               <div>
-                <span>Total Doctors</span>
-                <strong>4</strong>
-                <small>Registered doctors</small>
+                <span>Doctors</span>
+                <strong>12</strong>
+                <small>Registered Doctors</small>
               </div>
 
             </div>
 
-            <div className="admin-stat-card">
+            <div className="dashboard-stat">
 
-              <div className="admin-stat-icon green">
-                ♙
+              <div className="stat-icon teal">
+                👥
               </div>
 
               <div>
-                <span>Total Patients</span>
-                <strong>0</strong>
-                <small>Registered patients</small>
+                <span>Patients</span>
+                <strong>48</strong>
+                <small>Registered Patients</small>
               </div>
 
             </div>
 
-            <div className="admin-stat-card">
+            <div className="dashboard-stat">
 
-              <div className="admin-stat-icon purple">
-                ▣
+              <div className="stat-icon orange">
+                📅
               </div>
 
               <div>
                 <span>Appointments</span>
-                <strong>0</strong>
-                <small>Total appointments</small>
+                <strong>24</strong>
+                <small>This Month</small>
               </div>
 
             </div>
 
-            <div className="admin-stat-card">
+            <div className="dashboard-stat">
 
-              <div className="admin-stat-icon orange">
-                ✓
+              <div className="stat-icon coral">
+                💬
               </div>
 
               <div>
-                <span>Active Doctors</span>
-                <strong>4</strong>
-                <small>Currently available</small>
+                <span>Messages</span>
+                <strong>8</strong>
+                <small>Unread Messages</small>
               </div>
 
             </div>
 
           </section>
 
-          {/* MANAGEMENT */}
-          <section className="admin-section">
+          {/* MANAGEMENT CARDS */}
+          <section className="two-column-grid">
 
-            <div className="admin-section-heading">
+            <div className="dashboard-card">
 
-              <span>MANAGEMENT</span>
+              <div className="card-heading">
 
-              <h2>
-                Clinic Management
-              </h2>
+                <h3>
+                  Doctor Management
+                </h3>
+
+              </div>
 
               <p>
-                Manage the people and activities
-                across your healthcare platform.
+                Manage registered doctors and their
+                healthcare services.
               </p>
 
-            </div>
-
-            <div className="admin-management-grid">
-
-              {/* DOCTORS */}
               <button
-                className="admin-management-card"
-                onClick={goToDoctors}
-              >
-
-                <div className="management-icon blue">
-                  ♙
-                </div>
-
-                <div className="management-content">
-
-                  <h3>Manage Doctors</h3>
-
-                  <p>
-                    Add, view and manage healthcare
-                    professionals.
-                  </p>
-
-                  <span>
-                    View Doctors →
-                  </span>
-
-                </div>
-
-              </button>
-
-              {/* PATIENTS */}
-              <button
-                className="admin-management-card"
-                onClick={goToPatients}
-              >
-
-                <div className="management-icon green">
-                  ♙
-                </div>
-
-                <div className="management-content">
-
-                  <h3>Manage Patients</h3>
-
-                  <p>
-                    View registered patients and
-                    manage patient information.
-                  </p>
-
-                  <span>
-                    View Patients →
-                  </span>
-
-                </div>
-
-              </button>
-
-              {/* APPOINTMENTS */}
-              <button
-                className="admin-management-card"
+                className="green-button"
                 onClick={() =>
-                  showToast(
-                    "Appointment management will be available here"
-                  )
+                  (window.location.href =
+                    "/admin/doctors")
                 }
               >
-
-                <div className="management-icon purple">
-                  ▣
-                </div>
-
-                <div className="management-content">
-
-                  <h3>Appointments</h3>
-
-                  <p>
-                    Monitor and manage patient
-                    appointments.
-                  </p>
-
-                  <span>
-                    Manage Appointments →
-                  </span>
-
-                </div>
-
+                Manage Doctors
               </button>
 
-              {/* REPORTS */}
+            </div>
+
+            <div className="dashboard-card">
+
+              <div className="card-heading">
+
+                <h3>
+                  Patient Management
+                </h3>
+
+              </div>
+
+              <p>
+                View and manage patients registered
+                with CareLink.
+              </p>
+
               <button
-                className="admin-management-card"
+                className="green-button"
                 onClick={() =>
-                  showToast(
-                    "Reports section selected"
-                  )
+                  (window.location.href =
+                    "/admin/patients")
                 }
               >
-
-                <div className="management-icon orange">
-                  ▤
-                </div>
-
-                <div className="management-content">
-
-                  <h3>Reports</h3>
-
-                  <p>
-                    Review clinic activity and
-                    healthcare statistics.
-                  </p>
-
-                  <span>
-                    View Reports →
-                  </span>
-
-                </div>
-
+                Manage Patients
               </button>
 
             </div>
 
           </section>
 
-          {/* SYSTEM OVERVIEW */}
-          <section className="admin-section">
+          {/* QUICK ACTIONS */}
+          <section className="dashboard-card">
 
-            <div className="admin-section-heading">
+            <div className="card-heading">
 
-              <span>SYSTEM OVERVIEW</span>
-
-              <h2>
-                Platform Status
-              </h2>
-
-              <p>
-                Current status of your CareLink
-                healthcare platform.
-              </p>
+              <h3>
+                Quick Actions
+              </h3>
 
             </div>
 
-            <div className="admin-status-grid">
+            <div className="quick-action-grid">
 
-              <div className="admin-status-card">
+              <button
+                className="quick-action green-action"
+                onClick={() =>
+                  (window.location.href =
+                    "/admin/doctors")
+                }
+              >
+                <span>👨‍⚕️</span>
+                <small>
+                  Manage Doctors
+                </small>
+              </button>
 
-                <div className="status-check">
-                  ✓
-                </div>
+              <button
+                className="quick-action blue-action"
+                onClick={() =>
+                  (window.location.href =
+                    "/admin/patients")
+                }
+              >
+                <span>👥</span>
+                <small>
+                  Manage Patients
+                </small>
+              </button>
 
-                <div>
-                  <strong>
-                    Authentication
-                  </strong>
+              <button
+                className="quick-action orange-action"
+                onClick={() =>
+                  (window.location.href =
+                    "/admin/appointments")
+                }
+              >
+                <span>📅</span>
+                <small>
+                  Appointments
+                </small>
+              </button>
 
-                  <span>
-                    Operational
-                  </span>
-                </div>
-
-              </div>
-
-              <div className="admin-status-card">
-
-                <div className="status-check">
-                  ✓
-                </div>
-
-                <div>
-                  <strong>
-                    Database
-                  </strong>
-
-                  <span>
-                    Connected
-                  </span>
-                </div>
-
-              </div>
-
-              <div className="admin-status-card">
-
-                <div className="status-check">
-                  ✓
-                </div>
-
-                <div>
-                  <strong>
-                    Doctor Portal
-                  </strong>
-
-                  <span>
-                    Operational
-                  </span>
-                </div>
-
-              </div>
-
-              <div className="admin-status-card">
-
-                <div className="status-check">
-                  ✓
-                </div>
-
-                <div>
-                  <strong>
-                    Patient Portal
-                  </strong>
-
-                  <span>
-                    Operational
-                  </span>
-                </div>
-
-              </div>
+              <button
+                className="quick-action sky-action"
+              >
+                <span>📊</span>
+                <small>
+                  View Reports
+                </small>
+              </button>
 
             </div>
 
           </section>
 
-          {/* SUPPORT */}
-          <section className="admin-support">
+          {/* RECENT ACTIVITY */}
+          <section className="dashboard-card">
 
-            <div className="admin-support-icon">
-              ?
-            </div>
+            <div className="card-heading">
 
-            <div>
-
-              <span>ADMIN SUPPORT</span>
-
-              <h2>
-                Need assistance?
-              </h2>
-
-              <p>
-                Contact the CareLink support team
-                if you need help managing your
-                healthcare platform.
-              </p>
+              <h3>
+                Recent Activity
+              </h3>
 
             </div>
 
-            <button
-              onClick={() =>
-                showToast(
-                  "Support request selected"
-                )
-              }
-            >
-              Contact Support →
-            </button>
+            <div className="activity-item">
+
+              <div className="activity-icon">
+                👨‍⚕️
+              </div>
+
+              <div>
+                <strong>
+                  New doctor registered
+                </strong>
+
+                <span>
+                  Recently added to CareLink
+                </span>
+              </div>
+
+            </div>
+
+            <div className="activity-item">
+
+              <div className="activity-icon">
+                👥
+              </div>
+
+              <div>
+                <strong>
+                  New patient registered
+                </strong>
+
+                <span>
+                  Patient account created
+                </span>
+              </div>
+
+            </div>
+
+            <div className="activity-item">
+
+              <div className="activity-icon">
+                📅
+              </div>
+
+              <div>
+                <strong>
+                  Appointment scheduled
+                </strong>
+
+                <span>
+                  New appointment created
+                </span>
+              </div>
+
+            </div>
 
           </section>
 
         </div>
 
       </main>
-
-      {/* TOAST */}
-      {toast && (
-        <div className="admin-toast">
-          <span>✓</span>
-          {toast}
-        </div>
-      )}
 
     </div>
   );

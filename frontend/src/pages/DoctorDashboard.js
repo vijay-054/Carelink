@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../store/slices/authSlice";
+import { getDoctorAppointments } from "../store/slices/appointmentSlice";
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth || {});
+
+  const {
+    items: appointmentItems = [],
+    isLoading: appointmentsLoading = false,
+    isError: appointmentsError = false,
+    error: appointmentsErrorMessage = null,
+  } = useSelector((state) => state.appointments || {});
 
   const [activeMenu, setActiveMenu] = useState("Dashboard");
   const [showNotifications, setShowNotifications] = useState(false);
@@ -21,137 +29,273 @@ const DoctorDashboard = () => {
     user?.email ||
     "doctor@carelink.com";
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/login", { replace: true });
+  /*
+   * LOAD APPOINTMENTS FOR LOGGED-IN DOCTOR
+   */
+  useEffect(() => {
+    dispatch(getDoctorAppointments());
+  }, [dispatch]);
+
+  /*
+   * SORT APPOINTMENTS BY SLOT TIME
+   */
+  const appointments = useMemo(() => {
+    return Array.isArray(appointmentItems)
+      ? [...appointmentItems].sort((a, b) => {
+          const aTime = a?.slot?.startTime
+            ? new Date(a.slot.startTime).getTime()
+            : Number.MAX_SAFE_INTEGER;
+
+          const bTime = b?.slot?.startTime
+            ? new Date(b.slot.startTime).getTime()
+            : Number.MAX_SAFE_INTEGER;
+
+          return aTime - bTime;
+        })
+      : [];
+  }, [appointmentItems]);
+
+  /*
+   * PENDING APPOINTMENTS
+   */
+  const pendingAppointments = appointments.filter(
+    (appointment) =>
+      appointment?.status === "PENDING"
+  );
+
+  /*
+   * UNIQUE PATIENT COUNT
+   */
+  const totalPatients = new Set(
+    appointments
+      .map(
+        (appointment) =>
+          appointment?.patient?.id
+      )
+      .filter(Boolean)
+  ).size;
+
+  /*
+   * COMPLETED APPOINTMENTS
+   */
+  const completedVisits = appointments.filter(
+    (appointment) =>
+      appointment?.status === "COMPLETED"
+  ).length;
+
+  /*
+   * GET PATIENT NAME
+   */
+  const getPatientName = (appointment) => {
+    const patient = appointment?.patient;
+
+    return (
+      patient?.fullName ||
+      patient?.account?.fullName ||
+      patient?.account?.name ||
+      patient?.name ||
+      patient?.account?.email ||
+      "Patient"
+    );
   };
 
+  /*
+   * GET APPOINTMENT TIME
+   */
+  const getAppointmentTime = (appointment) => {
+    const startTime =
+      appointment?.slot?.startTime;
+
+    if (!startTime) {
+      return "Time not available";
+    }
+
+    const date = new Date(startTime);
+
+    if (Number.isNaN(date.getTime())) {
+      return startTime;
+    }
+
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  /*
+   * GET APPOINTMENT REASON
+   */
+  const getAppointmentType = (appointment) => {
+    return (
+      appointment?.reasonForVisit?.trim() ||
+      "Consultation"
+    );
+  };
+
+  /*
+   * FORMAT STATUS
+   */
+  const getAppointmentStatus = (status) => {
+    if (!status) {
+      return "Pending";
+    }
+
+    return String(status)
+      .toLowerCase()
+      .replace(/_/g, " ")
+      .replace(
+        /\b\w/g,
+        (letter) => letter.toUpperCase()
+      );
+  };
+
+  /*
+   * LOGOUT
+   */
+  const handleLogout = () => {
+    dispatch(logout());
+
+    navigate("/login", {
+      replace: true,
+    });
+  };
+
+  /*
+   * SIDEBAR MENU
+   */
   const menuItems = [
     {
       name: "Dashboard",
       icon: "⌂",
-      action: () => setActiveMenu("Dashboard"),
+      action: () =>
+        setActiveMenu("Dashboard"),
     },
     {
       name: "Appointments",
       icon: "▣",
-      action: () => setActiveMenu("Appointments"),
+      action: () =>
+        setActiveMenu("Appointments"),
     },
     {
       name: "Patients",
       icon: "♙",
-      action: () => setActiveMenu("Patients"),
+      action: () =>
+        setActiveMenu("Patients"),
     },
     {
       name: "Schedule",
       icon: "◷",
-      action: () => setActiveMenu("Schedule"),
+      action: () =>
+        setActiveMenu("Schedule"),
     },
     {
       name: "Messages",
       icon: "✉",
-      action: () => setActiveMenu("Messages"),
+      action: () =>
+        setActiveMenu("Messages"),
     },
     {
       name: "Profile",
       icon: "◯",
-      action: () => setActiveMenu("Profile"),
+      action: () =>
+        setActiveMenu("Profile"),
     },
   ];
 
+  /*
+   * DASHBOARD STATISTICS
+   */
   const stats = [
     {
-      title: "Today's Appointments",
-      value: "8",
-      description: "Scheduled for today",
+      title: "Appointments",
+      value: appointments.length,
+      description: "My appointments",
       icon: "▣",
       className: "blue",
     },
     {
-      title: "Total Patients",
-      value: "124",
-      description: "Active patients",
+      title: "My Patients",
+      value: totalPatients,
+      description: "Patients who booked you",
       icon: "♙",
       className: "green",
     },
     {
       title: "Pending Requests",
-      value: "5",
+      value: pendingAppointments.length,
       description: "Need your attention",
       icon: "!",
       className: "orange",
     },
     {
       title: "Completed Visits",
-      value: "86",
-      description: "This month",
+      value: completedVisits,
+      description: "Completed appointments",
       icon: "✓",
       className: "purple",
-    },
-  ];
-
-  const appointments = [
-    {
-      time: "09:00 AM",
-      patient: "Arun Kumar",
-      type: "General Consultation",
-      status: "Confirmed",
-    },
-    {
-      time: "10:30 AM",
-      patient: "Priya Sharma",
-      type: "Follow-up Visit",
-      status: "Confirmed",
-    },
-    {
-      time: "12:00 PM",
-      patient: "Rahul Raj",
-      type: "Health Checkup",
-      status: "Pending",
-    },
-    {
-      time: "03:00 PM",
-      patient: "Ananya S",
-      type: "Consultation",
-      status: "Confirmed",
     },
   ];
 
   return (
     <div className="doctor-dashboard">
 
-      {/* Animated background */}
+      {/* =====================================================
+          ANIMATED BACKGROUND
+      ===================================================== */}
+
       <div className="background-shape shape-one"></div>
       <div className="background-shape shape-two"></div>
       <div className="background-shape shape-three"></div>
 
-      {/* ================= SIDEBAR ================= */}
+      {/* =====================================================
+          SIDEBAR
+      ===================================================== */}
 
       <aside className="doctor-sidebar">
 
         <div className="doctor-brand">
-          <div className="doctor-logo">+</div>
+
+          <div className="doctor-logo">
+            +
+          </div>
 
           <div>
-            <div className="brand-name">CareLink</div>
+            <div className="brand-name">
+              CareLink
+            </div>
+
             <div className="brand-subtitle">
               Healthcare Portal
             </div>
           </div>
+
         </div>
+
+        {/* DOCTOR PROFILE */}
 
         <div className="doctor-profile-mini">
 
           <div className="doctor-avatar">
-            {doctorName.charAt(0).toUpperCase()}
+            {doctorName
+              .charAt(0)
+              .toUpperCase()}
           </div>
 
           <div className="mini-info">
-            <strong>Dr. {doctorName}</strong>
-            <span>Doctor</span>
+
+            <strong>
+              Dr. {doctorName}
+            </strong>
+
+            <span>
+              Doctor
+            </span>
+
           </div>
 
         </div>
+
+        {/* NAVIGATION */}
 
         <nav className="doctor-navigation">
 
@@ -165,19 +309,26 @@ const DoctorDashboard = () => {
               }
               onClick={item.action}
             >
+
               <span className="nav-icon">
                 {item.icon}
               </span>
 
-              <span>{item.name}</span>
+              <span>
+                {item.name}
+              </span>
+
             </button>
           ))}
 
         </nav>
 
+        {/* SIDEBAR BOTTOM */}
+
         <div className="sidebar-bottom">
 
           <div className="support-box">
+
             <div className="support-title">
               Need help?
             </div>
@@ -187,44 +338,68 @@ const DoctorDashboard = () => {
             </div>
 
             <button
-              onClick={() => alert("CareLink Support: support@carelink.com")}
+              onClick={() =>
+                alert(
+                  "CareLink Support: support@carelink.com"
+                )
+              }
             >
               Contact Support
             </button>
+
           </div>
 
           <button
             className="logout-button"
             onClick={handleLogout}
           >
-            <span>↪</span>
+
+            <span>
+              ↪
+            </span>
+
             Logout
+
           </button>
 
         </div>
 
       </aside>
 
-      {/* ================= MAIN ================= */}
+      {/* =====================================================
+          MAIN
+      ===================================================== */}
 
       <main className="doctor-main">
 
-        {/* HEADER */}
+        {/* ===================================================
+            HEADER
+        =================================================== */}
 
         <header className="doctor-header">
 
           <div>
+
             <div className="breadcrumb">
+
               DOCTOR PORTAL
-              <span>/</span>
+
+              <span>
+                /
+              </span>
+
               {activeMenu}
+
             </div>
 
-            <h1>{activeMenu}</h1>
+            <h1>
+              {activeMenu}
+            </h1>
 
             <p>
               Manage your patients and healthcare appointments.
             </p>
+
           </div>
 
           <div className="header-actions">
@@ -232,36 +407,62 @@ const DoctorDashboard = () => {
             <button
               className="notification-button"
               onClick={() =>
-                setShowNotifications(!showNotifications)
+                setShowNotifications(
+                  !showNotifications
+                )
               }
             >
+
               ♢
+
               <span className="notification-dot"></span>
+
             </button>
 
             {showNotifications && (
               <div className="notification-panel">
-                <strong>Notifications</strong>
+
+                <strong>
+                  Notifications
+                </strong>
 
                 <p>
-                  You have 5 pending appointment requests.
+                  You have{" "}
+                  {pendingAppointments.length}{" "}
+                  pending appointment requests.
                 </p>
 
-                <p>
-                  Today's first appointment is at 09:00 AM.
-                </p>
+                {appointments.length > 0 && (
+                  <p>
+                    Your first appointment is at{" "}
+                    {getAppointmentTime(
+                      appointments[0]
+                    )}
+                    .
+                  </p>
+                )}
+
               </div>
             )}
 
             <div className="header-user">
 
               <div className="header-avatar">
-                {doctorName.charAt(0).toUpperCase()}
+                {doctorName
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
 
               <div>
-                <strong>Dr. {doctorName}</strong>
-                <span>{doctorEmail}</span>
+
+                <strong>
+                  Dr. {doctorName}
+                </strong>
+
+                <span>
+                  {doctorEmail}
+                </span>
+
               </div>
 
             </div>
@@ -270,12 +471,16 @@ const DoctorDashboard = () => {
 
         </header>
 
-        {/* ================= DASHBOARD ================= */}
+        {/* ===================================================
+            DASHBOARD
+        =================================================== */}
 
         {activeMenu === "Dashboard" && (
           <>
 
-            {/* WELCOME CARD */}
+            {/* =================================================
+                WELCOME CARD
+            ================================================= */}
 
             <section className="doctor-welcome">
 
@@ -286,7 +491,8 @@ const DoctorDashboard = () => {
                 </span>
 
                 <h2>
-                  Good morning, Dr. {doctorName}! 👋
+                  Good morning, Dr.{" "}
+                  {doctorName}! 👋
                 </h2>
 
                 <p>
@@ -299,7 +505,9 @@ const DoctorDashboard = () => {
                   <button
                     className="primary-button"
                     onClick={() =>
-                      setActiveMenu("Appointments")
+                      setActiveMenu(
+                        "Appointments"
+                      )
                     }
                   >
                     View Appointments →
@@ -308,7 +516,9 @@ const DoctorDashboard = () => {
                   <button
                     className="secondary-button"
                     onClick={() =>
-                      setActiveMenu("Schedule")
+                      setActiveMenu(
+                        "Schedule"
+                      )
                     }
                   >
                     Manage Schedule
@@ -325,13 +535,16 @@ const DoctorDashboard = () => {
                 </div>
 
                 <div className="pulse-ring ring-one"></div>
+
                 <div className="pulse-ring ring-two"></div>
 
               </div>
 
             </section>
 
-            {/* STATS */}
+            {/* =================================================
+                STATS
+            ================================================= */}
 
             <section className="stats-grid">
 
@@ -349,9 +562,13 @@ const DoctorDashboard = () => {
 
                   <div className="stat-information">
 
-                    <span>{stat.title}</span>
+                    <span>
+                      {stat.title}
+                    </span>
 
-                    <strong>{stat.value}</strong>
+                    <strong>
+                      {stat.value}
+                    </strong>
 
                     <small>
                       {stat.description}
@@ -368,17 +585,22 @@ const DoctorDashboard = () => {
 
             </section>
 
-            {/* CONTENT GRID */}
+            {/* =================================================
+                CONTENT GRID
+            ================================================= */}
 
             <section className="dashboard-content">
 
-              {/* APPOINTMENTS */}
+              {/* =================================================
+                  REAL APPOINTMENTS
+              ================================================= */}
 
               <div className="content-card appointments-card">
 
                 <div className="card-header">
 
                   <div>
+
                     <span className="section-label">
                       TODAY
                     </span>
@@ -386,12 +608,15 @@ const DoctorDashboard = () => {
                     <h3>
                       Upcoming Appointments
                     </h3>
+
                   </div>
 
                   <button
                     className="view-all"
                     onClick={() =>
-                      setActiveMenu("Appointments")
+                      setActiveMenu(
+                        "Appointments"
+                      )
                     }
                   >
                     View all →
@@ -401,70 +626,158 @@ const DoctorDashboard = () => {
 
                 <div className="appointment-list">
 
-                  {appointments.map(
-                    (appointment, index) => (
+                  {/* LOADING */}
+
+                  {appointmentsLoading && (
+                    <div
+                      style={{
+                        padding: "24px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Loading appointments...
+                    </div>
+                  )}
+
+                  {/* ERROR */}
+
+                  {appointmentsError &&
+                    !appointmentsLoading && (
                       <div
-                        className="appointment-item"
-                        key={index}
+                        style={{
+                          padding: "24px",
+                          textAlign: "center",
+                          color: "#d9534f",
+                        }}
+                      >
+                        {appointmentsErrorMessage ||
+                          "Failed to load appointments"}
+                      </div>
+                    )}
+
+                  {/* EMPTY */}
+
+                  {!appointmentsLoading &&
+                    !appointmentsError &&
+                    appointments.length === 0 && (
+                      <div
+                        style={{
+                          padding: "30px 20px",
+                          textAlign: "center",
+                        }}
                       >
 
-                        <div className="appointment-time">
-                          {appointment.time}
-                        </div>
+                        <strong>
+                          No appointments yet
+                        </strong>
 
-                        <div className="appointment-avatar">
-                          {appointment.patient.charAt(0)}
-                        </div>
-
-                        <div className="appointment-details">
-
-                          <strong>
-                            {appointment.patient}
-                          </strong>
-
-                          <span>
-                            {appointment.type}
-                          </span>
-
-                        </div>
-
-                        <span
-                          className={
-                            appointment.status ===
-                            "Confirmed"
-                              ? "status confirmed"
-                              : "status pending"
-                          }
-                        >
-                          {appointment.status}
-                        </span>
-
-                        <button
-                          className="appointment-action"
-                          onClick={() =>
-                            alert(
-                              `Appointment with ${appointment.patient}`
-                            )
-                          }
-                        >
-                          →
-                        </button>
+                        <p>
+                          When a patient books your
+                          available slot, the appointment
+                          will appear here.
+                        </p>
 
                       </div>
-                    )
-                  )}
+                    )}
+
+                  {/* REAL APPOINTMENTS */}
+
+                  {!appointmentsLoading &&
+                    !appointmentsError &&
+                    appointments.map(
+                      (appointment) => {
+
+                        const patientName =
+                          getPatientName(
+                            appointment
+                          );
+
+                        const status =
+                          getAppointmentStatus(
+                            appointment?.status
+                          );
+
+                        const statusClass =
+                          appointment?.status ===
+                          "CONFIRMED"
+                            ? "status confirmed"
+                            : appointment?.status ===
+                              "PENDING"
+                              ? "status pending"
+                              : "status";
+
+                        return (
+                          <div
+                            className="appointment-item"
+                            key={appointment.id}
+                          >
+
+                            <div className="appointment-time">
+                              {getAppointmentTime(
+                                appointment
+                              )}
+                            </div>
+
+                            <div className="appointment-avatar">
+
+                              {patientName
+                                .charAt(0)
+                                .toUpperCase()}
+
+                            </div>
+
+                            <div className="appointment-details">
+
+                              <strong>
+                                {patientName}
+                              </strong>
+
+                              <span>
+                                {getAppointmentType(
+                                  appointment
+                                )}
+                              </span>
+
+                            </div>
+
+                            <span
+                              className={
+                                statusClass
+                              }
+                            >
+                              {status}
+                            </span>
+
+                            <button
+                              className="appointment-action"
+                              onClick={() =>
+                                alert(
+                                  `Appointment with ${patientName}`
+                                )
+                              }
+                            >
+                              →
+                            </button>
+
+                          </div>
+                        );
+                      }
+                    )}
 
                 </div>
 
               </div>
 
-              {/* RIGHT CARD */}
+              {/* =================================================
+                  AVAILABILITY
+              ================================================= */}
 
               <div className="content-card availability-card">
 
                 <div className="card-header">
 
                   <div>
+
                     <span className="section-label">
                       YOUR STATUS
                     </span>
@@ -472,6 +785,7 @@ const DoctorDashboard = () => {
                     <h3>
                       Availability
                     </h3>
+
                   </div>
 
                 </div>
@@ -481,6 +795,7 @@ const DoctorDashboard = () => {
                   <div className="online-indicator"></div>
 
                   <div>
+
                     <strong>
                       Available for appointments
                     </strong>
@@ -488,6 +803,7 @@ const DoctorDashboard = () => {
                     <span>
                       Patients can book your available slots.
                     </span>
+
                   </div>
 
                 </div>
@@ -495,13 +811,31 @@ const DoctorDashboard = () => {
                 <div className="availability-info">
 
                   <div>
-                    <span>Today's hours</span>
-                    <strong>09:00 AM - 05:00 PM</strong>
+
+                    <span>
+                      Today's hours
+                    </span>
+
+                    <strong>
+                      09:00 AM - 05:00 PM
+                    </strong>
+
                   </div>
 
                   <div>
-                    <span>Next appointment</span>
-                    <strong>09:00 AM</strong>
+
+                    <span>
+                      Next appointment
+                    </span>
+
+                    <strong>
+                      {appointments.length > 0
+                        ? getAppointmentTime(
+                            appointments[0]
+                          )
+                        : "No appointments"}
+                    </strong>
+
                   </div>
 
                 </div>
@@ -509,7 +843,9 @@ const DoctorDashboard = () => {
                 <button
                   className="schedule-button"
                   onClick={() =>
-                    setActiveMenu("Schedule")
+                    setActiveMenu(
+                      "Schedule"
+                    )
                   }
                 >
                   Manage Schedule →
@@ -519,15 +855,24 @@ const DoctorDashboard = () => {
 
             </section>
 
-            {/* QUICK ACTIONS */}
+            {/* =================================================
+                QUICK ACTIONS
+            ================================================= */}
 
             <section className="quick-section">
 
               <div className="section-heading">
 
                 <div>
-                  <span>SHORTCUTS</span>
-                  <h3>Quick Actions</h3>
+
+                  <span>
+                    SHORTCUTS
+                  </span>
+
+                  <h3>
+                    Quick Actions
+                  </h3>
+
                 </div>
 
                 <p>
@@ -540,14 +885,18 @@ const DoctorDashboard = () => {
 
                 <button
                   onClick={() =>
-                    setActiveMenu("Appointments")
+                    setActiveMenu(
+                      "Appointments"
+                    )
                   }
                 >
+
                   <span className="quick-icon blue-bg">
                     ▣
                   </span>
 
                   <div>
+
                     <strong>
                       Appointments
                     </strong>
@@ -555,21 +904,29 @@ const DoctorDashboard = () => {
                     <small>
                       Manage today's visits
                     </small>
+
                   </div>
 
-                  <span>→</span>
+                  <span>
+                    →
+                  </span>
+
                 </button>
 
                 <button
                   onClick={() =>
-                    setActiveMenu("Patients")
+                    setActiveMenu(
+                      "Patients"
+                    )
                   }
                 >
+
                   <span className="quick-icon green-bg">
                     ♙
                   </span>
 
                   <div>
+
                     <strong>
                       My Patients
                     </strong>
@@ -577,21 +934,29 @@ const DoctorDashboard = () => {
                     <small>
                       View patient records
                     </small>
+
                   </div>
 
-                  <span>→</span>
+                  <span>
+                    →
+                  </span>
+
                 </button>
 
                 <button
                   onClick={() =>
-                    setActiveMenu("Schedule")
+                    setActiveMenu(
+                      "Schedule"
+                    )
                   }
                 >
+
                   <span className="quick-icon purple-bg">
                     ◷
                   </span>
 
                   <div>
+
                     <strong>
                       Schedule
                     </strong>
@@ -599,21 +964,29 @@ const DoctorDashboard = () => {
                     <small>
                       Manage availability
                     </small>
+
                   </div>
 
-                  <span>→</span>
+                  <span>
+                    →
+                  </span>
+
                 </button>
 
                 <button
                   onClick={() =>
-                    setActiveMenu("Messages")
+                    setActiveMenu(
+                      "Messages"
+                    )
                   }
                 >
+
                   <span className="quick-icon orange-bg">
                     ✉
                   </span>
 
                   <div>
+
                     <strong>
                       Messages
                     </strong>
@@ -621,9 +994,13 @@ const DoctorDashboard = () => {
                     <small>
                       Patient conversations
                     </small>
+
                   </div>
 
-                  <span>→</span>
+                  <span>
+                    →
+                  </span>
+
                 </button>
 
               </div>
@@ -633,74 +1010,281 @@ const DoctorDashboard = () => {
           </>
         )}
 
-        {/* ================= APPOINTMENTS ================= */}
+        {/* =====================================================
+            APPOINTMENTS PAGE
+        ===================================================== */}
 
         {activeMenu === "Appointments" && (
           <section className="page-section">
 
             <div className="page-title-card">
+
               <span className="section-label">
                 DOCTOR PORTAL
               </span>
 
-              <h2>Appointments</h2>
+              <h2>
+                Appointments
+              </h2>
 
               <p>
                 Manage your upcoming and previous appointments.
               </p>
+
             </div>
 
             <div className="large-list-card">
 
-              {appointments.map(
-                (appointment, index) => (
+              {appointmentsLoading && (
+                <div
+                  style={{
+                    padding: "24px",
+                    textAlign: "center",
+                  }}
+                >
+                  Loading appointments...
+                </div>
+              )}
+
+              {appointmentsError &&
+                !appointmentsLoading && (
                   <div
-                    className="large-list-item"
-                    key={index}
+                    style={{
+                      padding: "24px",
+                      textAlign: "center",
+                      color: "#d9534f",
+                    }}
+                  >
+                    {appointmentsErrorMessage ||
+                      "Failed to load appointments"}
+                  </div>
+                )}
+
+              {!appointmentsLoading &&
+                !appointmentsError &&
+                appointments.length === 0 && (
+                  <div
+                    style={{
+                      padding: "30px 20px",
+                      textAlign: "center",
+                    }}
                   >
 
-                    <div className="list-time">
-                      {appointment.time}
+                    <strong>
+                      No appointments yet
+                    </strong>
+
+                    <p>
+                      Patients who book your available
+                      slots will appear here.
+                    </p>
+
+                  </div>
+                )}
+
+              {!appointmentsLoading &&
+                !appointmentsError &&
+                appointments.map(
+                  (appointment) => {
+
+                    const patientName =
+                      getPatientName(
+                        appointment
+                      );
+
+                    const status =
+                      getAppointmentStatus(
+                        appointment?.status
+                      );
+
+                    const statusClass =
+                      appointment?.status ===
+                      "CONFIRMED"
+                        ? "status confirmed"
+                        : appointment?.status ===
+                          "PENDING"
+                          ? "status pending"
+                          : "status";
+
+                    return (
+                      <div
+                        className="large-list-item"
+                        key={appointment.id}
+                      >
+
+                        <div className="list-time">
+                          {getAppointmentTime(
+                            appointment
+                          )}
+                        </div>
+
+                        <div className="appointment-avatar">
+
+                          {patientName
+                            .charAt(0)
+                            .toUpperCase()}
+
+                        </div>
+
+                        <div className="list-main">
+
+                          <strong>
+                            {patientName}
+                          </strong>
+
+                          <span>
+                            {getAppointmentType(
+                              appointment
+                            )}
+                          </span>
+
+                        </div>
+
+                        <span
+                          className={
+                            statusClass
+                          }
+                        >
+                          {status}
+                        </span>
+
+                        <button
+                          className="small-action"
+                          onClick={() =>
+                            alert(
+                              `Opening ${patientName}'s appointment`
+                            )
+                          }
+                        >
+                          Open
+                        </button>
+
+                      </div>
+                    );
+                  }
+                )}
+
+            </div>
+
+          </section>
+        )}
+
+        {/* =====================================================
+            PATIENTS
+        ===================================================== */}
+
+        {activeMenu === "Patients" && (
+          <section className="page-section">
+
+            <div className="page-title-card">
+
+              <span className="section-label">
+                DOCTOR PORTAL
+              </span>
+
+              <h2>
+                My Patients
+              </h2>
+
+              <p>
+                View and manage your patients.
+              </p>
+
+            </div>
+
+            <div className="patient-grid">
+
+              {Array.from(
+                new Map(
+                  appointments
+                    .map(
+                      (appointment) => {
+                        const patient =
+                          appointment?.patient;
+
+                        const id =
+                          patient?.id;
+
+                        if (!id) {
+                          return null;
+                        }
+
+                        const name =
+                          getPatientName(
+                            appointment
+                          );
+
+                        return [
+                          id,
+                          name,
+                        ];
+                      }
+                    )
+                    .filter(Boolean)
+                ).entries()
+              ).map(
+                ([id, patient]) => (
+                  <div
+                    className="patient-card"
+                    key={id}
+                  >
+
+                    <div className="patient-avatar">
+                      {patient
+                        .charAt(0)
+                        .toUpperCase()}
                     </div>
 
-                    <div className="appointment-avatar">
-                      {appointment.patient.charAt(0)}
-                    </div>
+                    <div>
 
-                    <div className="list-main">
                       <strong>
-                        {appointment.patient}
+                        {patient}
                       </strong>
 
                       <span>
-                        {appointment.type}
+                        Active Patient
                       </span>
+
                     </div>
 
-                    <span
-                      className={
-                        appointment.status ===
-                        "Confirmed"
-                          ? "status confirmed"
-                          : "status pending"
-                      }
-                    >
-                      {appointment.status}
-                    </span>
-
                     <button
-                      className="small-action"
                       onClick={() =>
                         alert(
-                          `Opening ${appointment.patient}'s appointment`
+                          `Patient profile: ${patient}`
                         )
                       }
                     >
-                      Open
+                      View →
                     </button>
 
                   </div>
                 )
+              )}
+
+              {appointments.length === 0 && (
+                <div
+                  style={{
+                    gridColumn:
+                      "1 / -1",
+                    padding: "30px",
+                    textAlign: "center",
+                    background:
+                      "white",
+                    border:
+                      "1px solid #e0ebf1",
+                    borderRadius:
+                      "15px",
+                  }}
+                >
+                  <strong>
+                    No patients yet
+                  </strong>
+
+                  <p>
+                    Patients who book your appointments
+                    will appear here.
+                  </p>
+                </div>
               )}
 
             </div>
@@ -708,115 +1292,109 @@ const DoctorDashboard = () => {
           </section>
         )}
 
-        {/* ================= PATIENTS ================= */}
-
-        {activeMenu === "Patients" && (
-          <section className="page-section">
-
-            <div className="page-title-card">
-              <span className="section-label">
-                DOCTOR PORTAL
-              </span>
-
-              <h2>My Patients</h2>
-
-              <p>
-                View and manage your patients.
-              </p>
-            </div>
-
-            <div className="patient-grid">
-
-              {[
-                "Arun Kumar",
-                "Priya Sharma",
-                "Rahul Raj",
-                "Ananya S",
-                "Karthik M",
-                "Divya R",
-              ].map((patient) => (
-                <div
-                  className="patient-card"
-                  key={patient}
-                >
-
-                  <div className="patient-avatar">
-                    {patient.charAt(0)}
-                  </div>
-
-                  <div>
-                    <strong>{patient}</strong>
-
-                    <span>
-                      Active Patient
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      alert(
-                        `Patient profile: ${patient}`
-                      )
-                    }
-                  >
-                    View →
-                  </button>
-
-                </div>
-              ))}
-
-            </div>
-
-          </section>
-        )}
-
-        {/* ================= SCHEDULE ================= */}
+        {/* =====================================================
+            SCHEDULE
+        ===================================================== */}
 
         {activeMenu === "Schedule" && (
           <section className="page-section">
 
             <div className="page-title-card">
+
               <span className="section-label">
                 DOCTOR PORTAL
               </span>
 
-              <h2>My Schedule</h2>
+              <h2>
+                My Schedule
+              </h2>
 
               <p>
                 Manage your working hours and appointment availability.
               </p>
+
             </div>
 
             <div className="schedule-card">
 
               <div className="schedule-row">
-                <strong>Monday</strong>
-                <span>09:00 AM - 05:00 PM</span>
-                <b>Available</b>
+
+                <strong>
+                  Monday
+                </strong>
+
+                <span>
+                  09:00 AM - 05:00 PM
+                </span>
+
+                <b>
+                  Available
+                </b>
+
               </div>
 
               <div className="schedule-row">
-                <strong>Tuesday</strong>
-                <span>09:00 AM - 05:00 PM</span>
-                <b>Available</b>
+
+                <strong>
+                  Tuesday
+                </strong>
+
+                <span>
+                  09:00 AM - 05:00 PM
+                </span>
+
+                <b>
+                  Available
+                </b>
+
               </div>
 
               <div className="schedule-row">
-                <strong>Wednesday</strong>
-                <span>09:00 AM - 05:00 PM</span>
-                <b>Available</b>
+
+                <strong>
+                  Wednesday
+                </strong>
+
+                <span>
+                  09:00 AM - 05:00 PM
+                </span>
+
+                <b>
+                  Available
+                </b>
+
               </div>
 
               <div className="schedule-row">
-                <strong>Thursday</strong>
-                <span>09:00 AM - 05:00 PM</span>
-                <b>Available</b>
+
+                <strong>
+                  Thursday
+                </strong>
+
+                <span>
+                  09:00 AM - 05:00 PM
+                </span>
+
+                <b>
+                  Available
+                </b>
+
               </div>
 
               <div className="schedule-row">
-                <strong>Friday</strong>
-                <span>09:00 AM - 05:00 PM</span>
-                <b>Available</b>
+
+                <strong>
+                  Friday
+                </strong>
+
+                <span>
+                  09:00 AM - 05:00 PM
+                </span>
+
+                <b>
+                  Available
+                </b>
+
               </div>
 
             </div>
@@ -824,21 +1402,27 @@ const DoctorDashboard = () => {
           </section>
         )}
 
-        {/* ================= MESSAGES ================= */}
+        {/* =====================================================
+            MESSAGES
+        ===================================================== */}
 
         {activeMenu === "Messages" && (
           <section className="page-section">
 
             <div className="page-title-card">
+
               <span className="section-label">
                 COMMUNICATION
               </span>
 
-              <h2>Messages</h2>
+              <h2>
+                Messages
+              </h2>
 
               <p>
                 Communicate securely with your patients.
               </p>
+
             </div>
 
             <div className="empty-state">
@@ -860,27 +1444,35 @@ const DoctorDashboard = () => {
           </section>
         )}
 
-        {/* ================= PROFILE ================= */}
+        {/* =====================================================
+            PROFILE
+        ===================================================== */}
 
         {activeMenu === "Profile" && (
           <section className="page-section">
 
             <div className="page-title-card">
+
               <span className="section-label">
                 ACCOUNT
               </span>
 
-              <h2>Doctor Profile</h2>
+              <h2>
+                Doctor Profile
+              </h2>
 
               <p>
                 Manage your CareLink account information.
               </p>
+
             </div>
 
             <div className="profile-card">
 
               <div className="profile-large-avatar">
-                {doctorName.charAt(0).toUpperCase()}
+                {doctorName
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
 
               <div className="profile-information">
@@ -906,7 +1498,9 @@ const DoctorDashboard = () => {
 
       </main>
 
-      {/* ================= STYLES ================= */}
+      {/* =====================================================
+          STYLES
+      ===================================================== */}
 
       <style>{`
 
@@ -923,8 +1517,6 @@ const DoctorDashboard = () => {
           position: relative;
           overflow: hidden;
         }
-
-        /* ANIMATED BACKGROUND */
 
         .background-shape {
           position: fixed;
@@ -967,8 +1559,6 @@ const DoctorDashboard = () => {
             transform: translate(20px, -18px) rotate(8deg);
           }
         }
-
-        /* SIDEBAR */
 
         .doctor-sidebar {
           width: 245px;
@@ -1158,8 +1748,6 @@ const DoctorDashboard = () => {
           color: #e55353;
         }
 
-        /* MAIN */
-
         .doctor-main {
           margin-left: 245px;
           width: calc(100% - 245px);
@@ -1276,8 +1864,6 @@ const DoctorDashboard = () => {
           font-size: 9px;
           margin-top: 3px;
         }
-
-        /* WELCOME */
 
         .doctor-welcome {
           margin-top: 30px;
@@ -1441,8 +2027,6 @@ const DoctorDashboard = () => {
           }
         }
 
-        /* STATS */
-
         .stats-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
@@ -1524,8 +2108,6 @@ const DoctorDashboard = () => {
           color: #7a94a6;
           font-size: 13px;
         }
-
-        /* CONTENT */
 
         .dashboard-content {
           display: grid;
@@ -1642,8 +2224,6 @@ const DoctorDashboard = () => {
           color: #078fcb;
         }
 
-        /* AVAILABILITY */
-
         .availability-status {
           display: flex;
           align-items: center;
@@ -1710,8 +2290,6 @@ const DoctorDashboard = () => {
           font-size: 9px;
           font-weight: 700;
         }
-
-        /* QUICK */
 
         .quick-section {
           margin-top: 24px;
@@ -1808,8 +2386,6 @@ const DoctorDashboard = () => {
           background: #fff1df;
           color: #ec8b27;
         }
-
-        /* OTHER PAGES */
 
         .page-section {
           padding-top: 30px;
@@ -2040,8 +2616,6 @@ const DoctorDashboard = () => {
           font-size: 8px;
           font-weight: bold;
         }
-
-        /* RESPONSIVE */
 
         @media (max-width: 1100px) {
 

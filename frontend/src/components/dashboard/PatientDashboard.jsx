@@ -1,7 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
 import {
   Activity,
   Bell,
@@ -24,7 +23,6 @@ import {
 } from "lucide-react";
 
 import { logout } from "../../store/slices/authSlice";
-
 import "./Dashboard.css";
 
 const PatientDashboard = () => {

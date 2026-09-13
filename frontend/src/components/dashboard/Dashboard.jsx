@@ -1,5 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import "./Dashboard.css";
 
 import PatientDashboard from "./PatientDashboard";
 import DoctorDashboard from "./DoctorDashboard";

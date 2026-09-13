@@ -7,15 +7,25 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+public interface AppointmentRepository
+        extends JpaRepository<Appointment, Long> {
 
-    // Patient's appointments
+    /* =========================================================
+       PATIENT APPOINTMENTS
+    ========================================================= */
+
     List<Appointment> findByPatientId(Long patientId);
 
-    // Doctor's appointments
+    /* =========================================================
+       DOCTOR APPOINTMENTS
+    ========================================================= */
+
     List<Appointment> findByDoctorId(Long doctorId);
 
-    // Patient pending appointment limit
+    /* =========================================================
+       PENDING APPOINTMENT COUNT
+    ========================================================= */
+
     long countByPatientIdAndStatus(
             Long patientId,
             Appointment.AppointmentStatus status

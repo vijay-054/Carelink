@@ -57,7 +57,7 @@ public class AppointmentController {
     }
 
     /* =========================================================
-       PATIENT APPOINTMENTS
+       GET MY APPOINTMENTS - PATIENT
     ========================================================= */
 
     @GetMapping("/my")
@@ -73,12 +73,12 @@ public class AppointmentController {
     }
 
     /* =========================================================
-       DOCTOR APPOINTMENTS
+       GET MY APPOINTMENTS - DOCTOR
     ========================================================= */
 
     @GetMapping("/doctor")
     @PreAuthorize("hasRole('DOCTOR')")
-    public ResponseEntity<List<Appointment>> doctorAppointments(
+    public ResponseEntity<List<Appointment>> getDoctorAppointments(
             @AuthenticationPrincipal UserDetails user) {
 
         return ResponseEntity.ok(
@@ -89,7 +89,7 @@ public class AppointmentController {
     }
 
     /* =========================================================
-       ALL APPOINTMENTS - ADMIN
+       GET ALL APPOINTMENTS - ADMIN
     ========================================================= */
 
     @GetMapping

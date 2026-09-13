@@ -24,7 +24,6 @@ import {
 } from "lucide-react";
 
 import { logout } from "../../store/slices/authSlice";
-import "./Dashboard.css";
 
 const PatientDashboard = () => {
   const dispatch = useDispatch();

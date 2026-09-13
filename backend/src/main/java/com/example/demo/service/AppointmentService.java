@@ -1,10 +1,18 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.BookingRequestDto;
-import com.example.demo.entity.*;
+import com.example.demo.entity.Account;
+import com.example.demo.entity.Appointment;
+import com.example.demo.entity.AvailabilitySlot;
+import com.example.demo.entity.DoctorProfile;
+import com.example.demo.entity.PatientProfile;
 import com.example.demo.exception.AppointmentLimitExceededException;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.*;
+import com.example.demo.repository.AccountRepository;
+import com.example.demo.repository.AppointmentRepository;
+import com.example.demo.repository.AvailabilitySlotRepository;
+import com.example.demo.repository.DoctorProfileRepository;
+import com.example.demo.repository.PatientProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,27 +38,29 @@ public class AppointmentService {
             String email,
             BookingRequestDto dto) {
 
-        Account account = accountRepository
-                .findByEmail(email)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Account not found"
-                        )
-                );
+        Account account =
+                accountRepository.findByEmail(email)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Account not found"
+                                )
+                        );
 
-        PatientProfile patient = patientProfileRepository
-                .findByAccountId(account.getId())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Patient profile not found"
-                        )
-                );
+        PatientProfile patient =
+                patientProfileRepository
+                        .findByAccountId(account.getId())
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Patient profile not found"
+                                )
+                        );
 
         long pendingCount =
-                appointmentRepository.countByPatientIdAndStatus(
-                        patient.getId(),
-                        Appointment.AppointmentStatus.PENDING
-                );
+                appointmentRepository
+                        .countByPatientIdAndStatus(
+                                patient.getId(),
+                                Appointment.AppointmentStatus.PENDING
+                        );
 
         if (pendingCount >= 3) {
             throw new AppointmentLimitExceededException(
@@ -74,8 +84,17 @@ public class AppointmentService {
             );
         }
 
+        /*
+         * Mark slot as booked.
+         */
+
         slot.setBooked(true);
+
         availabilitySlotRepository.save(slot);
+
+        /*
+         * Doctor comes from the selected slot.
+         */
 
         Appointment appointment =
                 Appointment.builder()
@@ -123,6 +142,11 @@ public class AppointmentService {
                         .getAccount()
                         .getEmail();
 
+        /*
+         * Only patient or doctor involved
+         * in this appointment can cancel.
+         */
+
         if (!patientEmail.equals(email)
                 && !doctorEmail.equals(email)) {
 
@@ -142,6 +166,10 @@ public class AppointmentService {
             );
         }
 
+        /*
+         * Make slot available again.
+         */
+
         appointment.getSlot().setBooked(false);
 
         availabilitySlotRepository.save(
@@ -158,15 +186,14 @@ public class AppointmentService {
     }
 
     /* =========================================================
-       PATIENT APPOINTMENTS
+       PATIENT - GET MY APPOINTMENTS
     ========================================================= */
 
     public List<Appointment> getPatientAppointments(
             String email) {
 
         Account account =
-                accountRepository
-                        .findByEmail(email)
+                accountRepository.findByEmail(email)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Account not found"
@@ -188,15 +215,14 @@ public class AppointmentService {
     }
 
     /* =========================================================
-       DOCTOR APPOINTMENTS
+       DOCTOR - GET MY APPOINTMENTS
     ========================================================= */
 
     public List<Appointment> getDoctorAppointments(
             String email) {
 
         Account account =
-                accountRepository
-                        .findByEmail(email)
+                accountRepository.findByEmail(email)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "Account not found"
@@ -212,13 +238,27 @@ public class AppointmentService {
                                 )
                         );
 
+        /*
+         * VERY IMPORTANT:
+         *
+         * We search using DOCTOR ID.
+         *
+         * Therefore:
+         *
+         * Patient A books Doctor B
+         *
+         * Doctor B sees Patient A.
+         *
+         * Doctor C does NOT see Patient A.
+         */
+
         return appointmentRepository.findByDoctorId(
                 doctor.getId()
         );
     }
 
     /* =========================================================
-       ADMIN - ALL APPOINTMENTS
+       ADMIN - GET ALL APPOINTMENTS
     ========================================================= */
 
     public List<Appointment> getAllAppointments() {

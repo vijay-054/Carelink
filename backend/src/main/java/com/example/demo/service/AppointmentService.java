@@ -21,64 +21,90 @@ public class AppointmentService {
     private final DoctorProfileRepository doctorProfileRepository;
     private final AvailabilitySlotRepository availabilitySlotRepository;
 
+    /* =========================================================
+       BOOK APPOINTMENT - PATIENT
+    ========================================================= */
+
     @Transactional
     public Appointment bookAppointment(
             String email,
             BookingRequestDto dto) {
 
-        Account account = accountRepository
-                .findByEmail(email)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Account not found"));
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Account not found"));
 
-        PatientProfile patient =
-                patientProfileRepository
-                        .findByAccountId(account.getId())
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Patient profile not found"));
+        PatientProfile patient = patientProfileRepository
+                .findByAccountId(account.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Patient profile not found"));
 
         long pendingCount =
-                appointmentRepository
-                        .countByPatientIdAndStatus(
-                                patient.getId(),
-                                Appointment.AppointmentStatus.PENDING);
+                appointmentRepository.countByPatientIdAndStatus(
+                        patient.getId(),
+                        Appointment.AppointmentStatus.PENDING
+                );
 
         if (pendingCount >= 3) {
             throw new AppointmentLimitExceededException(
                     "Maximum of 3 pending appointments allowed. " +
-                    "Please complete or cancel existing ones.");
+                    "Please complete or cancel existing ones."
+            );
         }
 
         AvailabilitySlot slot =
-                availabilitySlotRepository
-                        .findById(dto.getSlotId())
+                availabilitySlotRepository.findById(dto.getSlotId())
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
-                                        "Slot not found"));
+                                        "Slot not found"
+                                ));
 
         if (slot.isBooked()) {
             throw new RuntimeException(
-                    "Slot is already booked");
+                    "Slot is already booked"
+            );
         }
 
+        /*
+         * Mark the selected slot as booked.
+         */
         slot.setBooked(true);
         availabilitySlotRepository.save(slot);
 
-        Appointment appointment =
-                Appointment.builder()
-                        .patient(patient)
-                        .doctor(slot.getDoctor())
-                        .slot(slot)
-                        .status(
-                                Appointment.AppointmentStatus.PENDING)
-                        .reasonForVisit(
-                                dto.getReasonForVisit())
-                        .build();
+        /*
+         * The doctor is automatically taken
+         * from the selected availability slot.
+         *
+         * Therefore:
+         *
+         * Patient
+         *    ↓
+         * Selected Slot
+         *    ↓
+         * Doctor
+         */
 
-        return appointmentRepository.save(appointment);
+        Appointment appointment = Appointment.builder()
+                .patient(patient)
+                .doctor(slot.getDoctor())
+                .slot(slot)
+                .status(
+                        Appointment.AppointmentStatus.PENDING
+                )
+                .reasonForVisit(
+                        dto.getReasonForVisit()
+                )
+                .build();
+
+        return appointmentRepository.save(
+                appointment
+        );
     }
+
+
+    /* =========================================================
+       CANCEL APPOINTMENT
+    ========================================================= */
 
     @Transactional
     public void cancelAppointment(
@@ -86,29 +112,32 @@ public class AppointmentService {
             Long appointmentId) {
 
         Appointment appointment =
-                appointmentRepository
-                        .findById(appointmentId)
+                appointmentRepository.findById(appointmentId)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
-                                        "Appointment not found"));
+                                        "Appointment not found"
+                                ));
 
         String patientEmail =
-                appointment
-                        .getPatient()
+                appointment.getPatient()
                         .getAccount()
                         .getEmail();
 
         String doctorEmail =
-                appointment
-                        .getDoctor()
+                appointment.getDoctor()
                         .getAccount()
                         .getEmail();
 
+        /*
+         * Only the patient or doctor involved
+         * in the appointment can cancel it.
+         */
         if (!patientEmail.equals(email)
                 && !doctorEmail.equals(email)) {
 
             throw new RuntimeException(
-                    "Unauthorized");
+                    "Unauthorized"
+            );
         }
 
         if (appointment.getStatus()
@@ -118,74 +147,100 @@ public class AppointmentService {
                 == Appointment.AppointmentStatus.COMPLETED) {
 
             throw new RuntimeException(
-                    "Cannot cancel a CANCELLED or COMPLETED appointment");
+                    "Cannot cancel a CANCELLED or COMPLETED appointment"
+            );
         }
 
-        appointment
-                .getSlot()
-                .setBooked(false);
+        /*
+         * Make the slot available again.
+         */
+        appointment.getSlot().setBooked(false);
 
         availabilitySlotRepository.save(
-                appointment.getSlot());
+                appointment.getSlot()
+        );
 
         appointment.setStatus(
-                Appointment.AppointmentStatus.CANCELLED);
+                Appointment.AppointmentStatus.CANCELLED
+        );
 
-        appointmentRepository.save(appointment);
+        appointmentRepository.save(
+                appointment
+        );
     }
 
-    /*
-     * PATIENT APPOINTMENTS
-     */
+
+    /* =========================================================
+       GET PATIENT APPOINTMENTS
+    ========================================================= */
+
     public List<Appointment> getPatientAppointments(
             String email) {
 
         Account account =
-                accountRepository
-                        .findByEmail(email)
+                accountRepository.findByEmail(email)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
-                                        "Account not found"));
+                                        "Account not found"
+                                ));
 
         PatientProfile patient =
                 patientProfileRepository
                         .findByAccountId(account.getId())
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
-                                        "Patient profile not found"));
+                                        "Patient profile not found"
+                                ));
 
-        return appointmentRepository
-                .findByPatientId(patient.getId());
+        return appointmentRepository.findByPatientId(
+                patient.getId()
+        );
     }
 
-    /*
-     * DOCTOR APPOINTMENTS
-     */
+
+    /* =========================================================
+       GET DOCTOR APPOINTMENTS
+    ========================================================= */
+
     public List<Appointment> getDoctorAppointments(
             String email) {
 
         Account account =
-                accountRepository
-                        .findByEmail(email)
+                accountRepository.findByEmail(email)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
-                                        "Account not found"));
+                                        "Account not found"
+                                ));
 
         DoctorProfile doctor =
                 doctorProfileRepository
                         .findByAccountId(account.getId())
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
-                                        "Doctor profile not found"));
+                                        "Doctor profile not found"
+                                ));
 
-        return appointmentRepository
-                .findByDoctorId(doctor.getId());
+        /*
+         * IMPORTANT:
+         *
+         * This fetches appointments using
+         * doctor.getId(), NOT patient.getId().
+         *
+         * So if Patient A books Doctor B,
+         * Doctor B will see that appointment.
+         */
+        return appointmentRepository.findByDoctorId(
+                doctor.getId()
+        );
     }
 
-    /*
-     * ADMIN - ALL APPOINTMENTS
-     */
+
+    /* =========================================================
+       GET ALL APPOINTMENTS - ADMIN
+    ========================================================= */
+
     public List<Appointment> getAllAppointments() {
+
         return appointmentRepository.findAll();
     }
 }

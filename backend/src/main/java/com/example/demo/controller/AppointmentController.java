@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.BookingRequestDto;
-import com.example.demo.entity.Account;
 import com.example.demo.entity.Appointment;
 import com.example.demo.service.AppointmentService;
 import jakarta.validation.Valid;
@@ -21,9 +20,11 @@ public class AppointmentController {
 
     private final AppointmentService appointmentService;
 
-    /*
-     * PATIENT BOOKS APPOINTMENT
-     */
+
+    /* =========================================================
+       PATIENT - BOOK APPOINTMENT
+    ========================================================= */
+
     @PostMapping("/book")
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Appointment> book(
@@ -33,12 +34,16 @@ public class AppointmentController {
         return ResponseEntity.ok(
                 appointmentService.bookAppointment(
                         user.getUsername(),
-                        dto));
+                        dto
+                )
+        );
     }
 
-    /*
-     * CANCEL APPOINTMENT
-     */
+
+    /* =========================================================
+       PATIENT / DOCTOR - CANCEL APPOINTMENT
+    ========================================================= */
+
     @PutMapping("/cancel/{id}")
     @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
     public ResponseEntity<Void> cancel(
@@ -47,70 +52,57 @@ public class AppointmentController {
 
         appointmentService.cancelAppointment(
                 user.getUsername(),
-                id);
+                id
+        );
 
         return ResponseEntity.noContent().build();
     }
 
-    /*
-     * PATIENT / DOCTOR THEIR OWN APPOINTMENTS
-     */
+
+    /* =========================================================
+       PATIENT - GET MY APPOINTMENTS
+    ========================================================= */
+
     @GetMapping("/my")
-    @PreAuthorize("hasAnyRole('PATIENT', 'DOCTOR')")
+    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<List<Appointment>> myAppointments(
             @AuthenticationPrincipal UserDetails user) {
 
-        Account.Role role = getRole(user);
-
-        if (role == Account.Role.DOCTOR) {
-
-            return ResponseEntity.ok(
-                    appointmentService
-                            .getDoctorAppointments(
-                                    user.getUsername()));
-        }
-
         return ResponseEntity.ok(
-                appointmentService
-                        .getPatientAppointments(
-                                user.getUsername()));
+                appointmentService.getPatientAppointments(
+                        user.getUsername()
+                )
+        );
     }
 
-    /*
-     * ADMIN - ALL APPOINTMENTS
-     */
+
+    /* =========================================================
+       DOCTOR - GET MY PATIENT APPOINTMENTS
+    ========================================================= */
+
+    @GetMapping("/doctor")
+    @PreAuthorize("hasRole('DOCTOR')")
+    public ResponseEntity<List<Appointment>> doctorAppointments(
+            @AuthenticationPrincipal UserDetails user) {
+
+        return ResponseEntity.ok(
+                appointmentService.getDoctorAppointments(
+                        user.getUsername()
+                )
+        );
+    }
+
+
+    /* =========================================================
+       ADMIN - GET ALL APPOINTMENTS
+    ========================================================= */
+
     @GetMapping
     @PreAuthorize("hasRole('CLINIC_ADMIN')")
-    public ResponseEntity<List<Appointment>>
-    getAllAppointments() {
+    public ResponseEntity<List<Appointment>> getAllAppointments() {
 
         return ResponseEntity.ok(
-                appointmentService
-                        .getAllAppointments());
-    }
-
-    /*
-     * GET ROLE FROM AUTHENTICATED USER
-     */
-    private Account.Role getRole(
-            UserDetails user) {
-
-        String authority =
-                user.getAuthorities()
-                        .stream()
-                        .findFirst()
-                        .map(Object::toString)
-                        .orElse("");
-
-        authority = authority
-                .trim()
-                .toUpperCase();
-
-        if (authority.startsWith("ROLE_")) {
-            authority =
-                    authority.substring(5);
-        }
-
-        return Account.Role.valueOf(authority);
+                appointmentService.getAllAppointments()
+        );
     }
 }

@@ -1,7 +1,7 @@
 import api from "./api";
 
 /* =========================================================
-   PATIENT - GET MY APPOINTMENTS
+   GET PATIENT APPOINTMENTS
 ========================================================= */
 
 const getMyAppointments = async () => {
@@ -12,7 +12,7 @@ const getMyAppointments = async () => {
 
 
 /* =========================================================
-   DOCTOR - GET MY PATIENT APPOINTMENTS
+   GET DOCTOR APPOINTMENTS
 ========================================================= */
 
 const getDoctorAppointments = async () => {
@@ -23,7 +23,7 @@ const getDoctorAppointments = async () => {
 
 
 /* =========================================================
-   ADMIN - GET ALL APPOINTMENTS
+   GET ALL APPOINTMENTS - ADMIN
 ========================================================= */
 
 const getAllAppointments = async () => {
@@ -34,7 +34,7 @@ const getAllAppointments = async () => {
 
 
 /* =========================================================
-   PATIENT - BOOK APPOINTMENT
+   BOOK APPOINTMENT - PATIENT
 ========================================================= */
 
 const bookAppointment = async (appointmentData) => {
@@ -61,7 +61,7 @@ const cancelAppointment = async (appointmentId) => {
 
 
 /* =========================================================
-   EXPORT
+   EXPORT SERVICE
 ========================================================= */
 
 const appointmentService = {

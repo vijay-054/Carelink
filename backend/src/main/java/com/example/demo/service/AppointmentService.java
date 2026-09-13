@@ -1,18 +1,10 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.BookingRequestDto;
-import com.example.demo.entity.Account;
-import com.example.demo.entity.Appointment;
-import com.example.demo.entity.AvailabilitySlot;
-import com.example.demo.entity.DoctorProfile;
-import com.example.demo.entity.PatientProfile;
+import com.example.demo.entity.*;
 import com.example.demo.exception.AppointmentLimitExceededException;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.AccountRepository;
-import com.example.demo.repository.AppointmentRepository;
-import com.example.demo.repository.AvailabilitySlotRepository;
-import com.example.demo.repository.DoctorProfileRepository;
-import com.example.demo.repository.PatientProfileRepository;
+import com.example.demo.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,24 +38,21 @@ public class AppointmentService {
                         )
                 );
 
-        PatientProfile patient =
-                patientProfileRepository
-                        .findByAccountId(account.getId())
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Patient profile not found"
-                                )
-                        );
+        PatientProfile patient = patientProfileRepository
+                .findByAccountId(account.getId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Patient profile not found"
+                        )
+                );
 
         long pendingCount =
-                appointmentRepository
-                        .countByPatientIdAndStatus(
-                                patient.getId(),
-                                Appointment.AppointmentStatus.PENDING
-                        );
+                appointmentRepository.countByPatientIdAndStatus(
+                        patient.getId(),
+                        Appointment.AppointmentStatus.PENDING
+                );
 
         if (pendingCount >= 3) {
-
             throw new AppointmentLimitExceededException(
                     "Maximum of 3 pending appointments allowed. " +
                     "Please complete or cancel existing ones."
@@ -80,31 +69,13 @@ public class AppointmentService {
                         );
 
         if (slot.isBooked()) {
-
             throw new RuntimeException(
                     "Slot is already booked"
             );
         }
 
-        /*
-         * Mark selected slot as booked.
-         */
-
         slot.setBooked(true);
-
         availabilitySlotRepository.save(slot);
-
-        /*
-         * IMPORTANT
-         *
-         * Doctor comes from the selected slot.
-         *
-         * Patient
-         *    ↓
-         * Selected Slot
-         *    ↓
-         * Doctor
-         */
 
         Appointment appointment =
                 Appointment.builder()
@@ -143,21 +114,14 @@ public class AppointmentService {
                         );
 
         String patientEmail =
-                appointment
-                        .getPatient()
+                appointment.getPatient()
                         .getAccount()
                         .getEmail();
 
         String doctorEmail =
-                appointment
-                        .getDoctor()
+                appointment.getDoctor()
                         .getAccount()
                         .getEmail();
-
-        /*
-         * Only the patient or doctor involved
-         * in the appointment can cancel it.
-         */
 
         if (!patientEmail.equals(email)
                 && !doctorEmail.equals(email)) {
@@ -178,13 +142,7 @@ public class AppointmentService {
             );
         }
 
-        /*
-         * Make slot available again.
-         */
-
-        appointment
-                .getSlot()
-                .setBooked(false);
+        appointment.getSlot().setBooked(false);
 
         availabilitySlotRepository.save(
                 appointment.getSlot()
@@ -200,7 +158,7 @@ public class AppointmentService {
     }
 
     /* =========================================================
-       GET PATIENT APPOINTMENTS
+       PATIENT APPOINTMENTS
     ========================================================= */
 
     public List<Appointment> getPatientAppointments(
@@ -230,7 +188,7 @@ public class AppointmentService {
     }
 
     /* =========================================================
-       GET DOCTOR APPOINTMENTS
+       DOCTOR APPOINTMENTS
     ========================================================= */
 
     public List<Appointment> getDoctorAppointments(
@@ -254,22 +212,13 @@ public class AppointmentService {
                                 )
                         );
 
-        /*
-         * IMPORTANT:
-         *
-         * This uses doctor.getId().
-         *
-         * Therefore only appointments belonging
-         * to the logged-in doctor are returned.
-         */
-
         return appointmentRepository.findByDoctorId(
                 doctor.getId()
         );
     }
 
     /* =========================================================
-       GET ALL APPOINTMENTS - ADMIN
+       ADMIN - ALL APPOINTMENTS
     ========================================================= */
 
     public List<Appointment> getAllAppointments() {

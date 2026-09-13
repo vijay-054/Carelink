@@ -9,13 +9,13 @@ import java.util.List;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    // Get appointments for a specific patient
+    // Patient's appointments
     List<Appointment> findByPatientId(Long patientId);
 
-    // Get appointments for a specific doctor
+    // Doctor's appointments
     List<Appointment> findByDoctorId(Long doctorId);
 
-    // Count pending appointments for a patient
+    // Count patient's pending appointments
     long countByPatientIdAndStatus(
             Long patientId,
             Appointment.AppointmentStatus status

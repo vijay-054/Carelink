@@ -1,6 +1,9 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import {
+  getDoctorAppointments,
+} from "../../store/slices/appointmentSlice";
 
 import { logout } from "../../store/slices/authSlice";
 
@@ -8,6 +11,41 @@ import "./Dashboard.css";
 
 
 const DoctorDashboard = () => {
+    const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { user } = useSelector(
+    (state) => state.auth || {}
+  );
+
+  const {
+    items: appointments = [],
+    isLoading,
+    isError,
+    error,
+  } = useSelector(
+    (state) => state.appointments || {}
+  );
+
+  useEffect(() => {
+    dispatch(getDoctorAppointments());
+  }, [dispatch]);
+
+  const pendingAppointments =
+    appointments.filter(
+      (appointment) =>
+        appointment?.status === "PENDING"
+    );
+
+  const totalPatients =
+    new Set(
+      appointments
+        .map(
+          (appointment) =>
+            appointment?.patient?.id
+        )
+        .filter(Boolean)
+    ).size;
 
   const dispatch = useDispatch();
   const navigate = useNavigate();

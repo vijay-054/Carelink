@@ -173,7 +173,9 @@ const appointmentSlice = createSlice({
           state.isError = false;
           state.error = null;
 
-          state.items = Array.isArray(action.payload)
+          state.items = Array.isArray(
+            action.payload
+          )
             ? action.payload
             : [];
         }
@@ -211,7 +213,9 @@ const appointmentSlice = createSlice({
           state.isError = false;
           state.error = null;
 
-          state.items = Array.isArray(action.payload)
+          state.items = Array.isArray(
+            action.payload
+          )
             ? action.payload
             : [];
         }
@@ -249,7 +253,9 @@ const appointmentSlice = createSlice({
           state.isError = false;
           state.error = null;
 
-          state.items = Array.isArray(action.payload)
+          state.items = Array.isArray(
+            action.payload
+          )
             ? action.payload
             : [];
         }
@@ -327,8 +333,19 @@ const appointmentSlice = createSlice({
           state.isError = false;
           state.error = null;
 
+          /*
+           * The real thunk returns appointmentId
+           * as action.payload.
+           *
+           * The test directly dispatches the fulfilled
+           * action with meta.arg.
+           *
+           * Therefore support both.
+           */
+
           const cancelledId =
-            action.payload;
+            action.payload ??
+            action.meta?.arg;
 
           state.items = state.items.filter(
             (item) =>
@@ -362,5 +379,9 @@ export const {
   clearAppointmentError,
   clearAppointments,
 } = appointmentSlice.actions;
+
+/* =========================================================
+   EXPORT REDUCER
+========================================================= */
 
 export default appointmentSlice.reducer;

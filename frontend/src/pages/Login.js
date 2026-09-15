@@ -3,12 +3,19 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { login, reset } from "../store/slices/authSlice";
 
+import "../components/Login.css";
+
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { user, isLoading, isError, isSuccess, message } =
-    useSelector((state) => state.auth || {});
+  const {
+    user,
+    isLoading,
+    isError,
+    isSuccess,
+    message,
+  } = useSelector((state) => state.auth || {});
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,12 +23,32 @@ const Login = () => {
 
   useEffect(() => {
     if (isError) {
-      setError(message || "Invalid email or password");
+      setError(message || "Invalid email or password.");
       dispatch(reset());
     }
 
     if (isSuccess && user) {
-      const role = user.role?.toUpperCase();
+      let role =
+        user.role ||
+        user.userRole ||
+        user.roleName ||
+        user.authority ||
+        user.authorities?.[0]?.authority ||
+        user.authorities?.[0] ||
+        "";
+
+      if (typeof role === "object") {
+        role =
+          role.name ||
+          role.role ||
+          role.authority ||
+          "";
+      }
+
+      role = String(role)
+        .trim()
+        .toUpperCase()
+        .replace("ROLE_", "");
 
       if (role === "DOCTOR") {
         navigate("/doctor-dashboard");
@@ -31,7 +58,7 @@ const Login = () => {
       ) {
         navigate("/admin-dashboard");
       } else {
-        navigate("/dashboard");
+        navigate("/patient-dashboard");
       }
 
       dispatch(reset());
@@ -47,9 +74,10 @@ const Login = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
     setError("");
 
-    if (!email || !password) {
+    if (!email.trim() || !password.trim()) {
       setError("Please enter your email and password.");
       return;
     }
@@ -64,46 +92,78 @@ const Login = () => {
 
   return (
     <div className="auth-page">
+
+      {/* Decorative background */}
       <div className="auth-background">
         <div className="floating-circle circle-one"></div>
         <div className="floating-circle circle-two"></div>
         <div className="floating-circle circle-three"></div>
+
         <div className="floating-plus plus-one">+</div>
         <div className="floating-plus plus-two">+</div>
+        <div className="floating-plus plus-three">+</div>
       </div>
 
+      {/* Main Card */}
       <div className="auth-card">
+
+        {/* Logo */}
         <div className="auth-logo">
-          <div className="auth-logo-icon">+</div>
-          <div>
+
+          <div className="auth-logo-icon">
+            +
+          </div>
+
+          <div className="auth-logo-text">
             <strong>
               Care<span>Link</span>
             </strong>
-            <small>Healthcare Portal</small>
+
+            <small>
+              Healthcare Portal
+            </small>
           </div>
+
         </div>
 
+        {/* Heading */}
         <div className="auth-heading">
-          <span className="auth-tag">WELCOME BACK</span>
 
-          <h1>Sign in to CareLink</h1>
+          <span className="auth-tag">
+            WELCOME BACK
+          </span>
+
+          <h1>
+            Sign in to CareLink
+          </h1>
 
           <p>
             Access your healthcare dashboard and stay
             connected with your care team.
           </p>
+
         </div>
 
+        {/* Error */}
         {error && (
           <div className="auth-error">
             <span>!</span>
-            {error}
+            <p>{error}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        {/* Login Form */}
+        <form
+          className="auth-form"
+          onSubmit={handleSubmit}
+        >
+
+          {/* Email */}
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+
+            <label htmlFor="email">
+              Email Address
+            </label>
 
             <input
               id="email"
@@ -116,11 +176,23 @@ const Login = () => {
               autoComplete="email"
               required
             />
+
           </div>
 
+          {/* Password */}
           <div className="form-group">
+
             <div className="password-label">
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">
+                Password
+              </label>
+
+              <button
+                type="button"
+                className="forgot-password"
+              >
+                Forgot password?
+              </button>
             </div>
 
             <input
@@ -134,13 +206,26 @@ const Login = () => {
               autoComplete="current-password"
               required
             />
+
           </div>
 
+          {/* Remember */}
+          <div className="login-options">
+
+            <label className="remember-me">
+              <input type="checkbox" />
+              <span>Remember me</span>
+            </label>
+
+          </div>
+
+          {/* Submit */}
           <button
             type="submit"
             className="submit-btn"
             disabled={isLoading}
           >
+
             {isLoading ? (
               <>
                 <span className="button-spinner"></span>
@@ -149,20 +234,36 @@ const Login = () => {
             ) : (
               <>
                 Sign In
-                <span>→</span>
+                <span className="submit-arrow">
+                  →
+                </span>
               </>
             )}
+
           </button>
+
         </form>
 
+        {/* Security */}
         <div className="auth-divider">
-          <span>Secure healthcare access</span>
+          <span>
+            🔒 Secure healthcare access
+          </span>
         </div>
 
+        {/* Register */}
         <div className="auth-footer">
-          <span>Don't have a CareLink account?</span>{" "}
-          <Link to="/register">Create an account</Link>
+
+          <span>
+            Don't have a CareLink account?
+          </span>
+
+          <Link to="/register">
+            Create an account
+          </Link>
+
         </div>
+
       </div>
     </div>
   );

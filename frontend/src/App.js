@@ -10,8 +10,9 @@ import { useSelector } from "react-redux";
 
 import "./App.css";
 
+// Pages
 import Login from "./pages/Login";
-import Register from "./components/Register";
+import Register from "./pages/Register";
 
 import Dashboard from "./pages/Dashboard";
 import DoctorDashboard from "./pages/DoctorDashboard";
@@ -22,7 +23,7 @@ import AdminPatientsPage from "./pages/AdminPatientsPage";
 
 
 /* =========================================================
-   ROLE HELPER
+   GET USER ROLE
 ========================================================= */
 
 const getRole = (user) => {
@@ -39,7 +40,8 @@ const getRole = (user) => {
     user.authorities?.[0] ||
     null;
 
-  if (typeof role === "object") {
+  // If role is an object
+  if (typeof role === "object" && role !== null) {
     role =
       role.name ||
       role.role ||
@@ -53,6 +55,7 @@ const getRole = (user) => {
 
   role = String(role).trim().toUpperCase();
 
+  // Convert ROLE_PATIENT -> PATIENT
   if (role.startsWith("ROLE_")) {
     role = role.substring(5);
   }
@@ -62,7 +65,7 @@ const getRole = (user) => {
 
 
 /* =========================================================
-   AUTH CHECK
+   CHECK AUTHENTICATION
 ========================================================= */
 
 const isAuthenticated = (user) => {
@@ -70,7 +73,21 @@ const isAuthenticated = (user) => {
     return false;
   }
 
-  return Boolean(user.token);
+  // Main authentication check
+  if (user.token) {
+    return true;
+  }
+
+  // Support common token property names
+  if (user.accessToken) {
+    return true;
+  }
+
+  if (user.jwt) {
+    return true;
+  }
+
+  return false;
 };
 
 
@@ -81,18 +98,46 @@ const isAuthenticated = (user) => {
 function LoadingScreen() {
   return (
     <div className="route-loading">
-      <div className="loading-logo">+</div>
+      <div className="loading-card">
 
-      <h2>CareLink</h2>
+        <div className="loading-logo">
+          +
+        </div>
 
-      <div className="loading-spinner"></div>
+        <h2>CareLink</h2>
 
-      <p>
-        Loading your healthcare portal...
-      </p>
+        <div className="loading-spinner"></div>
+
+        <p>
+          Loading your healthcare portal...
+        </p>
+
+      </div>
     </div>
   );
 }
+
+
+/* =========================================================
+   GET DASHBOARD PATH BASED ON ROLE
+========================================================= */
+
+const getDashboardPath = (role) => {
+  switch (role) {
+    case "PATIENT":
+      return "/patient-dashboard";
+
+    case "DOCTOR":
+      return "/doctor-dashboard";
+
+    case "ADMIN":
+    case "CLINIC_ADMIN":
+      return "/admin-dashboard";
+
+    default:
+      return "/login";
+  }
+};
 
 
 /* =========================================================
@@ -100,14 +145,19 @@ function LoadingScreen() {
 ========================================================= */
 
 function ProtectedRoute({ children }) {
-  const { user, isLoading } = useSelector(
+  const auth = useSelector(
     (state) => state.auth || {}
   );
 
+  const user = auth.user;
+  const isLoading = auth.isLoading;
+
+  // Wait for authentication check
   if (isLoading) {
     return <LoadingScreen />;
   }
 
+  // User is not logged in
   if (!isAuthenticated(user)) {
     return (
       <Navigate
@@ -122,19 +172,21 @@ function ProtectedRoute({ children }) {
 
 
 /* =========================================================
-   ROLE ROUTE
+   ROLE PROTECTED ROUTE
 ========================================================= */
 
 function RoleRoute({
   allowedRoles,
   children,
 }) {
-  const { user } = useSelector(
+  const auth = useSelector(
     (state) => state.auth || {}
   );
 
+  const user = auth.user;
   const role = getRole(user);
 
+  // No role
   if (!role) {
     return (
       <Navigate
@@ -144,43 +196,15 @@ function RoleRoute({
     );
   }
 
+  // Role is allowed
   if (allowedRoles.includes(role)) {
     return children;
   }
 
-  if (role === "DOCTOR") {
-    return (
-      <Navigate
-        to="/doctor-dashboard"
-        replace
-      />
-    );
-  }
-
-  if (
-    role === "CLINIC_ADMIN" ||
-    role === "ADMIN"
-  ) {
-    return (
-      <Navigate
-        to="/admin-dashboard"
-        replace
-      />
-    );
-  }
-
-  if (role === "PATIENT") {
-    return (
-      <Navigate
-        to="/patient-dashboard"
-        replace
-      />
-    );
-  }
-
+  // Role is not allowed
   return (
     <Navigate
-      to="/login"
+      to={getDashboardPath(role)}
       replace
     />
   );
@@ -192,10 +216,19 @@ function RoleRoute({
 ========================================================= */
 
 function RoleDashboardRedirect() {
-  const { user } = useSelector(
+  const auth = useSelector(
     (state) => state.auth || {}
   );
 
+  const user = auth.user;
+  const isLoading = auth.isLoading;
+
+  // Still checking authentication
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  // Not logged in
   if (!isAuthenticated(user)) {
     return (
       <Navigate
@@ -207,39 +240,9 @@ function RoleDashboardRedirect() {
 
   const role = getRole(user);
 
-  if (role === "DOCTOR") {
-    return (
-      <Navigate
-        to="/doctor-dashboard"
-        replace
-      />
-    );
-  }
-
-  if (
-    role === "CLINIC_ADMIN" ||
-    role === "ADMIN"
-  ) {
-    return (
-      <Navigate
-        to="/admin-dashboard"
-        replace
-      />
-    );
-  }
-
-  if (role === "PATIENT") {
-    return (
-      <Navigate
-        to="/patient-dashboard"
-        replace
-      />
-    );
-  }
-
   return (
     <Navigate
-      to="/login"
+      to={getDashboardPath(role)}
       replace
     />
   );
@@ -247,13 +250,15 @@ function RoleDashboardRedirect() {
 
 
 /* =========================================================
-   PATIENT PAGE
+   PATIENT DASHBOARD
 ========================================================= */
 
 function PatientPage() {
   return (
     <ProtectedRoute>
-      <RoleRoute allowedRoles={["PATIENT"]}>
+      <RoleRoute
+        allowedRoles={["PATIENT"]}
+      >
         <Dashboard />
       </RoleRoute>
     </ProtectedRoute>
@@ -262,13 +267,15 @@ function PatientPage() {
 
 
 /* =========================================================
-   DOCTOR PAGE
+   DOCTOR DASHBOARD
 ========================================================= */
 
 function DoctorPage() {
   return (
     <ProtectedRoute>
-      <RoleRoute allowedRoles={["DOCTOR"]}>
+      <RoleRoute
+        allowedRoles={["DOCTOR"]}
+      >
         <DoctorDashboard />
       </RoleRoute>
     </ProtectedRoute>
@@ -285,8 +292,8 @@ function AdminPage() {
     <ProtectedRoute>
       <RoleRoute
         allowedRoles={[
-          "CLINIC_ADMIN",
           "ADMIN",
+          "CLINIC_ADMIN",
         ]}
       >
         <AdminDashboard />
@@ -305,8 +312,8 @@ function AdminDoctors() {
     <ProtectedRoute>
       <RoleRoute
         allowedRoles={[
-          "CLINIC_ADMIN",
           "ADMIN",
+          "CLINIC_ADMIN",
         ]}
       >
         <AdminDoctorsPage />
@@ -325,8 +332,8 @@ function AdminPatients() {
     <ProtectedRoute>
       <RoleRoute
         allowedRoles={[
-          "CLINIC_ADMIN",
           "ADMIN",
+          "CLINIC_ADMIN",
         ]}
       >
         <AdminPatientsPage />
@@ -341,9 +348,17 @@ function AdminPatients() {
 ========================================================= */
 
 function App() {
-  const { user, isLoading } = useSelector(
+  const auth = useSelector(
     (state) => state.auth || {}
   );
+
+  const user = auth.user;
+  const isLoading = auth.isLoading;
+
+  /*
+    Show loading screen only while Redux
+    is checking the authentication state.
+  */
 
   if (isLoading && !user) {
     return <LoadingScreen />;
@@ -351,9 +366,12 @@ function App() {
 
   return (
     <BrowserRouter>
+
       <Routes>
 
-        {/* HOME */}
+        {/* =================================================
+            HOME
+        ================================================= */}
 
         <Route
           path="/"
@@ -363,12 +381,14 @@ function App() {
         />
 
 
-        {/* LOGIN */}
+        {/* =================================================
+            LOGIN
+        ================================================= */}
 
         <Route
           path="/login"
           element={
-            user ? (
+            isAuthenticated(user) ? (
               <RoleDashboardRedirect />
             ) : (
               <Login />
@@ -377,12 +397,14 @@ function App() {
         />
 
 
-        {/* REGISTER */}
+        {/* =================================================
+            REGISTER
+        ================================================= */}
 
         <Route
           path="/register"
           element={
-            user ? (
+            isAuthenticated(user) ? (
               <RoleDashboardRedirect />
             ) : (
               <Register />
@@ -391,7 +413,9 @@ function App() {
         />
 
 
-        {/* GENERIC DASHBOARD */}
+        {/* =================================================
+            GENERIC DASHBOARD
+        ================================================= */}
 
         <Route
           path="/dashboard"
@@ -401,7 +425,9 @@ function App() {
         />
 
 
-        {/* PATIENT DASHBOARD */}
+        {/* =================================================
+            PATIENT
+        ================================================= */}
 
         <Route
           path="/patient-dashboard"
@@ -411,7 +437,9 @@ function App() {
         />
 
 
-        {/* DOCTOR DASHBOARD */}
+        {/* =================================================
+            DOCTOR
+        ================================================= */}
 
         <Route
           path="/doctor-dashboard"
@@ -421,7 +449,9 @@ function App() {
         />
 
 
-        {/* ADMIN DASHBOARD */}
+        {/* =================================================
+            ADMIN
+        ================================================= */}
 
         <Route
           path="/admin-dashboard"
@@ -431,7 +461,9 @@ function App() {
         />
 
 
-        {/* ADMIN DOCTORS */}
+        {/* =================================================
+            ADMIN DOCTORS
+        ================================================= */}
 
         <Route
           path="/admin/doctors"
@@ -441,7 +473,9 @@ function App() {
         />
 
 
-        {/* ADMIN PATIENTS */}
+        {/* =================================================
+            ADMIN PATIENTS
+        ================================================= */}
 
         <Route
           path="/admin/patients"
@@ -451,7 +485,9 @@ function App() {
         />
 
 
-        {/* FALLBACK */}
+        {/* =================================================
+            UNKNOWN URL
+        ================================================= */}
 
         <Route
           path="*"
@@ -461,6 +497,7 @@ function App() {
         />
 
       </Routes>
+
     </BrowserRouter>
   );
 }

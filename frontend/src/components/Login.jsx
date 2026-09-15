@@ -1,149 +1,272 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, Link } from "react-router-dom";
+import { login } from "../store/slices/authSlice";
 import "./Login.css";
-
-import {
-  login,
-  reset,
-} from "../store/slices/authSlice";
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const {
-    user,
-    isLoading,
-    isError,
-    isSuccess,
-    message,
-  } = useSelector(
+  const { isLoading, isError, error } = useSelector(
     (state) => state.auth || {}
   );
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    if (isError) {
-      alert(message || "Login failed");
-      dispatch(reset());
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!email.trim() || !password.trim()) {
       return;
     }
 
-if (isSuccess && user) {
+    try {
+      const result = await dispatch(
+        login({
+          email: email.trim(),
+          password,
+        })
+      ).unwrap();
 
-  const role = String(
-    user.role ||
-    user.userRole ||
-    user.roleName ||
-    user.authority ||
-    ""
-  )
-    .replace("ROLE_", "")
-    .trim()
-    .toUpperCase();
+      const user = result?.user || result;
 
-  if (role === "DOCTOR") {
-    navigate("/doctor-dashboard");
-  } else if (role === "CLINIC_ADMIN") {
-    navigate("/admin-dashboard");
-  } else {
-    navigate("/dashboard");
-  }
+      const role = String(
+        user?.role ||
+          user?.userRole ||
+          user?.roleName ||
+          user?.authority ||
+          user?.authorities?.[0]?.authority ||
+          user?.authorities?.[0] ||
+          ""
+      )
+        .replace("ROLE_", "")
+        .toUpperCase();
 
-  dispatch(reset());
-}
-  }, [
-    isError,
-    isSuccess,
-    user,
-    message,
-    navigate,
-    dispatch,
-  ]);
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    dispatch(
-      login({
-        email,
-        password,
-      })
-    );
+      if (role === "DOCTOR") {
+        navigate("/doctor-dashboard");
+      } else if (
+        role === "CLINIC_ADMIN" ||
+        role === "ADMIN"
+      ) {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/patient-dashboard");
+      }
+    } catch (err) {
+      console.error("Login failed:", err);
+    }
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <div className="login-page">
 
-        <h2>Login</h2>
+      {/* LEFT SIDE */}
+      <section className="login-left">
 
-        <p className="auth-subtitle">
-          Sign in to access your CareLink account.
-        </p>
-
-        <form onSubmit={handleSubmit}>
-
-          <div className="form-group">
-            <label htmlFor="email">
-              Email *
-            </label>
-
-            <input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(event) =>
-                setEmail(event.target.value)
-              }
-              required
-            />
+        <div className="login-brand">
+          <div className="login-brand-icon">
+            +
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">
-              Password *
-            </label>
-
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(event) =>
-                setPassword(event.target.value)
-              }
-              required
-            />
+          <div className="login-brand-text">
+            <strong>CareLink</strong>
+            <span>HEALTHCARE PORTAL</span>
           </div>
-
-          <button
-            type="submit"
-            className="submit-btn"
-            disabled={isLoading}
-          >
-            {isLoading
-              ? "Logging in..."
-              : "Login"}
-          </button>
-
-        </form>
-
-        <div className="auth-footer">
-          Don't have an account?{" "}
-
-          <Link to="/register">
-            Register
-          </Link>
         </div>
 
-      </div>
+        <div className="login-left-content">
+
+          <span className="eyebrow">
+            SMARTER HEALTHCARE
+          </span>
+
+          <h1>
+            Your Health.
+            <br />
+            <span>Our Priority.</span>
+          </h1>
+
+          <p>
+            Connect with trusted doctors, manage your
+            appointments and keep your healthcare journey
+            simple — all in one place.
+          </p>
+
+          <div className="login-features">
+
+            <div className="login-feature">
+              <div className="login-feature-icon">
+                ✓
+              </div>
+              <span>
+                Easy appointment scheduling
+              </span>
+            </div>
+
+            <div className="login-feature">
+              <div className="login-feature-icon">
+                ✓
+              </div>
+              <span>
+                Connect with qualified doctors
+              </span>
+            </div>
+
+            <div className="login-feature">
+              <div className="login-feature-icon">
+                ✓
+              </div>
+              <span>
+                Secure healthcare management
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* RIGHT SIDE */}
+      <section className="login-right">
+
+        <div className="login-card">
+
+          <div className="login-header">
+
+            <span className="welcome-text">
+              WELCOME BACK
+            </span>
+
+            <h2>
+              Sign in to CareLink
+            </h2>
+
+            <p>
+              Access your healthcare dashboard and stay
+              connected with your care team.
+            </p>
+
+          </div>
+
+          <form
+            className="login-form"
+            onSubmit={handleSubmit}
+          >
+
+            {/* EMAIL */}
+            <div className="login-form-group">
+
+              <label htmlFor="login-email">
+                Email Address
+              </label>
+
+              <input
+                id="login-email"
+                type="email"
+                className="login-input"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                required
+              />
+
+            </div>
+
+            {/* PASSWORD */}
+            <div className="login-form-group">
+
+              <label htmlFor="login-password">
+                Password
+              </label>
+
+              <div className="login-password-wrapper">
+
+                <input
+                  id="login-password"
+                  type="password"
+                  className="login-input"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) =>
+                    setPassword(e.target.value)
+                  }
+                  required
+                />
+
+              </div>
+
+            </div>
+
+            {/* OPTIONS */}
+            <div className="login-options">
+
+              <label className="login-remember">
+                <input type="checkbox" />
+                <span>Remember me</span>
+              </label>
+
+              <a
+                href="#forgot"
+                className="login-forgot"
+                onClick={(e) =>
+                  e.preventDefault()
+                }
+              >
+                Forgot password?
+              </a>
+
+            </div>
+
+            {/* ERROR */}
+            {isError && (
+              <div className="login-error">
+                {error ||
+                  "Unable to sign in. Please check your credentials."}
+              </div>
+            )}
+
+            {/* SUBMIT */}
+            <button
+              type="submit"
+              className="login-submit"
+              disabled={
+                isLoading ||
+                !email.trim() ||
+                !password.trim()
+              }
+            >
+              {isLoading ? (
+                <>
+                  <span className="login-spinner" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign In →"
+              )}
+            </button>
+
+          </form>
+
+          <div className="login-security">
+            🔒 Secure healthcare access
+          </div>
+
+          <div className="login-register">
+            Don't have a CareLink account?{" "}
+            <Link to="/register">
+              Create an account
+            </Link>
+          </div>
+
+        </div>
+
+      </section>
+
     </div>
   );
 };

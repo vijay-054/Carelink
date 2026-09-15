@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { login, reset } from "../store/slices/authSlice";
+import { useNavigate } from "react-router-dom";
+import { login } from "../store/slices/authSlice";
 import "./Login.css";
 
 const Login = () => {

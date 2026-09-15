@@ -18,14 +18,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState("");
 
-  useEffect(() => {
-    dispatch(reset());
-
-    return () => {
-      dispatch(reset());
-    };
-  }, [dispatch]);
-
+  /*
+   * Redirect user based on role after successful login.
+   */
   useEffect(() => {
     if (user) {
       const role = String(
@@ -41,7 +36,10 @@ const Login = () => {
 
       if (role === "DOCTOR") {
         navigate("/doctor-dashboard", { replace: true });
-      } else if (role === "CLINIC_ADMIN") {
+      } else if (
+        role === "CLINIC_ADMIN" ||
+        role === "ADMIN"
+      ) {
         navigate("/admin-dashboard", { replace: true });
       } else {
         navigate("/patient-dashboard", { replace: true });
@@ -49,6 +47,9 @@ const Login = () => {
     }
   }, [user, navigate]);
 
+  /*
+   * Handle login form submission.
+   */
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -210,12 +211,14 @@ const Login = () => {
                 </p>
               </div>
 
+              {/* Registration success message */}
               {location.state?.registered && (
                 <div className="success-message">
                   Account created successfully. Please sign in.
                 </div>
               )}
 
+              {/* Login error */}
               {errorMessage && (
                 <div className="login-error">
                   <span className="error-icon">!</span>
@@ -346,8 +349,13 @@ const Login = () => {
 
       {/* Footer */}
       <footer className="login-footer">
-        <span>© {new Date().getFullYear()} CareLink</span>
-        <span>Healthcare Management Platform</span>
+        <span>
+          © {new Date().getFullYear()} CareLink
+        </span>
+
+        <span>
+          Healthcare Management Platform
+        </span>
       </footer>
     </div>
   );

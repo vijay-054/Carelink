@@ -1,7 +1,16 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../store/slices/authSlice";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  HeartPulse,
+  ShieldCheck,
+  Clock3,
+  ArrowRight,
+  Mail,
+  Lock,
+} from "lucide-react";
+
+import { loginUser } from "../store/slices/authSlice";
 import "./Login.css";
 
 const Login = () => {
@@ -24,31 +33,27 @@ const Login = () => {
 
     try {
       const result = await dispatch(
-        login({
+        loginUser({
           email: email.trim(),
           password,
         })
       ).unwrap();
 
-      const user = result?.user || result;
+      const role =
+        result?.role ||
+        result?.user?.role ||
+        result?.userRole ||
+        "";
 
-      const role = String(
-        user?.role ||
-          user?.userRole ||
-          user?.roleName ||
-          user?.authority ||
-          user?.authorities?.[0]?.authority ||
-          user?.authorities?.[0] ||
-          ""
-      )
+      const normalizedRole = String(role)
         .replace("ROLE_", "")
         .toUpperCase();
 
-      if (role === "DOCTOR") {
+      if (normalizedRole === "DOCTOR") {
         navigate("/doctor-dashboard");
       } else if (
-        role === "CLINIC_ADMIN" ||
-        role === "ADMIN"
+        normalizedRole === "CLINIC_ADMIN" ||
+        normalizedRole === "ADMIN"
       ) {
         navigate("/admin-dashboard");
       } else {
@@ -67,64 +72,64 @@ const Login = () => {
 
         <div className="login-brand">
           <div className="login-brand-icon">
-            +
+            <HeartPulse size={24} />
           </div>
 
-          <div className="login-brand-text">
-            <strong>CareLink</strong>
-            <span>HEALTHCARE PORTAL</span>
+          <div>
+            <div className="login-brand-name">CareLink</div>
+            <div className="login-brand-subtitle">
+              Healthcare Portal
+            </div>
           </div>
         </div>
 
         <div className="login-left-content">
 
-          <span className="eyebrow">
-            SMARTER HEALTHCARE
-          </span>
+          <div className="login-eyebrow">
+            YOUR HEALTH. OUR PRIORITY.
+          </div>
 
           <h1>
-            Your Health.
-            <br />
-            <span>Our Priority.</span>
+            Healthcare that
+            <span> connects.</span>
           </h1>
 
           <p>
-            Connect with trusted doctors, manage your
-            appointments and keep your healthcare journey
-            simple — all in one place.
+            Access your healthcare dashboard, manage appointments,
+            connect with doctors and keep your health information
+            organized — all in one secure place.
           </p>
 
           <div className="login-features">
 
             <div className="login-feature">
               <div className="login-feature-icon">
-                ✓
+                <ShieldCheck size={19} />
               </div>
-              <span>
-                Easy appointment scheduling
-              </span>
+
+              <div>
+                <strong>Secure & Private</strong>
+                <span>Your healthcare information stays protected.</span>
+              </div>
             </div>
 
             <div className="login-feature">
               <div className="login-feature-icon">
-                ✓
+                <Clock3 size={19} />
               </div>
-              <span>
-                Connect with qualified doctors
-              </span>
-            </div>
 
-            <div className="login-feature">
-              <div className="login-feature-icon">
-                ✓
+              <div>
+                <strong>Easy Appointment Management</strong>
+                <span>Book and manage appointments with ease.</span>
               </div>
-              <span>
-                Secure healthcare management
-              </span>
             </div>
 
           </div>
 
+        </div>
+
+        <div className="login-left-footer">
+          © 2026 CareLink Healthcare Management System
         </div>
 
       </section>
@@ -136,20 +141,24 @@ const Login = () => {
 
           <div className="login-header">
 
-            <span className="welcome-text">
+            <span className="login-welcome">
               WELCOME BACK
             </span>
 
-            <h2>
-              Sign in to CareLink
-            </h2>
+            <h2>Sign in to CareLink</h2>
 
             <p>
-              Access your healthcare dashboard and stay
-              connected with your care team.
+              Access your healthcare dashboard and stay connected
+              with your care team.
             </p>
 
           </div>
+
+          {isError && (
+            <div className="login-error">
+              {error || "Invalid email or password. Please try again."}
+            </div>
+          )}
 
           <form
             className="login-form"
@@ -159,42 +168,21 @@ const Login = () => {
             {/* EMAIL */}
             <div className="login-form-group">
 
-              <label htmlFor="login-email">
+              <label htmlFor="email">
                 Email Address
               </label>
 
-              <input
-                id="login-email"
-                type="email"
-                className="login-input"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                required
-              />
+              <div className="login-input-wrapper">
 
-            </div>
-
-            {/* PASSWORD */}
-            <div className="login-form-group">
-
-              <label htmlFor="login-password">
-                Password
-              </label>
-
-              <div className="login-password-wrapper">
+                <Mail size={18} />
 
                 <input
-                  id="login-password"
-                  type="password"
-                  className="login-input"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) =>
-                    setPassword(e.target.value)
-                  }
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  autoComplete="email"
                   required
                 />
 
@@ -202,65 +190,79 @@ const Login = () => {
 
             </div>
 
-            {/* OPTIONS */}
+            {/* PASSWORD */}
+            <div className="login-form-group">
+
+              <label htmlFor="password">
+                Password
+              </label>
+
+              <div className="login-input-wrapper">
+
+                <Lock size={18} />
+
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  required
+                />
+
+              </div>
+
+            </div>
+
             <div className="login-options">
 
-              <label className="login-remember">
+              <label className="remember-me">
                 <input type="checkbox" />
                 <span>Remember me</span>
               </label>
 
-              <a
-                href="#forgot"
-                className="login-forgot"
-                onClick={(e) =>
-                  e.preventDefault()
-                }
+              <button
+                type="button"
+                className="forgot-password"
               >
                 Forgot password?
-              </a>
+              </button>
 
             </div>
 
-            {/* ERROR */}
-            {isError && (
-              <div className="login-error">
-                {error ||
-                  "Unable to sign in. Please check your credentials."}
-              </div>
-            )}
-
-            {/* SUBMIT */}
             <button
               type="submit"
               className="login-submit"
-              disabled={
-                isLoading ||
-                !email.trim() ||
-                !password.trim()
-              }
+              disabled={isLoading}
             >
               {isLoading ? (
-                <>
-                  <span className="login-spinner" />
-                  Signing in...
-                </>
+                "Signing in..."
               ) : (
-                "Sign In →"
+                <>
+                  Sign In
+                  <ArrowRight size={18} />
+                </>
               )}
             </button>
 
           </form>
 
-          <div className="login-security">
-            🔒 Secure healthcare access
+          <div className="login-divider">
+            <span>OR</span>
           </div>
 
           <div className="login-register">
-            Don't have a CareLink account?{" "}
+            <span>Don't have a CareLink account?</span>
+
             <Link to="/register">
               Create an account
             </Link>
+          </div>
+
+          <div className="login-security">
+            <ShieldCheck size={14} />
+            <span>Secure healthcare access</span>
           </div>
 
         </div>

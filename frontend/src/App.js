@@ -1,6 +1,4 @@
 import React from "react";
-import "./App.css";
-
 import {
   BrowserRouter,
   Routes,
@@ -10,8 +8,10 @@ import {
 
 import { useSelector } from "react-redux";
 
+import "./App.css";
+
 import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Register from "./components/Register";
 
 import Dashboard from "./pages/Dashboard";
 import DoctorDashboard from "./pages/DoctorDashboard";

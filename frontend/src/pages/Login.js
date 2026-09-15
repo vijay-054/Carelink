@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Eye, EyeOff, HeartPulse, Mail, Lock, ShieldCheck } from "lucide-react";
 
 import { login } from "../store/slices/authSlice";
 import "./Login.css";
